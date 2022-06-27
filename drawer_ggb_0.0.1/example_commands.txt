@@ -1,0 +1,5 @@
+A(1, 1)
+B(2, 3)
+C(5, 0)
+Polygon(A, B, C)
+Circle(A, B, C)
