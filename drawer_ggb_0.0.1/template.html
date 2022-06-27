@@ -7,26 +7,33 @@
     <title>Test geogebra</title>
 </head>
 <body>
-    <div id="ggb-element"></div>
-    <input value="Press this button to show construction" onclick="ggbOnInit()" type="button">
-    <script src="https://geogebra.org/apps/deployggb.js"></script>
+<div id="ggb-element"></div>
+<input value="Press this button to show construction" onclick="ggbOnInit()" type="button">
+<script src="https://geogebra.org/apps/deployggb.js"></script>
 
-    <script type="text/javascript">  
-        function ggbOnInit(){
+<script type="text/javascript">
+    function ggbOnInit() {
 
 //////
-        };
+    };
 
-        var params = {"appName": "geometry", "width": 1400, "height": 900, "showToolBar": true, "showAlgebraInput": true, "showMenuBar": true};
+    var params = {
+        "appName": "geometry",
+        "width": 1400,
+        "height": 900,
+        "showToolBar": true,
+        "showAlgebraInput": true,
+        "showMenuBar": true
+    };
 
-        var applet = new GGBApplet('5.0', params);
-        window.addEventListener("load", function() { 
-                applet.inject('ggb-element');
+    var applet = new GGBApplet('5.0', params);
+    window.addEventListener("load", function () {
+            applet.inject('ggb-element');
 
-            }
-            );
-                        
-    </script>
+        }
+    );
+
+</script>
 
 
 </body>
