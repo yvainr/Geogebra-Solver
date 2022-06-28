@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Test geogebra</title>
+</head>
+<body>
+<div id="ggb-element"></div>
+<!--<input value="Press this button to show construction" onclick="ggbOnInit()" type="button">-->
+<!--<h4>{{ commands_text }}</h4>-->
+<form method="post" action="{{ url_for('index', commands_text=commands_text)}}">
+    <div class="form-group col">
+        <button type="submit" class="btn btn-primary">Press this button to go back</button>
+    </div>
+</form>
+<script src="https://geogebra.org/apps/deployggb.js"></script>
+
+<script type="text/javascript">
+    function ggbOnInit() {
+
+            ggbApplet.evalCommand('A(1,1)');
+
+    }
+
+    var params = {
+        "appName": "geometry",
+        "width": 1400,
+        "height": 700,
+        "showToolBar": false,
+        "showAlgebraInput": false,
+        "showMenuBar": false
+    };
+
+    var applet = new GGBApplet('5.0', params);
+    window.addEventListener("load", function () {
+            applet.inject('ggb-element');
+
+        }
+    );
+    let observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (!mutation.addedNodes) return
+
+            // console.log(mutation.addedNodes);
+            for (let i = 0; i < mutation.addedNodes.length; i++) {
+                // do things to your newly added nodes here
+                let node = mutation.addedNodes[i];
+                // console.log(node.classList);
+                if ('classList' in node && node.classList.contains('DockGlassPane')){
+                    // console.log(node);
+                    // console.log(ggbApplet)
+                    ggbOnInit()
+                }
+            }
+        })
+    })
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: false,
+        characterData: false
+    })
+
+    // stop watching using:
+    // observer.disconnect()
+</script>
+
+
+</body>
+</html>
