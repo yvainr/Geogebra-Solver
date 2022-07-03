@@ -49,17 +49,24 @@ figure_types = {'параллелограмм', 'четырехугольник'
 
 
 def polygons_create(text):
-    for polygon in text.split():
-        vertices_list = list(polygon)
+    for polygon in text.split(','):
+        vertices_list = list(polygon.split()[0])
         vertices_class_list = list()
 
         for vertice in vertices_list:
             vertices_class_list.append(find_point_with_name(vertice))
 
-        polygons.append(Polygon(vertices_class_list))
+        if len(vertices_list) > 1:
+            for vertice_index in range(len(vertices_list)):
+                find_segment_with_points(vertices_list[vertice_index-1], vertices_list[vertice_index])
 
-        for vertice_index in range(len(vertices_list)):
-            find_segment_with_points(vertices_list[vertice_index-1], vertices_list[vertice_index])
+        if len(vertices_list) > 3:
+            convex = polygon.split()[1]
+            if convex == 'выпуклый':
+                polygons.append(Polygon(vertices_class_list, False))
+            else:
+                polygons.append(Polygon(vertices_class_list))
+
 
 
 def segments_create(text):
@@ -83,12 +90,24 @@ def segments_relations_create(text):
         if len(relation.split()[0]) == len(relation.split()[1]) == 2:
             seg_1 = find_segment_with_points(relation.split()[0][0], relation.split()[0][1])
             seg_2 = find_segment_with_points(relation.split()[1][0], relation.split()[1][1])
+
         if len(relation.split()[0]) == 1:
             seg_1 = find_segment_with_points(relation.split()[0], relation.split()[1][0])
             seg_2 = find_segment_with_points(relation.split()[0], relation.split()[1][1])
+
+            line = find_line_with_points(relation.split()[1][0], relation.split()[1][1])
+            new_points = deepcopy(line.points)
+            new_points.add(find_point_with_name(relation.split()[0]))
+            setattr(line, 'points', new_points)
+
         if len(relation.split()[1]) == 1:
             seg_1 = find_segment_with_points(relation.split()[1], relation.split()[0][0])
             seg_2 = find_segment_with_points(relation.split()[1], relation.split()[0][1])
+
+            line = find_line_with_points(relation.split()[0][0], relation.split()[0][1])
+            new_points = deepcopy(line.points)
+            new_points.add(find_point_with_name(relation.split()[1]))
+            setattr(line, 'points', new_points)
 
         rel = relation.split()[2]
         new_relations = deepcopy(seg_1.relations)
@@ -367,30 +386,11 @@ def json_create():
     return output
 
 
-json_example = \
-    {
-        'name': 'a',
-        'class': 'Segment',
-        'points_on_line': None,
-        # only lines
-        'points_on_segment': {'A', 'B'},
-        # only segments
-        'angle_between_lines': {},
-        # only angles
-        'size': 7,
-        # only segments and angles
-        'relations': {'object_name': Fraction(1, 3)},
-        # only segments
-        'convex': None
-        # only polygons
-    }
-
-
 # квадрат
-text1 = 'ABCD O' # вводится список многоугольников и отдельных точек
+text1 = 'ABCD выпуклый, O' # вводится список многоугольников и отдельных точек
 text2 = 'AC' # вводятся дополнительные отрезки, которые необходимо провести
 text3 = 'ABC 90, BCD 90, CDA 90' # вводится список углов по буквам, начиная "слева"
-text4 = 'AB BC 1/1, CD BC 1/1, CD AD 1/1, AC O 1/1' # вводится список пар отрезок/отрезок,
+text4 = 'AB BC 1/1, BC CD 1/1, CD AD 1/1, AD AB 1/1, AC O 1/1' # вводится список пар отрезок/отрезок,
 # либо отрезок/точка, точка/отрезок с отношениями, причем во вторых двух случаях отношение пишется "слева направо",
 # то есть в примере 'AC O 1/2', AO к CO =  1 к 2
 text5 = 'ABC ABO 2/1' # вводится список отношений углов, порядок точек в угле так же важен
