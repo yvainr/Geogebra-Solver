@@ -51,11 +51,12 @@ figure_types = {'параллелограмм', 'четырехугольник'
 def polygons_create(text):
     for polygon in text.split():
         vertices_list = list(polygon)
+        vertices_class_list = list()
 
         for vertice in vertices_list:
-            find_point_with_name(vertice)
+            vertices_class_list.append(find_point_with_name(vertice))
 
-        polygons.append(Polygon(deepcopy(points)))
+        polygons.append(Polygon(vertices_class_list))
 
         for vertice_index in range(len(vertices_list)):
             find_segment_with_points(vertices_list[vertice_index-1], vertices_list[vertice_index])
@@ -298,8 +299,7 @@ def json_create():
 
         object.setdefault('name', point.name)
         object.setdefault('type', 'point')
-        object.setdefault('points_on_line', None)
-        object.setdefault('points_on_segment', None)
+        object.setdefault('points_on_object', None)
         object.setdefault('angle_between_lines', None)
         object.setdefault('size', None)
         object.setdefault('relations', None)
@@ -313,8 +313,7 @@ def json_create():
 
         object.setdefault('name', None)
         object.setdefault('type', 'line')
-        object.setdefault('points_on_line', points_processing(line.points))
-        object.setdefault('points_on_segment', None)
+        object.setdefault('points_on_object', points_processing(line.points))
         object.setdefault('angle_between_lines', None)
         object.setdefault('size', None)
         object.setdefault('relations', None)
@@ -328,8 +327,7 @@ def json_create():
 
         object.setdefault('name', None)
         object.setdefault('type', 'angle')
-        object.setdefault('points_on_line', None)
-        object.setdefault('points_on_segment', None)
+        object.setdefault('points_on_object', None)
         object.setdefault('angle_between_lines', lines_processing(angle.lines))
         object.setdefault('size', angle.size)
         object.setdefault('relations', relations_processing(angle.relations, 'angle'))
@@ -343,8 +341,7 @@ def json_create():
 
         object.setdefault('name', None)
         object.setdefault('type', 'segment')
-        object.setdefault('points_on_line', None)
-        object.setdefault('points_on_segment', points_processing(segment.points))
+        object.setdefault('points_on_object', points_processing(segment.points))
         object.setdefault('angle_between_lines', None)
         object.setdefault('size', segment.size)
         object.setdefault('relations', relations_processing(segment.relations, 'segment'))
@@ -357,9 +354,8 @@ def json_create():
         object = {}
 
         object.setdefault('name', None)
-        object.setdefault('type', 'segment')
-        object.setdefault('points_on_line', None)
-        object.setdefault('points_on_segment', points_processing(polygon.points))
+        object.setdefault('type', 'polygon')
+        object.setdefault('points_on_object', points_processing(polygon.points))
         object.setdefault('angle_between_lines', None)
         object.setdefault('size', None)
         object.setdefault('relations', None)
