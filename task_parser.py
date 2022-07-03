@@ -9,7 +9,6 @@ from copy import deepcopy
 class Point:
     def __init__(self, name):
         self.name = name
-        # лежит ли внутри многоугольника
 
 
 class Line:
@@ -44,121 +43,132 @@ angles = []
 segments = []
 polygons = []
 
-figure_types = {'параллелограмм', 'четырехугольник', 'прямоугольник', 'квадрат', 'треугольник',
-                'равносторонний треугольник', 'равнобедренный треугольник', 'трапеция', 'ромб'}
-
 
 def polygons_create(text):
-    for polygon in text.split(','):
-        vertices_list = list(polygon.split()[0])
-        vertices_class_list = list()
+    if len(text.split()) > 0:
+        for polygon in text.split(','):
+            vertices_list = list(polygon.split()[0])
+            vertices_class_list = list()
 
-        for vertice in vertices_list:
-            vertices_class_list.append(find_point_with_name(vertice))
+            for vertice in vertices_list:
+                vertices_class_list.append(find_point_with_name(vertice))
 
-        if len(vertices_list) > 1:
-            for vertice_index in range(len(vertices_list)):
-                find_segment_with_points(vertices_list[vertice_index-1], vertices_list[vertice_index])
+            if len(vertices_list) > 1:
+                for vertice_index in range(len(vertices_list)):
+                    find_segment_with_points(vertices_list[vertice_index-1], vertices_list[vertice_index])
 
-        if len(vertices_list) > 3:
-            convex = polygon.split()[1]
-            if convex == 'выпуклый':
-                polygons.append(Polygon(vertices_class_list, False))
-            else:
-                polygons.append(Polygon(vertices_class_list))
-
+            if len(vertices_list) > 3:
+                try:
+                    convex = polygon.split()[1]
+                    if convex == 'выпуклый':
+                        polygons.append(Polygon(vertices_class_list, False))
+                    else:
+                        polygons.append(Polygon(vertices_class_list))
+                except IndexError:
+                    polygons.append(Polygon(vertices_class_list))
 
 
 def segments_create(text):
-    for segment in text.split():
-        seg = Segment(find_point_with_name(segment[0]), find_point_with_name(segment[1]))
-        find_same_segments(segments, seg)
+    if len(text.split()) > 0:
+        for segment in text.split(','):
+            segment = segment.split()
+            try:
+                size = int(segment[1])
+            except IndexError:
+                size = None
+
+            seg = Segment(find_point_with_name(segment[0][0]), find_point_with_name(segment[0][1]), size)
+            find_same_segments(segments, seg)
 
 
 def angles_create(text):
-    for angle in text.split(','):
-        angle_name, angle_size = angle.split()
-        A, B, C = list(angle_name)
-        if A != B != C != A:
-            l1 = find_line_with_points(A, B)
-            l2 = find_line_with_points(B, C)
-            setattr(find_angle_with_lines(l1, l2), 'size', int(angle_size))
+    if len(text.split()) > 0:
+        for angle in text.split(','):
+            angle_name, angle_size = angle.split()
+            A, B, C = list(angle_name)
+            if A != B != C != A:
+                l1 = find_line_with_points(A, B)
+                l2 = find_line_with_points(B, C)
+                setattr(find_angle_with_lines(l1, l2), 'size', int(angle_size))
 
 
 def segments_relations_create(text):
-    for relation in text.split(','):
-        if len(relation.split()[0]) == len(relation.split()[1]) == 2:
-            seg_1 = find_segment_with_points(relation.split()[0][0], relation.split()[0][1])
-            seg_2 = find_segment_with_points(relation.split()[1][0], relation.split()[1][1])
+    if len(text.split()) > 0:
+        for relation in text.split(','):
+            if len(relation.split()[0]) == len(relation.split()[1]) == 2:
+                seg_1 = find_segment_with_points(relation.split()[0][0], relation.split()[0][1])
+                seg_2 = find_segment_with_points(relation.split()[1][0], relation.split()[1][1])
 
-        if len(relation.split()[0]) == 1:
-            seg_1 = find_segment_with_points(relation.split()[0], relation.split()[1][0])
-            seg_2 = find_segment_with_points(relation.split()[0], relation.split()[1][1])
+            if len(relation.split()[0]) == 1:
+                seg_1 = find_segment_with_points(relation.split()[0], relation.split()[1][0])
+                seg_2 = find_segment_with_points(relation.split()[0], relation.split()[1][1])
 
-            line = find_line_with_points(relation.split()[1][0], relation.split()[1][1])
-            new_points = deepcopy(line.points)
-            new_points.add(find_point_with_name(relation.split()[0]))
-            setattr(line, 'points', new_points)
+                line = find_line_with_points(relation.split()[1][0], relation.split()[1][1])
+                new_points = deepcopy(line.points)
+                new_points.add(find_point_with_name(relation.split()[0]))
+                setattr(line, 'points', new_points)
 
-        if len(relation.split()[1]) == 1:
-            seg_1 = find_segment_with_points(relation.split()[1], relation.split()[0][0])
-            seg_2 = find_segment_with_points(relation.split()[1], relation.split()[0][1])
+            if len(relation.split()[1]) == 1:
+                seg_1 = find_segment_with_points(relation.split()[1], relation.split()[0][0])
+                seg_2 = find_segment_with_points(relation.split()[1], relation.split()[0][1])
 
-            line = find_line_with_points(relation.split()[0][0], relation.split()[0][1])
-            new_points = deepcopy(line.points)
-            new_points.add(find_point_with_name(relation.split()[1]))
-            setattr(line, 'points', new_points)
+                line = find_line_with_points(relation.split()[0][0], relation.split()[0][1])
+                new_points = deepcopy(line.points)
+                new_points.add(find_point_with_name(relation.split()[1]))
+                setattr(line, 'points', new_points)
 
-        rel = relation.split()[2]
-        new_relations = deepcopy(seg_1.relations)
-        if seg_2 in new_relations:
-            new_relations[seg_2] = Fraction(rel)
-        else:
-            new_relations.setdefault(seg_2, Fraction(rel))
-        setattr(seg_1, 'relations', new_relations)
+            rel = relation.split()[2]
+            new_relations = deepcopy(seg_1.relations)
+            if seg_2 in new_relations:
+                new_relations[seg_2] = Fraction(rel)
+            else:
+                new_relations.setdefault(seg_2, Fraction(rel))
+            setattr(seg_1, 'relations', new_relations)
 
-        new_relations = deepcopy(seg_2.relations)
-        if seg_1 in new_relations:
-            new_relations[seg_1] = 1/Fraction(rel)
-        else:
-            new_relations.setdefault(seg_1, 1/Fraction(rel))
-        setattr(seg_2, 'relations', new_relations)
+            new_relations = deepcopy(seg_2.relations)
+            if seg_1 in new_relations:
+                new_relations[seg_1] = 1/Fraction(rel)
+            else:
+                new_relations.setdefault(seg_1, 1/Fraction(rel))
+            setattr(seg_2, 'relations', new_relations)
 
 
 def angles_relations_create(text):
-    for relation in text.split(','):
-        ang_1, ang_2, rel = relation.split()
-        ang_1 = find_angle_with_points(ang_1[0], ang_1[1], ang_1[2])
-        ang_2 = find_angle_with_points(ang_2[0], ang_2[1], ang_2[2])
+    if len(text.split()) > 0:
+        for relation in text.split(','):
+            ang_1, ang_2, rel = relation.split()
+            ang_1 = find_angle_with_points(ang_1[0], ang_1[1], ang_1[2])
+            ang_2 = find_angle_with_points(ang_2[0], ang_2[1], ang_2[2])
 
-        new_relations = deepcopy(ang_1.relations)
-        if ang_2 in new_relations:
-            new_relations[ang_2] = Fraction(rel)
-        else:
-            new_relations.setdefault(ang_2, Fraction(rel))
-        setattr(ang_1, 'relations', new_relations)
+            new_relations = deepcopy(ang_1.relations)
+            if ang_2 in new_relations:
+                new_relations[ang_2] = Fraction(rel)
+            else:
+                new_relations.setdefault(ang_2, Fraction(rel))
+            setattr(ang_1, 'relations', new_relations)
 
-        new_relations = deepcopy(ang_2.relations)
-        if ang_1 in new_relations:
-            new_relations[ang_1] = 1/Fraction(rel)
-        else:
-            new_relations.setdefault(ang_1, 1/Fraction(rel))
-        setattr(ang_2, 'relations', new_relations)
+            new_relations = deepcopy(ang_2.relations)
+            if ang_1 in new_relations:
+                new_relations[ang_1] = 1/Fraction(rel)
+            else:
+                new_relations.setdefault(ang_1, 1/Fraction(rel))
+            setattr(ang_2, 'relations', new_relations)
 
 
 def line_intersection_create(text):
-    for intersection in text.split(','):
-        l1, l2, P = intersection.split()
+    if len(text.split()) > 0:
+        for intersection in text.split(','):
+            l1, l2, P = intersection.split()
 
-        l1 = find_line_with_segment(find_segment_with_points(l1[0], l1[1]))
-        new_points = deepcopy(l1.points)
-        new_points.add(find_point_with_name(P))
-        setattr(l1, 'points', new_points)
+            l1 = find_line_with_segment(find_segment_with_points(l1[0], l1[1]))
+            new_points = deepcopy(l1.points)
+            new_points.add(find_point_with_name(P))
+            setattr(l1, 'points', new_points)
 
-        l2 = find_line_with_segment(find_segment_with_points(l2[0], l2[1]))
-        new_points = deepcopy(l2.points)
-        new_points.add(find_point_with_name(P))
-        setattr(l2, 'points', new_points)
+            l2 = find_line_with_segment(find_segment_with_points(l2[0], l2[1]))
+            new_points = deepcopy(l2.points)
+            new_points.add(find_point_with_name(P))
+            setattr(l2, 'points', new_points)
 
 
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
@@ -295,9 +305,9 @@ def relations_processing(relations_set, parametr):
     ret = {}
     for object in relations_set:
         if parametr == "angle":
-            ret.setdefault(f"object_{angles.index(object)+len(points)+len(lines)+1}", relations_set[object])
+            ret.setdefault(f"object_{angles.index(object)+len(points)+len(lines)+1}", str(relations_set[object]))
         if parametr == "segment":
-            ret.setdefault(f"object_{relation_processing_helper(object)+len(points)+len(lines)+len(angles)+1}", relations_set[object])
+            ret.setdefault(f"object_{relation_processing_helper(object)+len(points)+len(lines)+len(angles)+1}", str(relations_set[object]))
 
     return ret
 
@@ -386,15 +396,13 @@ def json_create():
     return output
 
 
-# квадрат
-text1 = 'ABCD выпуклый, O' # вводится список многоугольников и отдельных точек
-text2 = 'AC' # вводятся дополнительные отрезки, которые необходимо провести
-text3 = 'ABC 90, BCD 90, CDA 90' # вводится список углов по буквам, начиная "слева"
-text4 = 'AB BC 1/1, BC CD 1/1, CD AD 1/1, AD AB 1/1, AC O 1/1' # вводится список пар отрезок/отрезок,
-# либо отрезок/точка, точка/отрезок с отношениями, причем во вторых двух случаях отношение пишется "слева направо",
-# то есть в примере 'AC O 1/2', AO к CO =  1 к 2
-text5 = 'ABC ABO 2/1' # вводится список отношений углов, порядок точек в угле так же важен
-text6 = 'AC BD O' # вводится по очереди пара отрезков, задающих прямые, и точка пересечения этих прямых
+# Волчкевич страница 26 задача 1
+text1 = ‘ABCD '  # многоугольники
+text2 = 'AC, BD'  # дополнительные отрезки
+text3 = ''  # углы
+text4 = 'BO CO 1/1'  # отношения отрезков
+text5 = 'DBA DCA 1/1'  # отношения углов
+text6 = 'AC BD O'  # точки пересечения прямых
 
 polygons_create(text1)
 segments_create(text2)
