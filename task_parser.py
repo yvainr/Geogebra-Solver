@@ -1,9 +1,5 @@
 from fractions import Fraction
-# для удобной работы с отношениями
-# from itertools import combinations
-# для всех сочетаний элементов из списка
 from pprint import pprint
-from copy import deepcopy
 
 
 class Point:
@@ -12,19 +8,19 @@ class Point:
 
 
 class Line:
-    def __init__(self, points_on_line={}):
+    def __init__(self, points_on_line=set()):
         self.points = points_on_line
 
 
 class Angle:
-    def __init__(self, line_one, line_two, size=None, relations={}):
+    def __init__(self, line_one, line_two, size=None, relations=set()):
         self.lines = [line_one, line_two]
         self.size = size
         self.relations = relations
 
 
 class Segment:
-    def __init__(self, point_one, point_two, size=None, relations={}):
+    def __init__(self, point_one, point_two, size=None, relations=set()):
         self.points = {point_one, point_two}
         self.size = size
         self.relations = relations
@@ -57,15 +53,14 @@ def polygons_create(text):
                 for vertice_index in range(len(vertices_list)):
                     find_segment_with_points(vertices_list[vertice_index-1], vertices_list[vertice_index])
 
-            if len(vertices_list) > 3:
-                try:
-                    convex = polygon.split()[1]
-                    if convex == 'выпуклый':
-                        polygons.append(Polygon(vertices_class_list, False))
-                    else:
-                        polygons.append(Polygon(vertices_class_list))
-                except IndexError:
+            try:
+                convex = polygon.split()[1]
+                if convex == 'выпуклый':
+                    polygons.append(Polygon(vertices_class_list, False))
+                else:
                     polygons.append(Polygon(vertices_class_list))
+            except IndexError:
+                polygons.append(Polygon(vertices_class_list))
 
 
 def segments_create(text):
@@ -110,7 +105,7 @@ def segments_relations_create(text):
                 seg_2 = find_segment_with_points(relation.split()[0], relation.split()[1][1])
 
                 line = find_line_with_points(relation.split()[1][0], relation.split()[1][1])
-                new_points = deepcopy(line.points)
+                new_points = set_copy_create(line.points)
                 new_points.add(find_point_with_name(relation.split()[0]))
                 setattr(line, 'points', new_points)
 
@@ -119,19 +114,19 @@ def segments_relations_create(text):
                 seg_2 = find_segment_with_points(relation.split()[1], relation.split()[0][1])
 
                 line = find_line_with_points(relation.split()[0][0], relation.split()[0][1])
-                new_points = deepcopy(line.points)
+                new_points = set_copy_create(line.points)
                 new_points.add(find_point_with_name(relation.split()[1]))
                 setattr(line, 'points', new_points)
 
             rel = relation.split()[2]
-            new_relations = deepcopy(seg_1.relations)
+            new_relations = dict_copy_create(seg_1.relations)
             if seg_2 in new_relations:
                 new_relations[seg_2] = Fraction(rel)
             else:
                 new_relations.setdefault(seg_2, Fraction(rel))
             setattr(seg_1, 'relations', new_relations)
 
-            new_relations = deepcopy(seg_2.relations)
+            new_relations = dict_copy_create(seg_2.relations)
             if seg_1 in new_relations:
                 new_relations[seg_1] = 1/Fraction(rel)
             else:
@@ -146,14 +141,14 @@ def angles_relations_create(text):
             ang_1 = find_angle_with_points(ang_1[0], ang_1[1], ang_1[2])
             ang_2 = find_angle_with_points(ang_2[0], ang_2[1], ang_2[2])
 
-            new_relations = deepcopy(ang_1.relations)
+            new_relations = dict_copy_create(ang_1.relations)
             if ang_2 in new_relations:
                 new_relations[ang_2] = Fraction(rel)
             else:
                 new_relations.setdefault(ang_2, Fraction(rel))
             setattr(ang_1, 'relations', new_relations)
 
-            new_relations = deepcopy(ang_2.relations)
+            new_relations = dict_copy_create(ang_2.relations)
             if ang_1 in new_relations:
                 new_relations[ang_1] = 1/Fraction(rel)
             else:
@@ -168,13 +163,13 @@ def line_intersection_create(text):
 
             l1 = find_line_with_segment(find_segment_with_points(l1[0], l1[1]))
             if find_point_with_name(P) not in l1.points:
-                new_points = deepcopy(l1.points)
+                new_points = set_copy_create(l1.points)
                 new_points.add(find_point_with_name(P))
                 setattr(l1, 'points', new_points)
 
             l2 = find_line_with_segment(find_segment_with_points(l2[0], l2[1]))
             if find_point_with_name(P) not in l2.points:
-                new_points = deepcopy(l2.points)
+                new_points = set_copy_create(l2.points)
                 new_points.add(find_point_with_name(P))
                 setattr(l2, 'points', new_points)
 
@@ -311,100 +306,102 @@ def lines_processing(lines_list):
 
 def relations_processing(relations_set, parametr):
     ret = {}
-    for object in relations_set:
+    for obj in relations_set:
         if parametr == "angle":
-            ret.setdefault(f"object_{relation_processing_helper_for_angles(object)+len(points)+len(lines)+1}", str(relations_set[object]))
+            ret.setdefault(f"object_{angles.index(obj)+len(points)+len(lines)+1}", str(relations_set[obj]))
         if parametr == "segment":
-            ret.setdefault(f"object_{relation_processing_helper_for_segments(object)+len(points)+len(lines)+len(angles)+1}", str(relations_set[object]))
+            ret.setdefault(f"object_{segments.index(obj)+len(points)+len(lines)+len(angles)+1}", str(relations_set[obj]))
 
     return ret
 
 
-def relation_processing_helper_for_segments(segment):
-    for i in range(len(segments)):
-        if set(get_points_names_from_list(segments[i].points)) == set(get_points_names_from_list(segment.points)):
-            return i
+def set_copy_create(input_set):
+    ret = set()
+    for element in input_set:
+        ret.add(element)
+    return ret
 
 
-def relation_processing_helper_for_angles(angle):
-    for i in range(len(angles)):
-        if set(get_points_names_from_list(angle.lines[0].points)) <= set(get_points_names_from_list(angles[i].lines[0].points)) and set(get_points_names_from_list(angle.lines[1].points)) <= set(get_points_names_from_list(angles[i].lines[1].points)):
-            return i
+def dict_copy_create(input_dict):
+    ret = dict()
+    for key in input_dict:
+        ret[key] = input_dict[key]
+    return ret
 
 
 # создание выходной json-ки
 def json_create():
-    output = {}
+    output = dict()
     object_index = 1
 
     for point in points:
-        object = {}
+        object = dict()
 
-        object.setdefault('name', point.name)
-        object.setdefault('type', 'point')
-        object.setdefault('points_on_object', None)
-        object.setdefault('angle_between_lines', None)
-        object.setdefault('size', None)
-        object.setdefault('relations', None)
-        object.setdefault('convex', None)
+        object['name'] = point.name
+        object['type'] = 'point'
+        object['points_on_object'] = None
+        object['angle_between_lines'] = None
+        object['size'] = None
+        object['relations'] = None
+        object['convex'] = None
 
-        output.setdefault(f"object_{object_index}", object)
+        output[f"object_{object_index}"] = object
         object_index += 1
 
     for line in lines:
-        object = {}
+        object = dict()
 
-        object.setdefault('name', None)
-        object.setdefault('type', 'line')
-        object.setdefault('points_on_object', points_processing(line.points))
-        object.setdefault('angle_between_lines', None)
-        object.setdefault('size', None)
-        object.setdefault('relations', None)
-        object.setdefault('convex', None)
+        object['name'] = None
+        object['type'] = 'line'
+        object['points_on_object'] = points_processing(line.points)
+        object['angle_between_lines'] = None
+        object['size'] = None
+        object['relations'] = None
+        object['convex'] = None
 
-        output.setdefault(f"object_{object_index}", object)
+        output[f"object_{object_index}"] = object
         object_index += 1
 
     for angle in angles:
-        object = {}
+        object = dict()
 
-        object.setdefault('name', None)
-        object.setdefault('type', 'angle')
-        object.setdefault('points_on_object', None)
-        object.setdefault('angle_between_lines', lines_processing(angle.lines))
-        object.setdefault('size', angle.size)
-        object.setdefault('relations', relations_processing(angle.relations, 'angle'))
-        object.setdefault('convex', None)
+        object['name'] = None
+        object['type'] = 'angle'
+        object['points_on_object'] = None
+        object['angle_between_lines'] = lines_processing(angle.lines)
+        object['size'] = angle.size
+        object['relations'] = relations_processing(angle.relations, 'angle')
+        object['convex'] = None
 
-        output.setdefault(f"object_{object_index}", object)
+        output[f"object_{object_index}"] = object
         object_index += 1
 
     for segment in segments:
         object = {}
 
-        object.setdefault('name', None)
-        object.setdefault('type', 'segment')
-        object.setdefault('points_on_object', points_processing(segment.points))
-        object.setdefault('angle_between_lines', None)
-        object.setdefault('size', segment.size)
-        object.setdefault('relations', relations_processing(segment.relations, 'segment'))
-        object.setdefault('convex', None)
+        object['name'] = None
+        object['type'] = 'segment'
+        object['points_on_object'] = points_processing(segment.points)
+        object['angle_between_lines'] = None
+        object['size'] = segment.size
+        object['relations'] = relations_processing(segment.relations, 'segment')
+        object['convex'] = None
 
-        output.setdefault(f"object_{object_index}", object)
+        output[f"object_{object_index}"] = object
         object_index += 1
 
     for polygon in polygons:
-        object = {}
+        object = dict()
 
-        object.setdefault('name', None)
-        object.setdefault('type', 'polygon')
-        object.setdefault('points_on_object', points_processing(polygon.points))
-        object.setdefault('angle_between_lines', None)
-        object.setdefault('size', None)
-        object.setdefault('relations', None)
-        object.setdefault('convex', polygon.convex)
+        object['name'] = None
+        object['type'] = 'polygon'
+        object['points_on_object'] = points_processing(polygon.points)
+        object['angle_between_lines'] = None
+        object['size'] = None
+        object['relations'] = None
+        object['convex'] = polygon.convex
 
-        output.setdefault(f"object_{object_index}", object)
+        output[f"object_{object_index}"] = object
         object_index += 1
 
     return output
@@ -412,11 +409,11 @@ def json_create():
 
 # Волчкевич страница 26 задача 1
 text1 = 'ABC'  # многоугольники
-text2 = 'MB'  # дополнительные отрезки
-text3 = 'CE BD -1'  # углы
-text4 = 'AC M 1/1, AB M 1/1'  # отношения отрезков
-text5 = 'MBA DBM 1/1, MBA CEM 1/1'  # отношения углов
-text6 = 'CE BM E'  # точки пересечения прямых
+text2 = 'AP, CQ'  # дополнительные отрезки
+text3 = ''  # углы по трем точкам иил между прямыми
+text4 = 'BC P 1/1, AB Q 1/1'  # отношения отрезков
+text5 = ''  # отношения углов
+text6 = 'AP CQ M'  # точки пересечения прямых
 
 polygons_create(text1)
 segments_create(text2)
