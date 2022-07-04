@@ -84,11 +84,17 @@ def segments_create(text):
 def angles_create(text):
     if len(text.split()) > 0:
         for angle in text.split(','):
-            angle_name, angle_size = angle.split()
-            A, B, C = list(angle_name)
-            if A != B != C != A:
-                l1 = find_line_with_points(A, B)
-                l2 = find_line_with_points(B, C)
+            if len(angle) == 2:
+                angle_name, angle_size = angle.split()
+                A, B, C = list(angle_name)
+                if A != B != C != A:
+                    l1 = find_line_with_points(A, B)
+                    l2 = find_line_with_points(B, C)
+                    setattr(find_angle_with_lines(l1, l2), 'size', int(angle_size))
+            if len(angle) == 3:
+                l1, l2, angle_size = angle.split()
+                l1 = find_line_with_points(l1[0], l1[1])
+                l2 = find_line_with_points(l2[0], l2[1])
                 setattr(find_angle_with_lines(l1, l2), 'size', int(angle_size))
 
 
@@ -161,14 +167,16 @@ def line_intersection_create(text):
             l1, l2, P = intersection.split()
 
             l1 = find_line_with_segment(find_segment_with_points(l1[0], l1[1]))
-            new_points = deepcopy(l1.points)
-            new_points.add(find_point_with_name(P))
-            setattr(l1, 'points', new_points)
+            if find_point_with_name(P) not in l1.points:
+                new_points = deepcopy(l1.points)
+                new_points.add(find_point_with_name(P))
+                setattr(l1, 'points', new_points)
 
             l2 = find_line_with_segment(find_segment_with_points(l2[0], l2[1]))
-            new_points = deepcopy(l2.points)
-            new_points.add(find_point_with_name(P))
-            setattr(l2, 'points', new_points)
+            if find_point_with_name(P) not in l2.points:
+                new_points = deepcopy(l2.points)
+                new_points.add(find_point_with_name(P))
+                setattr(l2, 'points', new_points)
 
 
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
@@ -305,16 +313,22 @@ def relations_processing(relations_set, parametr):
     ret = {}
     for object in relations_set:
         if parametr == "angle":
-            ret.setdefault(f"object_{angles.index(object)+len(points)+len(lines)+1}", str(relations_set[object]))
+            ret.setdefault(f"object_{relation_processing_helper_for_angles(object)+len(points)+len(lines)+1}", str(relations_set[object]))
         if parametr == "segment":
-            ret.setdefault(f"object_{relation_processing_helper(object)+len(points)+len(lines)+len(angles)+1}", str(relations_set[object]))
+            ret.setdefault(f"object_{relation_processing_helper_for_segments(object)+len(points)+len(lines)+len(angles)+1}", str(relations_set[object]))
 
     return ret
 
 
-def relation_processing_helper(segment):
+def relation_processing_helper_for_segments(segment):
     for i in range(len(segments)):
         if set(get_points_names_from_list(segments[i].points)) == set(get_points_names_from_list(segment.points)):
+            return i
+
+
+def relation_processing_helper_for_angles(angle):
+    for i in range(len(angles)):
+        if set(get_points_names_from_list(angle.lines[0].points)) <= set(get_points_names_from_list(angles[i].lines[0].points)) and set(get_points_names_from_list(angle.lines[1].points)) <= set(get_points_names_from_list(angles[i].lines[1].points)):
             return i
 
 
@@ -397,12 +411,12 @@ def json_create():
 
 
 # Волчкевич страница 26 задача 1
-text1 = ‘ABCD '  # многоугольники
-text2 = 'AC, BD'  # дополнительные отрезки
-text3 = ''  # углы
-text4 = 'BO CO 1/1'  # отношения отрезков
-text5 = 'DBA DCA 1/1'  # отношения углов
-text6 = 'AC BD O'  # точки пересечения прямых
+text1 = 'ABC'  # многоугольники
+text2 = 'MB'  # дополнительные отрезки
+text3 = 'CE BD -1'  # углы
+text4 = 'AC M 1/1, AB M 1/1'  # отношения отрезков
+text5 = 'MBA DBM 1/1, MBA CEM 1/1'  # отношения углов
+text6 = 'CE BM E'  # точки пересечения прямых
 
 polygons_create(text1)
 segments_create(text2)
