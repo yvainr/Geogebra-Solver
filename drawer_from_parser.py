@@ -5,7 +5,7 @@ from math import*
 points_of_triangle = []
 names = []
 
-x = taskp.json_create()
+x = task_parser.json_create()
 
 for object in x:
     t = x[object]
@@ -16,13 +16,13 @@ for object in x:
 
 angle_default = 70
 
-first_angle = taskp.find_angle_with_points(points_of_triangle[1],points_of_triangle[0], points_of_triangle[2]).size
-second_angle = taskp.find_angle_with_points(points_of_triangle[0],points_of_triangle[1], points_of_triangle[2]).size
-third_angle = taskp.find_angle_with_points(points_of_triangle[1],points_of_triangle[2], points_of_triangle[0]).size
+first_angle = task_parser.find_angle_with_points(points_of_triangle[1],points_of_triangle[0], points_of_triangle[2]).size
+second_angle = task_parser.find_angle_with_points(points_of_triangle[0],points_of_triangle[1], points_of_triangle[2]).size
+third_angle = task_parser.find_angle_with_points(points_of_triangle[1],points_of_triangle[2], points_of_triangle[0]).size
 
-first_segment = taskp.find_segment_with_points(points_of_triangle[1],points_of_triangle[2]).size
-second_segment = taskp.find_segment_with_points(points_of_triangle[0],points_of_triangle[2]).size
-third_segment = taskp.find_segment_with_points(points_of_triangle[1],points_of_triangle[0]).size
+first_segment = task_parser.find_segment_with_points(points_of_triangle[1],points_of_triangle[2]).size
+second_segment = task_parser.find_segment_with_points(points_of_triangle[0],points_of_triangle[2]).size
+third_segment = task_parser.find_segment_with_points(points_of_triangle[1],points_of_triangle[0]).size
 
 first_angle = 80
 second_angle = 20
@@ -43,6 +43,8 @@ def izvesten_otrezok(name,first_segment, names_1, names_2, second_angle, third_a
     first_str = names_1 + "(" + str(first_segment / 2) + ", 0)"
     second_str = names_2 + "(" + str(first_segment * (-1) / 2) + ", 0)"
     x = [0, first_segment / 2, first_segment * (-1) / 2]
+    third_plus = ""
+    fourth_plus = ""
     if third_segment != None and second_angle != None:
         third_str = "w1 = Circle(" + str(names_1) + "," + str(third_segment) + ")"
 
@@ -50,6 +52,10 @@ def izvesten_otrezok(name,first_segment, names_1, names_2, second_angle, third_a
         fourth_str = "l = Line(" + str(names_1) + ",(" + str(0) + "," + str(y_d) + "))"
 
         fith_str = str(name) + "_{1} = Intersect(l, w1)"
+        one_plus = 'SetVisibleInView(l, 1, false)'
+        sec_plus = "SetVisibleInView( w1, 1, false )"
+        third_plus = 'SetVisibleInView(' + str(name) + "_{2}" + ', 1, false)'
+        fourth_plus = "Rename(" + str(name) + "_{1}," + str(name) + ")"
     elif second_segment != None and third_angle != None:
         third_str = "w1 = Circle(" + str(names_2) + "," + str(second_segment) + ")"
 
@@ -57,6 +63,10 @@ def izvesten_otrezok(name,first_segment, names_1, names_2, second_angle, third_a
         fourth_str = "l = Line(" + str(names_2) + ",(" + str(0) + "," + str(y_d) + "))"
 
         fith_str = str(name) + "_{1} = Intersect(l, w1)"
+        one_plus = 'SetVisibleInView(l, 1, false)'
+        sec_plus = "SetVisibleInView( w1, 1, false )"
+        third_plus = 'SetVisibleInView(' + str(name) + "_{2}" + ', 1, false)'
+        fourth_plus = "Rename(" + str(name) + "_{1}," + str(name) + ")"
     elif third_angle != None and second_angle != None:
         y_d = x[1] * tan(second_angle)
         third_str = "l = Line(" + str(names_1) + ",(" + str(0) + "," + str(y_d) + "))"
@@ -65,12 +75,18 @@ def izvesten_otrezok(name,first_segment, names_1, names_2, second_angle, third_a
         fourth_str = "l1 = Line(" + str(names_2) + ",(" + str(0) + "," + str(y_d) + "))"
 
         fith_str = str(name) + "_{1} = intersect(l1, l)"
+        one_plus = 'SetVisibleInView(l, 1, false)'
+        sec_plus = "SetVisibleInView( l1, 1, false )"
     elif third_segment != None and second_segment != None:
         third_str = "w1 = Circle(" + str(names_1) + "," + str(third_segment) + ")"
 
         fourth_str = "w2 = Circle(" + str(names_2) + "," + str(second_segment) + ")"
 
         fith_str = str(name) + "_{1} = Intersect(w1, w2)"
+        one_plus = 'SetVisibleInView(w2, 1, false)'
+        sec_plus = "SetVisibleInView( w1, 1, false )"
+        third_plus = 'SetVisibleInView(' + str(name) + "_{2}" + ', 1, false)'
+        fourth_plus = "Rename(" + str(name) + "_{1}," + str(name) + ")"
     elif second_segment != None and second_angle != None:
         third_str = "w1 = Circle(" + str(names_2) + "," + str(second_segment) + ")"
 
@@ -78,6 +94,10 @@ def izvesten_otrezok(name,first_segment, names_1, names_2, second_angle, third_a
         fourth_str = "l = Line(" + str(names_1) + ",(" + str(0) + "," + str(y_d) + "))"
 
         fith_str = str(name) + "_{1} = Intersect(l, w1)"
+        one_plus = 'SetVisibleInView(l, 1, false)'
+        sec_plus = "SetVisibleInView( w1, 1, false )"
+        third_plus = 'SetVisibleInView(' + str(name) + "_{2}" + ', 1, false)'
+        fourth_plus = "Rename(" + str(name) + "_{1}," + str(name) + ")"
     elif third_segment != None and third_angle != None:
         third_str = "w1 = Circle(" + str(names_1) + "," + str(third_segment) + ")"
 
@@ -85,6 +105,10 @@ def izvesten_otrezok(name,first_segment, names_1, names_2, second_angle, third_a
         fourth_str = "l = Line(" + str(names_2) + ",(" + str(0) + "," + str(y_d) + "))"
 
         fith_str = str(name) + "_{1} = Intersect(l, w1)"
+        one_plus = 'SetVisibleInView(l, 1, false)'
+        sec_plus = "SetVisibleInView( w1, 1, false )"
+        third_plus = 'SetVisibleInView(' + str(name) + "_{2}" + ', 1, false)'
+        fourth_plus = "Rename(" + str(name) + "_{1}," + str(name) + ")"
     elif third_segment != None:
         third_str = "w1 = Circle(" + str(names_1) + "," + str(third_segment) + ")"
 
@@ -93,6 +117,10 @@ def izvesten_otrezok(name,first_segment, names_1, names_2, second_angle, third_a
         fourth_str = "l = Line(" + str(names_1) + ",(" + str(0) + "," + str(y_d) + "))"
 
         fith_str = str(name) + "_{1} = Intersect(l, w1)"
+        one_plus = 'SetVisibleInView(l, 1, false)'
+        sec_plus = "SetVisibleInView( w1, 1, false )"
+        third_plus = 'SetVisibleInView(' + str(name) + "_{2}" + ', 1, false)'
+        fourth_plus = "Rename(" + str(name) + "_{1}," + str(name) + ")"
     elif second_segment != None:
         third_str = "w1 = Circle(" + str(names_2) + "," + str(second_segment) + ")"
 
@@ -102,6 +130,10 @@ def izvesten_otrezok(name,first_segment, names_1, names_2, second_angle, third_a
         fourth_str = "l = Line(" + str(names_2) + ",(" + str(0) + "," + str(y_d) + "))"
 
         fith_str = str(name) + "_{1} = Intersect(l, w1)"
+        one_plus = 'SetVisibleInView(l, 1, false)'
+        sec_plus = "SetVisibleInView( w1, 1, false )"
+        third_plus = 'SetVisibleInView(' + str(name) + "_{2}" + ', 1, false)'
+        fourth_plus = "Rename(" + str(name) + "_{1}," + str(name) + ")"
     elif third_angle != None:
         second_angle = 1
         y_d = x[1] * tan(second_angle)
@@ -111,6 +143,8 @@ def izvesten_otrezok(name,first_segment, names_1, names_2, second_angle, third_a
         fourth_str = "l1 = Line(" + str(names_2) + ",(" + str(0) + "," + str(y_d) + "))"
 
         fith_str = str(name) + "_{1} = Intersect(l1, l)"
+        one_plus = 'SetVisibleInView(l, 1, false)'
+        sec_plus = "SetVisibleInView( l1, 1, false )"
     elif second_angle != None:
         third_angle = 1
         y_d = x[1] * tan(second_angle)
@@ -120,6 +154,8 @@ def izvesten_otrezok(name,first_segment, names_1, names_2, second_angle, third_a
         fourth_str = "l1 = Line(" + str(name) + ",(" + str(0) + "," + str(y_d) + "))"
 
         fith_str = str(name) + "_{1} = Intersect(l1, l)"
+        one_plus = 'SetVisibleInView(l, 1, false)'
+        sec_plus = "SetVisibleInView( l1, 1, false )"
     else:
         third_angle = 1
         second_angle = 1
@@ -131,8 +167,10 @@ def izvesten_otrezok(name,first_segment, names_1, names_2, second_angle, third_a
         fourth_str = "l1 = Line(" + str(names_2) + ",(" + str(0) + "," + str(y_d) + "))"
 
         fith_str = str(name) + "_{1} = Intersect(l1, l)"
+        one_plus = 'SetVisibleInView(l, 1, false)'
+        sec_plus = "SetVisibleInView( l1, 1, false )"
     sixth_str = f"Polygon({name}_{1}, {names_1}, {names_2})"
-    return [first_str, second_str, third_str, fourth_str, fith_str, sixth_str]
+    return [first_str, second_str, third_str, fourth_str, fith_str, sixth_str, one_plus, sec_plus, third_plus, fourth_plus]
 
 if (int(second_angle != None) + int(first_angle != None) + int(third_angle != None)) == 2:
     if second_angle == None:
@@ -161,7 +199,8 @@ elif (int(second_angle != None) + int(first_angle != None) + int(third_angle != 
 elif (int(second_angle != None) + int(first_angle != None) + int(third_angle != None)) == 0:
     ans = izvesten_otrezok(names[1], second_segment, names[0], names[2], first_angle, third_angle, first_segment, third_segment)
 
-import logging
-
 geogebra_html_generator.insert_commands(ans)
+
+
+
 
