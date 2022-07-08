@@ -72,22 +72,23 @@ def segments_create(text):
             except IndexError:
                 size = None
 
-            seg = Segment(find_point_with_name(segment[0][0]), find_point_with_name(segment[0][1]), size)
-            find_same_segments(segments, seg)
+            seg = find_segment_with_points(segment[0][0], segment[0][1])
+            seg.size = size
 
 
 def angles_create(text):
     if len(text.split()) > 0:
         for angle in text.split(','):
+            angle = angle.split()
             if len(angle) == 2:
-                angle_name, angle_size = angle.split()
+                angle_name, angle_size = angle
                 A, B, C = list(angle_name)
                 if A != B != C != A:
                     l1 = find_line_with_points(A, B)
                     l2 = find_line_with_points(B, C)
                     setattr(find_angle_with_lines(l1, l2), 'size', int(angle_size))
             if len(angle) == 3:
-                l1, l2, angle_size = angle.split()
+                l1, l2, angle_size = angle
                 l1 = find_line_with_points(l1[0], l1[1])
                 l2 = find_line_with_points(l2[0], l2[1])
                 setattr(find_angle_with_lines(l1, l2), 'size', int(angle_size))
@@ -405,21 +406,3 @@ def json_create():
         object_index += 1
 
     return output
-
-
-# Волчкевич страница 26 задача 1
-text1 = 'ABC'  # многоугольники
-text2 = 'AP, CQ'  # дополнительные отрезки
-text3 = ''  # углы по трем точкам иил между прямыми
-text4 = 'BC P 1/1, AB Q 1/1'  # отношения отрезков
-text5 = ''  # отношения углов
-text6 = 'AP CQ M'  # точки пересечения прямых
-
-polygons_create(text1)
-segments_create(text2)
-angles_create(text3)
-segments_relations_create(text4)
-angles_relations_create(text5)
-line_intersection_create(text6)
-
-pprint(json_create())
