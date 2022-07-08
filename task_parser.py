@@ -406,3 +406,36 @@ def json_create():
         object_index += 1
 
     return output
+
+#Текст задачи
+text1 = 'ABC'  #треугольник
+text2 = 'ABC 60'  # угол треугольника
+text3 = 'AB 5'  # сторона треугольника
+text4 = 'AC 3'  # сторона треугольника
+
+polygons_create(text1)
+angles_create(text2)
+segments_create(text3)
+segments_create(text4)
+
+data = json_create()
+with open('objects.txt','w') as out:
+    for key, val in data.items():
+        out.write('{}:{}\n'.format(key, val))
+
+# Волчкевич страница 26 задача 1
+#text1 = 'ABC'  # многоугольники
+#text2 = 'AP, CQ'  # дополнительные отрезки
+#text3 = ''  # углы по трем точкам иил между прямыми
+#text4 = 'BC P 1/1, AB Q 1/1'  # отношения отрезков
+#text5 = ''  # отношения углов
+#text6 = 'AP CQ M'  # точки пересечения прямых
+
+#polygons_create(text1)
+#segments_create(text2)
+#angles_create(text3)
+#segments_relations_create(text4)
+#angles_relations_create(text5)
+#line_intersection_create(text6)
+
+#pprint(json_create())
