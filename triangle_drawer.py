@@ -177,7 +177,7 @@ def CreateTriangleWithTwoSidesAndAngleBetweenThem(a, b, gamma, gamma_name):
 
 def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, gamma_name):
 	C = MyPoint(0, 0, gamma_name[1])
-	B = MyPoint(a, 0, gamma_name[2])
+	B = MyPoint(a, 0, gamma_name[0])
 	l = LineWithTiltAngle(C, gamma)
 	A1, A2 = LineAndCircleIntersectionPoints(l, B, c)
 	
@@ -189,7 +189,7 @@ def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, gamma_name):
 		else:
 			A = A2
 			
-	A.name = gamma_name[0]
+	A.name = gamma_name[2]
 	
 	return Shift(A, B, C)
 
