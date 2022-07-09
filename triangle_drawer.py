@@ -4,9 +4,10 @@ import geogebra_html_generator
 
 
 class MyPoint:
-	def __init__(self, x, y):
+	def __init__(self, x, y, name=None):
 		self.x = x
 		self.y = y
+		self.name = name
 
 
 class MyLine:
@@ -106,25 +107,26 @@ def LineAndCircleIntersectionPoints(l, O, r):
 	
 def Shift(A, B, C):
 	O = CircumscribedCircleCenter(A, B, C)
-	new_A = MyPoint(A.x - O.x, A.y - O.y)
-	new_B = MyPoint(B.x - O.x, B.y - O.y)
-	new_C = MyPoint(C.x - O.x, C.y - O.y)
+	new_A = MyPoint(A.x - O.x, A.y - O.y, A.name)
+	new_B = MyPoint(B.x - O.x, B.y - O.y, B.name)
+	new_C = MyPoint(C.x - O.x, C.y - O.y, C.name)
 	
 	return new_A, new_B, new_C
 
 
-def CreateTriangleWithThreeSides(a, b, c):
-	C = MyPoint(0, 0)
-	B = MyPoint(a, 0)
+def CreateTriangleWithThreeSides(a, b, c, angle):
+	C = MyPoint(0, 0, angle[1])
+	B = MyPoint(a, 0, angle[2])
 	A = CirclesIntersectionPoint(b, c, B)
+	A.name = angle[0]
 	
 	return Shift(A, B, C)
 
 
-def CreateTriangleWithSideAndContraAngle(a, alpha):
+def CreateTriangleWithSideAndContraAngle(a, alpha, alpha_name):
 	alph = alpha * pi / 180
-	C = MyPoint(0, 0)
-	B = MyPoint(a, 0)
+	C = MyPoint(0, 0, alpha_name[0])
+	B = MyPoint(a, 0, alpha_name[2])
 	if alpha != 90:
 		O = MyPoint(a/2, (1/tan(alph))*(a/2))
 	else:
@@ -134,26 +136,28 @@ def CreateTriangleWithSideAndContraAngle(a, alpha):
 	x = uniform(-r + a/2, r + a/2)
 	y = sqrt(r**2 - (x - a/2)**2) + O.y
 	
-	A = MyPoint(x, y)
+	A = MyPoint(x, y, alpha_name[1])
+	A, B, C = Shift(A, B, C)
 	
-	return Shift(A, B, C)
+	return A, B, C
 
 
-def CreateTriangleWithOneSideAndTwoAngles(a, beta, gamma):
-	C = MyPoint(0, 0)
-	B = MyPoint(a, 0)
+def CreateTriangleWithOneSideAndTwoAngles(a, beta, gamma, gamma_name):
+	C = MyPoint(0, 0, gamma_name[1])
+	B = MyPoint(a, 0, gamma_name[0])
 	
 	l1 = LineWithTiltAngle(C, gamma)
 	l2 = LineWithTiltAngle(B, 180 - beta)
 	
 	A = LineIntersectionPoint(l1, l2)
+	A.name = gamma_name[2]
 	
 	return Shift(A, B, C)
 
 
-def CreateTriangleWithTwoSidesAndAngleBetweenThem(a, b, gamma):
-	C = MyPoint(0, 0)
-	B = MyPoint(a, 0)
+def CreateTriangleWithTwoSidesAndAngleBetweenThem(a, b, gamma, gamma_name):
+	C = MyPoint(0, 0, gamma_name[1])
+	B = MyPoint(a, 0, gamma_name[2])
 	
 	l = LineWithTiltAngle(C, gamma)
 	
@@ -166,14 +170,14 @@ def CreateTriangleWithTwoSidesAndAngleBetweenThem(a, b, gamma):
 		x = (-2*t*k - sqrt(4*t**2*k**2 - 4*(k**2 + 1)*(t**2 - b**2))) / (2*(k**2 + 1))
 	y = k*x + t
 	
-	A = MyPoint(x, y)
+	A = MyPoint(x, y, gamma_name[0])
 	
 	return Shift(A, B, C)
 
 
-def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma):
-	C = MyPoint(0, 0)
-	B = MyPoint(a, 0)
+def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, gamma_name):
+	C = MyPoint(0, 0, gamma_name[1])
+	B = MyPoint(a, 0, gamma_name[2])
 	l = LineWithTiltAngle(C, gamma)
 	A1, A2 = LineAndCircleIntersectionPoints(l, B, c)
 	
@@ -184,16 +188,18 @@ def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma):
 			A = A1
 		else:
 			A = A2
+			
+	A.name = gamma_name[0]
 	
 	return Shift(A, B, C)
 
 
-def DrawTriangle(points, name_A='A', name_B='B', name_C='C'):
+def DrawTriangle(points):
 	A, B, C = points
-	geogebra_html_generator.insert_commands([f"{name_A}({Equal(A.x)}, {Equal(A.y)})", f"{name_B}({Equal(B.x)}, {Equal(B.y)})", f"{name_C}({Equal(C.x)}, {Equal(C.y)})", f"Polygon({name_A}, {name_B}, {name_C})"])
+	geogebra_html_generator.insert_commands([f"{A.name}({Equal(A.x)}, {Equal(A.y)})", f"{B.name}({Equal(B.x)}, {Equal(B.y)})", f"{C.name}({Equal(C.x)}, {Equal(C.y)})", f"Polygon({A.name}, {B.name}, {C.name})"])
 	
 	
-def CreateTriangle(sides, angles):
+def CreateTriangle(sides, angles, angles_names):
 	if angles.count(None) <= 1:
 		test_angle = 180
 		
@@ -209,28 +215,28 @@ def CreateTriangle(sides, angles):
 		
 		for i in range(3):
 			if sides[i]:
-				return CreateTriangleWithOneSideAndTwoAngles(sides[i], angles[i-1], angles[(i+1)%3])
+				return CreateTriangleWithOneSideAndTwoAngles(sides[i], angles[i-1], angles[(i+1)%3], angles_names[(i+1)%3])
 		else:	
 			random_index = randint(0,2)
-			return CreateTriangleWithOneSideAndTwoAngles(uniform(3, 6), angles[random_index-1], angles[(random_index+1)%3])
+			return CreateTriangleWithOneSideAndTwoAngles(uniform(3, 6), angles[random_index-1], angles[(random_index+1)%3], angles_names[(random_index+1)%3])
 		
 	else:
 		for i in range(3):
 			if angles[i]:
 				if sides[i-1] and sides[(i+1)%3]:
-					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[i-1], sides[(i+1)%3], angles[i])
+					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[i-1], sides[(i+1)%3], angles[i], angles_names[i])
 				if sides[i] and sides[i-1]:
-					return CreateTriangleWithTwoSidesAndAngleNotBetweenThem(sides[i-1], sides[i], angles[i])
+					return CreateTriangleWithTwoSidesAndAngleNotBetweenThem(sides[i-1], sides[i], angles[i], angles_names[i])
 				if sides[i] and sides[(i+1)%3]:
-					return CreateTriangleWithTwoSidesAndAngleNotBetweenThem(sides[(i+1)%3], sides[i], angles[i])
+					return CreateTriangleWithTwoSidesAndAngleNotBetweenThem(sides[(i+1)%3], sides[i], angles[i], angles_names[i])
 				if sides[i]:
-					return CreateTriangleWithSideAndContraAngle(sides[i], angles[i])
+					return CreateTriangleWithSideAndContraAngle(sides[i], angles[i], angles_names[i])
 				if sides[i-1]:
-					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[i-1], sides[i-1] * uniform(0.5, 1.5), angles[i])
+					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[i-1], sides[i-1] * uniform(0.5, 1.5), angles[i], angles_names[i])
 				if sides[(i+1)%3]:
-					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[(i+1)%3], sides[(i+1)%3] * uniform(0.5, 1.5), angles[i])
+					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[(i+1)%3], sides[(i+1)%3] * uniform(0.5, 1.5), angles[i], angles_names[i])
 				else:
-					return CreateTriangleWithTwoSidesAndAngleBetweenThem(uniform(3, 6), uniform(3, 6), angles[i])
+					return CreateTriangleWithTwoSidesAndAngleBetweenThem(uniform(3, 6), uniform(3, 6), angles[i], angles_names[i])
 		else:	
 			try:
 				mean_side = sum(filter(lambda x: x != None, sides)) / (3 - sides.count(None))
@@ -242,4 +248,4 @@ def CreateTriangle(sides, angles):
 				if not sides[i]:
 					sides[i] = mean_side * uniform(0.5, 1.5)
 			
-			return CreateTriangleWithThreeSides(sides[0], sides[1], sides[2])
+			return CreateTriangleWithThreeSides(sides[0], sides[1], sides[2], angles_names[2])
