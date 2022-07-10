@@ -12,7 +12,7 @@
 <div id="ggb-element"></div>
 <!--<input value="Press this button to show construction" onclick="ggbOnInit()" type="button">-->
 <!--<h4>{{ commands_text }}</h4>-->
-<form method="post" action="{{ url_for('index', commands_text=commands_text)}}">
+<form method="post" action="{{ url_for('index', commands_text=commands_text) if type == 'commands' else url_for('text_input', commands_text=commands_text)}}">
     <div class="form-group col">
         <button type="submit" class="btn btn-primary">Press this button to go back</button>
     </div>
@@ -22,7 +22,7 @@
 <script type="text/javascript">
     function ggbOnInit() {
 
-            ggbApplet.evalCommand('A(1,1)');
+            ggbApplet.evalCommand('A(1,1)'); 
 
     }
 

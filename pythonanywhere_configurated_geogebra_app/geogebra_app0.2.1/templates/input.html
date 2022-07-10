@@ -8,10 +8,10 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <title>Geogebra commands input</title>
+    <title>Geogebra text input</title>
   </head>
   <body>
-  <form method="post" action="/render_geogebra">
+  <form method="post" action="/analysis_commands">
     <nav class="navbar navbar-expand-md navbar-light bg-light">
         <a class="navbar-brand">Geogebra</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,9 +23,10 @@
                 <a class="nav-link" href="https://wiki.geogebra.org/en/Point_Command" target="_blank">Список команд</a>
             </li>
 
-                <li class="nav-item active">
-                <a class="nav-link" href="/text_input">Ввод команд текстом</a>
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Ввод команд geogebra</a>
             </li>
+
             </ul>
         </div>
     </nav>
@@ -34,14 +35,14 @@
             <div class="row">
 
                 <h3 class="col-10">
-                    <label for="commands">Commands input</label>
+                    <label for="commands">Text input</label>
                 </h3>
                 <div class="form-group col">
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </div>
         </div>
-        <textarea name="commands" placeholder="Дорогой пользователь, вводи команды правильно" class="form-control" rows="20">{{ commands_text if commands_text != None else '' }}</textarea>
+        <textarea name="text_commands" placeholder="Дорогой пользователь, вводи команды правильно" class="form-control" rows="20">{{ commands_text if commands_text != None else '' }}</textarea>
     </div>
   </form>
 <!--  <h3> {{ commands_text }} </h3>-->
