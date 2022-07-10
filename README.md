@@ -1,3 +1,4 @@
 # Geogebra-Solver
-Решаем геометрию за вас.
-http://geogebra0drawer.pythonanywhere.com/
+Рисуем и решаем геометрию за вас. <br>
+http://geogebra0drawer.pythonanywhere.com/ <br>
+http://geogebra0drawer.pythonanywhere.com/text_input
