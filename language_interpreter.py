@@ -62,7 +62,3 @@ inp = spaces_normalize(inp)
 inp = comma_normalize(inp)
 inp = input_str(inp)
 print_ret(inp)
-
-
-
-
