@@ -1,4 +1,4 @@
-import drawer_ggb.geogebra_html_generator as geogebra_html_generator
+import geogebra_html_generator
 import triangle_drawer as triad
 import task_parser as taskp
 from math import *
@@ -88,5 +88,8 @@ def text_splitter(text):
         taskp.line_intersection_create(text[5])
     except IndexError:
         pass
+
+    taskp.UseRelations(taskp.segments)
+    taskp.UseRelations(taskp.angles, False)
 
     draw_polygon(triangle_from_task_drawer(taskp.polygons[0].points[0].name, taskp.polygons[0].points[1].name, taskp.polygons[0].points[2].name))

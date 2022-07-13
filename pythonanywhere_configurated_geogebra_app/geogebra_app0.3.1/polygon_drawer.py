@@ -1,4 +1,4 @@
-import drawer_ggb.geogebra_html_generator as geogebra_html_generator
+import geogebra_html_generator
 import triangle_drawer as triad
 import task_parser as taskp
 from math import *

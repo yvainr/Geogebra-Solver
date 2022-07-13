@@ -1,4 +1,4 @@
-output_num = 6 
+output_num = 6
 #number of output strings
 
 def main_func(inp_str):
@@ -18,7 +18,7 @@ def distillation(part):
     for i in range(len(part)):
         try:
             if (47 < ord(part[i])< 58) or (64 < ord(part[i]) < 91) or (96 < ord(part[i]) < 123) or ord(part[i]) == 32:
-                new_part = new_part[:] + str(part[i])            
+                new_part = new_part[:] + str(part[i])
         except:
             pass
     return new_part.strip()

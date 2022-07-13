@@ -3,7 +3,7 @@ from time import sleep
 from werkzeug.exceptions import abort
 import logging
 import sqlite3
-from drawer_ggb.geogebra_html_generator import insert_commands
+from geogebra_html_generator import insert_commands
 import triangle_drawer
 import task_parser as taskp
 from polygon_drawer import text_splitter
@@ -77,7 +77,7 @@ def create():
 
         logger.info(f'Recieved geogebra commands: {commands}')
 
-        insert_commands(commands, input_file_name='web/templates/template.html', output_file_name='web/templates/geogebra_page.html')
+        insert_commands(commands, input_file_name='geogebra_app/templates/template.html', output_file_name='geogebra_app/templates/geogebra_page.html')
 
         return render_template('geogebra_page.html', commands_text=commands_text, type='commands')
 
@@ -92,6 +92,7 @@ def parse_text():
         logger.info(f'String to parse:{text}')
 
         objects = text_analyze(text) #array of lists of objects
+        logger.info(objects)
         parsed_text = ''
         for object_class in objects:
             parsed_text += (', '.join(object_class) + '\n')
