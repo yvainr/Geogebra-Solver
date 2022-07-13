@@ -3,8 +3,12 @@ from pprint import pprint
 
 
 class Point:
-    def __init__(self, name):
+    def __init__(self, name, specific_properties_point=None, specific_properties_triangle=None, cord_x=None, cord_y=None):
         self.name = name
+        self.specific_properties_point = specific_properties_point
+        self.specific_properties_triangle = specific_properties_triangle
+        self.x = cord_x
+        self.y = cord_y
 
 
 class Line:
@@ -33,11 +37,11 @@ class Polygon:
         # ?добавить точки внутри?
 
 
-points = []
-lines = []
-angles = []
-segments = []
-polygons = []
+points = list()
+lines = list()
+angles = list()
+segments = list()
+polygons = list()
 
 
 def polygons_create(text):
@@ -53,14 +57,22 @@ def polygons_create(text):
                 for vertice_index in range(len(vertices_list)):
                     find_segment_with_points(vertices_list[vertice_index-1], vertices_list[vertice_index])
 
-            try:
-                convex = polygon.split()[1]
-                if convex == 'выпуклый':
-                    polygons.append(Polygon(vertices_class_list, False))
-                else:
+            if len(vertices_list) > 3:
+                try:
+                    convex = polygon.split()[1]
+                    if convex == 'невыпуклый':
+                        polygons.append(Polygon(vertices_class_list, False))
+                    else:
+                        polygons.append(Polygon(vertices_class_list))
+                except IndexError:
                     polygons.append(Polygon(vertices_class_list))
-            except IndexError:
+
+            if len(vertices_list) == 3:
                 polygons.append(Polygon(vertices_class_list))
+
+            if len(vertices_list) == 1:
+                vertices_class_list[0].specific_properties_point = polygon.split()[1]
+                vertices_class_list[0].specific_properties_triangle = polygon.split()[2]
 
 
 def segments_create(text):
@@ -68,7 +80,7 @@ def segments_create(text):
         for segment in text.split(','):
             segment = segment.split()
             try:
-                size = int(segment[1])
+                size = float(Fraction(segment[1]))
             except IndexError:
                 size = None
 
@@ -86,12 +98,14 @@ def angles_create(text):
                 if A != B != C != A:
                     l1 = find_line_with_points(A, B)
                     l2 = find_line_with_points(B, C)
-                    setattr(find_angle_with_lines(l1, l2), 'size', int(angle_size))
+                    find_angle_with_lines(l1, l2).size = float(Fraction(angle_size))
+                    find_angle_with_lines(l2, l1).size = 180 - float(Fraction(angle_size))
             if len(angle) == 3:
                 l1, l2, angle_size = angle
                 l1 = find_line_with_points(l1[0], l1[1])
                 l2 = find_line_with_points(l2[0], l2[1])
-                setattr(find_angle_with_lines(l1, l2), 'size', int(angle_size))
+                find_angle_with_lines(l1, l2).size = float(Fraction(angle_size))
+                find_angle_with_lines(l2, l1).size = 180 - float(Fraction(angle_size))
 
 
 def segments_relations_create(text):
@@ -122,16 +136,16 @@ def segments_relations_create(text):
             rel = relation.split()[2]
             new_relations = dict_copy_create(seg_1.relations)
             if seg_2 in new_relations:
-                new_relations[seg_2] = Fraction(rel)
+                new_relations[seg_2] = 1/Fraction(rel)
             else:
-                new_relations.setdefault(seg_2, Fraction(rel))
+                new_relations.setdefault(seg_2, 1/Fraction(rel))
             setattr(seg_1, 'relations', new_relations)
 
             new_relations = dict_copy_create(seg_2.relations)
             if seg_1 in new_relations:
-                new_relations[seg_1] = 1/Fraction(rel)
+                new_relations[seg_1] = Fraction(rel)
             else:
-                new_relations.setdefault(seg_1, 1/Fraction(rel))
+                new_relations.setdefault(seg_1, Fraction(rel))
             setattr(seg_2, 'relations', new_relations)
 
 
@@ -144,16 +158,16 @@ def angles_relations_create(text):
 
             new_relations = dict_copy_create(ang_1.relations)
             if ang_2 in new_relations:
-                new_relations[ang_2] = Fraction(rel)
+                new_relations[ang_2] = 1/Fraction(rel)
             else:
-                new_relations.setdefault(ang_2, Fraction(rel))
+                new_relations.setdefault(ang_2, 1/Fraction(rel))
             setattr(ang_1, 'relations', new_relations)
 
             new_relations = dict_copy_create(ang_2.relations)
             if ang_1 in new_relations:
-                new_relations[ang_1] = 1/Fraction(rel)
+                new_relations[ang_1] = Fraction(rel)
             else:
-                new_relations.setdefault(ang_1, 1/Fraction(rel))
+                new_relations.setdefault(ang_1, Fraction(rel))
             setattr(ang_2, 'relations', new_relations)
 
 
@@ -406,3 +420,30 @@ def json_create():
         object_index += 1
 
     return output
+
+
+def UseRelations(objects, seg_check=True):
+    none_count = 0
+
+    for obj in objects:
+        if not obj.size:
+            none_count += 1
+
+    if seg_check and none_count == len(objects) != 0:
+        objects[0].size = 3
+        none_count -= 1
+
+    for n in range(none_count):
+
+        for i in range(len(objects)):
+            obj_1 = objects[i]
+
+            if not obj_1.size:
+                for j in range(len(objects)):
+                    obj_2 = objects[j]
+
+                    if obj_2.size:
+                        try:
+                            obj_1.size = float(obj_2.size * obj_2.relations[obj_1])
+                        except Exception:
+                            pass
