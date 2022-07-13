@@ -1,12 +1,6 @@
 output_num = 7 
 #number of output strings
 
-def output_normalize(ret):
-    objects = (text)
-    output_text = ''
-    for object_class in objects:
-          output_text += (', '.join(object_class) + '\n')
-
 def main_func(inp_str):
     #main func
     inp_str = string_split(inp_str)
