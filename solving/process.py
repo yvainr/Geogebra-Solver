@@ -129,13 +129,11 @@ def fix_all_angles():
                         if x[l3]['type'] == "line" and l3 != l2 and l3 != l1:
                             if not x[find_angle_with_lines(l1, l3)]["size"]:
                                 correct_three_angles(l1, l2, l3)
-                                fix_vertical_angles()
                             if not x[find_angle_with_lines(l2, l3)]["size"]:
                                 correct_three_angles(l2, l1, l3)
-                                fix_vertical_angles()
                             if not x[find_angle_with_lines(l2, l1)]["size"]:
                                 correct_three_angles(l2, l3, l1)
-                                fix_vertical_angles()
+    fix_vertical_angles()
 def search_triangle(triangle):
     A, B, C = x[triangle]['points_on_object'][0], x[triangle]['points_on_object'][1], x[triangle]['points_on_object'][2]
     AB = find_segment_with_points(A, B)
@@ -182,7 +180,6 @@ def equality_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA, BC
     if (x[AB]["size"] == x[A1B1]["size"] and x[AB]["size"] and x[BC]["size"] and x[BC]["size"] == x[B1C1]["size"] and x[ABC]["size"] and x[ABC]["size"] == x[A1B1C1]["size"]) \
             or (x[AB]["size"] and x[CA]["size"] and x[CAB]["size"] and x[AB]["size"] == x[A1B1]["size"] and x[CA]["size"] == x[C1A1]["size"] and x[CAB]["size"] == x[C1A1B1]["size"]) \
             or (x[CA]["size"] and x[BC]["size"] and x[BCA]["size"] and x[CA]["size"] == x[C1A1]["size"] and x[BC]["size"] == x[B1C1]["size"] and x[BCA]["size"] == x[B1C1A1]["size"]):
-        print(x[AB]["size"], x[A1B1]["size"], x[BC]["size"], x[B1C1]["size"], x[ABC]["size"], x[A1B1C1]["size"])
         equal_them(AB, A1B1)
         equal_them(BC, B1C1)
         equal_them(CA, C1A1)
@@ -230,8 +227,7 @@ def solving_process():
     for key in x:
         print(key, x[key])
 
-    print("Сколько итераций решения вы хотите сделать?")
-    iterations = int(input())
+    iterations = 7
     for i in range(iterations):
         fix_all_angles()
         isosceles_triangles()
