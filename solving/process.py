@@ -10,7 +10,7 @@ objects_cnt = 0
 
 ans = task_parser.ans
 
-out = []
+out = [0]
 
 
 def create():
@@ -178,20 +178,39 @@ def isosceles_triangles():
             correct_size(ABC, CAB, BC, CA)
             correct_size(CAB, BCA, BC, AB)
 
-def equality_triangles(triangle1, triangle2, AB, BC, CA, BCA, CAB, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1):
-    if equals(AB, A1B1) and equals(BC, B1C1) and equals(CA, C1A1) and equals(BCA, B1C1A1) and equals(CAB, C1A1B1) and equals(ABC, A1B1C1):
+def equality_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA, BCA, CAB, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1):
+    if (x[AB]["size"] == x[A1B1]["size"] and x[AB]["size"] and x[BC]["size"] and x[BC]["size"] == x[B1C1]["size"] and x[ABC]["size"] and x[ABC]["size"] == x[A1B1C1]["size"]) \
+            or (x[AB]["size"] and x[CA]["size"] and x[CAB]["size"] and x[AB]["size"] == x[A1B1]["size"] and x[CA]["size"] == x[C1A1]["size"] and x[CAB]["size"] == x[C1A1B1]["size"]) \
+            or (x[CA]["size"] and x[BC]["size"] and x[BCA]["size"] and x[CA]["size"] == x[C1A1]["size"] and x[BC]["size"] == x[B1C1]["size"] and x[BCA]["size"] == x[B1C1A1]["size"]):
+        print(x[AB]["size"], x[A1B1]["size"], x[BC]["size"], x[B1C1]["size"], x[ABC]["size"], x[A1B1C1]["size"])
         equal_them(AB, A1B1)
         equal_them(BC, B1C1)
         equal_them(CA, C1A1)
         equal_them(BCA, B1C1A1)
         equal_them(CAB, C1A1B1)
         equal_them(ABC, A1B1C1)
-    #if (int(AB.size == A1B1.size)* + int(BC.size == B1C1.size) + int(CA.size == C1A1.size)) >= 1:
-        #if (int(AB.size == A1B1.size) + int(BC.size == B1C1.size) + int(CA.size == C1A1.size)) == 3:
-            #ans = f"Треугольники {x[triangle1]['name']}, {x[triangle2]['name']} равны по третьему признаку"
-            #print(ans)
-        #elif (int(AB.size == A1B1.size) + int(BC.size == B1C1.size) + int(CA.size == C1A1.size)) == 2
-            #int(BCA.size == B1C1A1.size) + int(CAB.size == C1A1B1.size) + int(ABC.size == A1B1C1.size)
+        if out[0] == 0:
+            out[0] = f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по первому признаку равенства треугольников"
+    if (x[AB]["size"] and x[CAB]["size"] and x[ABC]["size"] and x[AB]["size"] == x[A1B1]["size"] and x[CAB]["size"] == x[C1A1B1]["size"] and x[ABC]["size"] == x[A1B1C1]["size"])\
+            or (x[BC]["size"] and x[ABC]["size"] and x[BCA]["size"] and x[BC]["size"] == x[B1C1]["size"] and x[ABC]["size"] == x[A1B1C1]["size"] and x[BCA]["size"] == x[B1C1A1]["size"])\
+            or (x[CA]["size"] and x[CAB]["size"] and x[BCA]["size"] and x[CA]["size"] == x[C1A1]["size"] and x[CAB]["size"] == x[C1A1B1]["size"] and x[BCA]["size"] == x[B1C1A1]["size"]):
+        equal_them(AB, A1B1)
+        equal_them(BC, B1C1)
+        equal_them(CA, C1A1)
+        equal_them(BCA, B1C1A1)
+        equal_them(CAB, C1A1B1)
+        equal_them(ABC, A1B1C1)
+        if out[0] == 0:
+            out[0] = f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по второму признаку равенства треугольников"
+    if (x[AB]["size"] and x[BC]["size"] and x[CA]["size"] and x[AB]["size"] == x[A1B1]["size"] and x[BC]["size"] == x[B1C1]["size"] and x[CA]["size"] == x[C1A1]["size"]):
+        equal_them(AB, A1B1)
+        equal_them(BC, B1C1)
+        equal_them(CA, C1A1)
+        equal_them(BCA, B1C1A1)
+        equal_them(CAB, C1A1B1)
+        equal_them(ABC, A1B1C1)
+        if out[0] == 0:
+            out[0] = f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по третьему признаку равенства треугольников"
 
 def full_equal_triangles():
     for triangle1 in x:
@@ -200,12 +219,12 @@ def full_equal_triangles():
                 if x[triangle2]['type'] == "polygon" and len(x[triangle2]['points_on_object']) == 3 and x[triangle1] != x[triangle2]:
                     [A, B, C, AB, BC, CA, ABC, BCA, CAB] = search_triangle(triangle1)
                     [A1, B1, C1, A1B1, B1C1, C1A1, A1B1C1, B1C1A1, C1A1B1] = search_triangle(triangle2)
-                    equality_triangles(triangle1, triangle2, AB, CA, BC, CAB, BCA, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
-                    equality_triangles(triangle1, triangle2, AB, BC, CA, BCA, CAB, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
-                    equality_triangles(triangle1, triangle2, BC, AB, CA, CAB, BCA, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
-                    equality_triangles(triangle1, triangle2, BC, CA, AB, CAB, ABC, BCA, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
-                    equality_triangles(triangle1, triangle2, CA, AB, BC, ABC, BCA, CAB, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
-                    equality_triangles(triangle1, triangle2, CA, BC, AB, ABC, CAB, BCA, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
+                    equality_triangles(triangle1, triangle2, C, B, A, C1, B1, A1, AB, CA, BC, BCA, ABC, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    equality_triangles(triangle1, triangle2, C, A, B, C1, B1, A1, AB, BC, CA, BCA, CAB, ABC, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    equality_triangles(triangle1, triangle2, A, C, B, C1, B1, A1, BC, AB, CA, CAB, BCA, ABC, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    equality_triangles(triangle1, triangle2, A, B, C, C1, B1, A1, BC, CA, AB, CAB, ABC, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    equality_triangles(triangle1, triangle2, B, C, A, C1, B1, A1, CA, AB, BC, ABC, BCA, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    equality_triangles(triangle1, triangle2, B, A, C, C1, B1, A1, CA, BC, AB, ABC, CAB, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
 
 def solving_process():
     for key in x:
@@ -217,6 +236,8 @@ def solving_process():
         fix_all_angles()
         isosceles_triangles()
         full_equal_triangles()
+    if out[0] != 0:
+        print(*out)
 
     for key in x:
         print(key, x[key])
