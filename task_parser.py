@@ -1,5 +1,6 @@
 from fractions import Fraction
 from pprint import pprint
+from random import uniform
 
 
 class Point:
@@ -10,24 +11,36 @@ class Point:
         self.x = cord_x
         self.y = cord_y
 
+    def __str__(self):
+        return f'name: {self.name}, specific_properties_point: {self.specific_properties_point}, specific_properties_triangle: {self.specific_properties_triangle}, x: {self.x}, y: {self.y}'
+
 
 class Line:
-    def __init__(self, points_on_line=set()):
+    def __init__(self, points_on_line={}):
         self.points = points_on_line
+
+    def __str__(self):
+        return f'points: {get_points_names_from_list(self.points)}'
 
 
 class Angle:
-    def __init__(self, line_one, line_two, size=None, relations=set()):
+    def __init__(self, line_one, line_two, size=None, relations={}):
         self.lines = [line_one, line_two]
         self.size = size
         self.relations = relations
 
+    def __str__(self):
+        return f'size: {self.size}'
+
 
 class Segment:
-    def __init__(self, point_one, point_two, size=None, relations=set()):
+    def __init__(self, point_one, point_two, size=None, relations={}):
         self.points = {point_one, point_two}
         self.size = size
         self.relations = relations
+
+    def __str__(self):
+        return f'points: {get_points_names_from_list(self.points)}, size: {self.size}'
 
 
 class Polygon:
@@ -35,6 +48,9 @@ class Polygon:
         self.points = vertices
         self.convex = convex
         # ?добавить точки внутри?
+
+    def __str__(self):
+        return f'points: {get_points_names_from_list(self.points)}, convex: {self.convex}'
 
 
 points = list()
@@ -71,8 +87,58 @@ def polygons_create(text):
                 polygons.append(Polygon(vertices_class_list))
 
             if len(vertices_list) == 1:
-                vertices_class_list[0].specific_properties_point = polygon.split()[1]
-                vertices_class_list[0].specific_properties_triangle = polygon.split()[2]
+                S = vertices_class_list[0]
+
+                S.specific_properties_point = polygon.split()[1]
+                S.specific_properties_triangle = polygon.split()[2]
+
+                A = find_point_with_name(polygon.split()[2][0])
+                B = find_point_with_name(polygon.split()[2][1])
+                C = find_point_with_name(polygon.split()[2][2])
+
+                AB = find_line_with_points(A, B)
+                BC = find_line_with_points(C, B)
+                CA = find_line_with_points(A, C)
+
+                if polygon.split()[1] == 'H':
+                    find_angle_with_lines(AB, find_line_with_points(C, S)).size = 90
+                    find_angle_with_lines(find_line_with_points(C, S), AB).size = 90
+                    find_angle_with_lines(BC, find_line_with_points(A, S)).size = 90
+                    find_angle_with_lines(find_line_with_points(A, S), BC).size = 90
+                    find_angle_with_lines(CA, find_line_with_points(B, S)).size = 90
+                    find_angle_with_lines(find_line_with_points(B, S), CA).size = 90
+
+                if polygon.split()[1] == 'O':
+                    AS = find_segment_with_points(A.name, S.name)
+                    BS = find_segment_with_points(B.name, S.name)
+                    CS = find_segment_with_points(C.name, S.name)
+
+                    update_relations(AS, BS, Fraction(1))
+                    update_relations(BS, AS, Fraction(1))
+                    update_relations(AS, CS, Fraction(1))
+                    update_relations(CS, AS, Fraction(1))
+                    update_relations(CS, BS, Fraction(1))
+                    update_relations(BS, CS, Fraction(1))
+
+                if polygon.split()[1] == 'I':
+                    AS = find_line_with_points(A, S)
+                    BS = find_line_with_points(B, S)
+                    CS = find_line_with_points(C, S)
+
+                    SAC = find_angle_with_lines(AS, CA)
+                    BAS = find_angle_with_lines(AB, AS)
+                    update_relations(SAC, BAS, Fraction(1))
+                    update_relations(BAS, SAC, Fraction(1))
+
+                    SBA = find_angle_with_lines(BS, AB)
+                    CBS = find_angle_with_lines(BC, BS)
+                    update_relations(SBA, CBS, Fraction(1))
+                    update_relations(CBS, SBA, Fraction(1))
+
+                    SCB = find_angle_with_lines(CS, BC)
+                    ACS = find_angle_with_lines(CA, CS)
+                    update_relations(SCB, ACS, Fraction(1))
+                    update_relations(ACS, SCB, Fraction(1))
 
 
 def segments_create(text):
@@ -344,6 +410,12 @@ def dict_copy_create(input_dict):
     return ret
 
 
+def update_relations(obj, key, value):
+    rel = dict_copy_create(obj.relations)
+    rel[key] = value
+    obj.relations = rel
+
+
 # создание выходной json-ки
 def json_create():
     output = dict()
@@ -447,3 +519,4 @@ def UseRelations(objects, seg_check=True):
                             obj_1.size = float(obj_2.size * obj_2.relations[obj_1])
                         except Exception:
                             pass
+                        
