@@ -1,7 +1,6 @@
 import task_parser
 from math import*
 
-Similaritys_allowed = True
 Proportion_theorem = True
 Cos_theorem_allowed = True
 Sin_theorem_allowed = True
@@ -11,7 +10,6 @@ objects_cnt = 0
 ans = task_parser.ans
 
 out = [0]
-
 
 def create():
     global ans
@@ -158,15 +156,23 @@ def correct_size(ABC, BCA, AB, CA):
         elif x[AB]["size"]:
             x[CA]["size"] = x[AB]["size"]
 
-def equals(AB, BC):
-    if x[AB]["size"] == x[BC]["size"] or not x[AB]["size"] or not x[BC]["size"]:
+def equal(AB, BC):
+    if x[AB]["size"] == x[BC]["size"] and x[AB]["size"]:
         return True
+    else:
+        return False
 
 def equal_them(AB, BC):
-    if AB:
+    if x[AB]["size"]:
         x[BC]["size"] = x[AB]["size"]
-    if BC:
+    if x[BC]["size"]:
         x[AB]["size"] = x[BC]["size"]
+
+def simil_them(AB, A1B1, k):
+    if x[AB]["size"]:
+        x[A1B1]["size"] = x[AB]["size"] / k
+    if x[A1B1]["size"]:
+        x[AB]["size"] = x[A1B1]["size"] * k
 
 def isosceles_triangles():
     for triangle in x:
@@ -176,52 +182,107 @@ def isosceles_triangles():
             correct_size(ABC, CAB, BC, CA)
             correct_size(CAB, BCA, BC, AB)
 
-def equality_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA, BCA, CAB, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1):
-    if (x[AB]["size"] == x[A1B1]["size"] and x[AB]["size"] and x[BC]["size"] and x[BC]["size"] == x[B1C1]["size"] and x[ABC]["size"] and x[ABC]["size"] == x[A1B1C1]["size"]) \
-            or (x[AB]["size"] and x[CA]["size"] and x[CAB]["size"] and x[AB]["size"] == x[A1B1]["size"] and x[CA]["size"] == x[C1A1]["size"] and x[CAB]["size"] == x[C1A1B1]["size"]) \
-            or (x[CA]["size"] and x[BC]["size"] and x[BCA]["size"] and x[CA]["size"] == x[C1A1]["size"] and x[BC]["size"] == x[B1C1]["size"] and x[BCA]["size"] == x[B1C1A1]["size"]):
-        equal_them(AB, A1B1)
-        equal_them(BC, B1C1)
-        equal_them(CA, C1A1)
-        equal_them(BCA, B1C1A1)
-        equal_them(CAB, C1A1B1)
-        equal_them(ABC, A1B1C1)
-        if out[0] == 0:
-            out[0] = f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по первому признаку равенства треугольников"
-    if (x[AB]["size"] and x[CAB]["size"] and x[ABC]["size"] and x[AB]["size"] == x[A1B1]["size"] and x[CAB]["size"] == x[C1A1B1]["size"] and x[ABC]["size"] == x[A1B1C1]["size"])\
-            or (x[BC]["size"] and x[ABC]["size"] and x[BCA]["size"] and x[BC]["size"] == x[B1C1]["size"] and x[ABC]["size"] == x[A1B1C1]["size"] and x[BCA]["size"] == x[B1C1A1]["size"])\
-            or (x[CA]["size"] and x[CAB]["size"] and x[BCA]["size"] and x[CA]["size"] == x[C1A1]["size"] and x[CAB]["size"] == x[C1A1B1]["size"] and x[BCA]["size"] == x[B1C1A1]["size"]):
-        equal_them(AB, A1B1)
-        equal_them(BC, B1C1)
-        equal_them(CA, C1A1)
-        equal_them(BCA, B1C1A1)
-        equal_them(CAB, C1A1B1)
-        equal_them(ABC, A1B1C1)
-        if out[0] == 0:
-            out[0] = f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по второму признаку равенства треугольников"
-    if (x[AB]["size"] and x[BC]["size"] and x[CA]["size"] and x[AB]["size"] == x[A1B1]["size"] and x[BC]["size"] == x[B1C1]["size"] and x[CA]["size"] == x[C1A1]["size"]):
-        equal_them(AB, A1B1)
-        equal_them(BC, B1C1)
-        equal_them(CA, C1A1)
-        equal_them(BCA, B1C1A1)
-        equal_them(CAB, C1A1B1)
-        equal_them(ABC, A1B1C1)
-        if out[0] == 0:
-            out[0] = f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по третьему признаку равенства треугольников"
+def one_step_similarity(AB, BC):
+    if x[AB]["size"] and x[BC]["size"]:
+        return x[AB]["size"] / x[BC]["size"]
+    else:
+        return False
 
-def full_equal_triangles():
+def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA, BCA, CAB, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1):
+    if (one_step_similarity(AB, A1B1) == one_step_similarity(BC, B1C1) and equal(ABC, A1B1C1) and one_step_similarity(AB, A1B1))\
+        or (one_step_similarity(AB, A1B1) == one_step_similarity(CA, C1A1) and equal(CAB, C1A1B1) and one_step_similarity(AB, A1B1))\
+        or (one_step_similarity(BC, B1C1) ==  one_step_similarity(CA, C1A1) and equal(BCA, B1C1A1) and one_step_similarity(BC, B1C1)):
+            k = one_step_similarity(AB, A1B1)
+            if not k:
+                k = one_step_similarity(BC, B1C1)
+                if not k:
+                    k = one_step_similarity(CA, C1A1)
+            simil_them(AB, A1B1, k)
+            simil_them(BC, B1C1, k)
+            simil_them(CA, C1A1, k)
+            equal_them(BCA, B1C1A1)
+            equal_them(CAB, C1A1B1)
+            equal_them(ABC, A1B1C1)
+            if not x[triangle1]["relations"]:
+                x[triangle1]["relations"] = {}
+            if not x[triangle2]["relations"]:
+                x[triangle2]["relations"] = {}
+            if triangle2 not in x[triangle1]["relations"]:
+                if k != 1:
+                    x[triangle1]["relations"][triangle2] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} подобен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} с коэффицентом {k:.5f} по двум сторонам и углу между ними"]
+                    x[triangle2]["relations"][triangle1] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} подобен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} с коэффицентом {(1 / k):.5f} по двум сторонам и углу между ними"]
+                    print(x[triangle1]["relations"][triangle2][1])
+                else:
+                    x[triangle1]["relations"][triangle2] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по двум сторонам и углу между ними"]
+                    x[triangle2]["relations"][triangle1] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по двум сторонам и углу между ними"]
+                    print(x[triangle1]["relations"][triangle2][1])
+    if (equal(ABC, A1B1C1) and equal(CAB, C1A1B1) and one_step_similarity(CA, C1A1))\
+        or (equal(ABC, A1B1C1) and equal(BCA, B1C1A1) and one_step_similarity(AB, A1B1))\
+        or (equal(CAB, C1A1B1) and equal(BCA, B1C1A1) and one_step_similarity(BC, B1C1)):
+            k = one_step_similarity(AB, A1B1)
+            if not k:
+                k = one_step_similarity(BC, B1C1)
+                if not k:
+                    k = one_step_similarity(CA, C1A1)
+            simil_them(AB, A1B1, k)
+            simil_them(BC, B1C1, k)
+            simil_them(CA, C1A1, k)
+            equal_them(BCA, B1C1A1)
+            equal_them(CAB, C1A1B1)
+            equal_them(ABC, A1B1C1)
+            if not x[triangle1]["relations"]:
+                x[triangle1]["relations"] = {}
+            if not x[triangle2]["relations"]:
+                x[triangle2]["relations"] = {}
+            if triangle2 not in x[triangle1]["relations"]:
+                if k != 1:
+                    x[triangle1]["relations"][triangle2] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} подобен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} с коэффицентом {k:.5f} по трем углам"]
+                    x[triangle2]["relations"][triangle1] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} подобен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} с коэффицентом {(1 / k):.5f} по трем углам"]
+                    print(x[triangle1]["relations"][triangle2][1])
+                else:
+                    x[triangle1]["relations"][triangle2] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по стороне и двум углам"]
+                    x[triangle2]["relations"][triangle1] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по стороне и двум углам"]
+                    print(x[triangle1]["relations"][triangle2][1])
+    if (one_step_similarity(CA, C1A1) == one_step_similarity(AB, A1B1) and one_step_similarity(BC, B1C1) == one_step_similarity(AB, A1B1) and one_step_similarity(AB, A1B1)):
+            k = one_step_similarity(AB, A1B1)
+            if not k:
+                k = one_step_similarity(BC, B1C1)
+                if not k:
+                    k = one_step_similarity(CA, C1A1)
+            simil_them(AB, A1B1, k)
+            simil_them(BC, B1C1, k)
+            simil_them(CA, C1A1, k)
+            equal_them(BCA, B1C1A1)
+            equal_them(CAB, C1A1B1)
+            equal_them(ABC, A1B1C1)
+            if not x[triangle1]["relations"]:
+                x[triangle1]["relations"] = {}
+            if not x[triangle2]["relations"]:
+                x[triangle2]["relations"] = {}
+            if triangle2 not in x[triangle1]["relations"]:
+                if k != 1:
+                    x[triangle1]["relations"][triangle2] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} подобен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} с коэффицентом {k:.5f} по всем сторонам"]
+                    x[triangle2]["relations"][triangle1] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} подобен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} с коэффицентом {(1 / k):.5f} по всем сторонам"]
+                    print(x[triangle1]["relations"][triangle2][1])
+                else:
+                    x[triangle1]["relations"][triangle2] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по всем сторонам"]
+                    x[triangle2]["relations"][triangle1] = [k, f"Треугольник {x[A]['name']}{x[B]['name']}{x[C]['name']} равен треугольнику {x[A1]['name']}{x[B1]['name']}{x[C1]['name']} по всем сторонам"]
+                    print(x[triangle1]["relations"][triangle2][1])
+
+def fix_all_triangles():
+    isosceles_triangles()
     for triangle1 in x:
         if x[triangle1]['type'] == "polygon" and len(x[triangle1]['points_on_object']) == 3:
             for triangle2 in x:
                 if x[triangle2]['type'] == "polygon" and len(x[triangle2]['points_on_object']) == 3 and x[triangle1] != x[triangle2]:
                     [A, B, C, AB, BC, CA, ABC, BCA, CAB] = search_triangle(triangle1)
                     [A1, B1, C1, A1B1, B1C1, C1A1, A1B1C1, B1C1A1, C1A1B1] = search_triangle(triangle2)
-                    equality_triangles(triangle1, triangle2, C, B, A, C1, B1, A1, AB, CA, BC, BCA, ABC, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
-                    equality_triangles(triangle1, triangle2, C, A, B, C1, B1, A1, AB, BC, CA, BCA, CAB, ABC, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
-                    equality_triangles(triangle1, triangle2, A, C, B, C1, B1, A1, BC, AB, CA, CAB, BCA, ABC, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
-                    equality_triangles(triangle1, triangle2, A, B, C, C1, B1, A1, BC, CA, AB, CAB, ABC, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
-                    equality_triangles(triangle1, triangle2, B, C, A, C1, B1, A1, CA, AB, BC, ABC, BCA, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
-                    equality_triangles(triangle1, triangle2, B, A, C, C1, B1, A1, CA, BC, AB, ABC, CAB, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, C, B, A, C1, B1, A1, AB, CA, BC, BCA, ABC, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, C, A, B, C1, B1, A1, AB, BC, CA, BCA, CAB, ABC, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, A, C, B, C1, B1, A1, BC, AB, CA, CAB, BCA, ABC, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, A, B, C, C1, B1, A1, BC, CA, AB, CAB, ABC, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, B, C, A, C1, B1, A1, CA, AB, BC, ABC, BCA, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, B, A, C, C1, B1, A1, CA, BC, AB, ABC, CAB, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
 
 def solving_process():
     for key in x:
@@ -230,12 +291,9 @@ def solving_process():
     iterations = 7
     for i in range(iterations):
         fix_all_angles()
-        isosceles_triangles()
-        full_equal_triangles()
-    if out[0] != 0:
-        print(*out)
-
+        fix_all_triangles()
     for key in x:
         print(key, x[key])
 
 solving_process()
+
