@@ -1,0 +1,275 @@
+import sys
+import task_parser as tp
+from math import*
+
+Proportion_theorem = True
+Cos_theorem_allowed = True
+Sin_theorem_allowed = True
+
+points = tp.points
+lines = tp.lines
+angles = tp.angles
+segments = tp.segments
+polygons = tp.polygons
+not_none_angles = []
+
+similarity = []
+
+def first():
+    for p1 in points:
+        for p2 in points:
+            if p1 != p2:
+                further_line = True
+                further_segment = True
+                for p3 in points:
+                    if p3 != p1 and p3 != p2:
+                        further = True
+                        for polyg in polygons:
+                            if len(polyg.points) == 3:
+                                if p1 in polyg.points and p2 in polyg.points and p3 in polyg.points:
+                                    further = False
+                        if further:
+                            polygons.append(tp.Polygon([p1, p2, p3]))
+                for line in lines:
+                    if {p1, p2} == line.points:
+                        further_line = False
+                if further_line:
+                    lines.append(tp.Line({p1, p2}))
+                for segment in segments:
+                    if {p1, p2} == segment.points:
+                        further_segment = False
+                if further_segment:
+                    segments.append(tp.Segment(p1, p2))
+
+    for l1 in lines:
+        for l2 in lines:
+            futher_angle = True
+            if l1 != l2:
+                for ang in angles:
+                    if [l1, l2] == ang.lines:
+                        futher_angle = False
+                if futher_angle:
+                    angles.append(tp.Angle(l1, l2))
+                    angles.append(tp.Angle(l2, l1))
+    for ang in angles:
+        if ang.size:
+            not_none_angles.append(ang)
+
+first()
+
+def find_angle_with_lines(l1, l2):
+    return tp.find_angle_with_lines(l1, l2)
+
+def find_segment_with_points(A, B):
+    return tp.find_segment_with_points(A.name, B.name)
+
+def find_line_with_points(A, B):
+    return tp.find_line_with_points(A.name, B.name)
+
+def fix_vertical_angles():
+    for ang_1 in not_none_angles:
+        for ang_2 in angles:
+            if ang_1 != ang_2:
+                lines1 = ang_1.lines
+                lines2 = ang_2.lines
+                if set(lines1) == set(lines2):
+                    ang_2.size = 180 - ang_1.size
+                    if ang_2 not in not_none_angles:
+                        not_none_angles.append(ang_2)
+
+def fix_all_angles():
+    fix_vertical_angles()
+    for ang1 in not_none_angles:
+        for ang2 in not_none_angles:
+            if ang1 != ang2 :
+                for ang3 in angles:
+                    if ang3 != ang2 and ang3 != ang1 and not ang3:
+                        lines1 = ang1.lines
+                        lines2 = ang2.lines
+                        lines3 = ang3.lines
+                        if lines1[1] == lines2[0] and [lines[0], lines2[1]] == lines3:
+                            ang3.size = (ang1 + ang2) % 180
+                            not_none_angles.append(ang3)
+
+    fix_vertical_angles()
+
+def search_triangle(triangle):
+    A, B, C = triangle.points[0], triangle.points[1], triangle.points[2]
+
+    AB = find_segment_with_points(A, B)
+
+    BC = find_segment_with_points(B, C)
+    CA = find_segment_with_points(C, A)
+
+    A2B2 = find_line_with_points(A, B)
+    B2C2 = find_line_with_points(B, C)
+    C2A2 = find_line_with_points(C, A)
+
+    ABC = find_angle_with_lines(A2B2, B2C2)
+    BCA = find_angle_with_lines(B2C2, C2A2)
+    CAB = find_angle_with_lines(C2A2, A2B2)
+
+    return [A, B, C, AB, BC, CA, ABC, BCA, CAB]
+
+def correct_size(ABC, BCA, AB, CA):
+    if ABC.size == BCA.size and ABC.size:
+        if CA.size:
+            AB.size = CA.size
+            if type(AB) == "angle":
+                if AB not in not_none_angles:
+                    not_none_angles.append(AB)
+        elif AB.size:
+            CA.size = AB.size
+            if type(CA) == "angle":
+                if CA not in not_none_angles:
+                    not_none_angles.append(CA)
+    if AB.size == CA.size and AB.size:
+        if BCA.size:
+            ABC.size = BCA.size
+            if type(ABC) == "angle":
+                if ABC not in not_none_angles:
+                    not_none_angles.append(ABC)
+        elif ABC.size:
+            BCA.size = ABC.size
+            if type(BCA) == "angle":
+                if BCA not in not_none_angles:
+                    not_none_angles.append(BCA)
+
+def equal(AB, BC):
+    if AB.size == BC.size and AB.size:
+        return True
+    else:
+        return False
+
+def equal_them(AB, BC):
+    if AB.size:
+        BC.size = AB.size
+        if type(BC) == "angle":
+            if BC not in not_none_angles:
+                not_none_angles.append(BC)
+    if BC.size:
+        AB.size = BC.size
+        if type(AB) == "angle":
+            if AB not in not_none_angles:
+                not_none_angles.append(AB)
+
+def simil_them(AB, A1B1, k):
+    if AB.size:
+        A1B1.size = AB.size / k
+        if type(AB) == "angle":
+            if A1B1 not in not_none_angles:
+                not_none_angles.append(AB)
+    if A1B1.size:
+        AB.size = A1B1.size * k
+        if type(A1B1) == "angle":
+            if A1B1 not in not_none_angles:
+                not_none_angles.append(A1B1)
+
+def isosceles_triangles():
+    for triangle in polygons:
+        if len(triangle.points) == 3:
+            [A, B, C, AB, BC, CA, ABC, BCA, CAB] = search_triangle(triangle)
+            correct_size(ABC, BCA, AB, CA)
+            correct_size(ABC, CAB, BC, CA)
+            correct_size(CAB, BCA, BC, AB)
+
+def one_step_similarity(AB, BC):
+    if AB.size and BC.size:
+        return AB.size / BC.size
+    else:
+        return False
+
+def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA, BCA, CAB, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1):
+    if (one_step_similarity(AB, A1B1) == one_step_similarity(BC, B1C1) and equal(ABC, A1B1C1) and one_step_similarity(AB, A1B1))\
+        or (one_step_similarity(AB, A1B1) == one_step_similarity(CA, C1A1) and equal(CAB, C1A1B1) and one_step_similarity(AB, A1B1))\
+        or (one_step_similarity(BC, B1C1) ==  one_step_similarity(CA, C1A1) and equal(BCA, B1C1A1) and one_step_similarity(BC, B1C1)):
+            k = one_step_similarity(AB, A1B1)
+            if not k:
+                k = one_step_similarity(BC, B1C1)
+                if not k:
+                    k = one_step_similarity(CA, C1A1)
+            simil_them(AB, A1B1, k)
+            simil_them(BC, B1C1, k)
+            simil_them(CA, C1A1, k)
+            equal_them(BCA, B1C1A1)
+            equal_them(CAB, C1A1B1)
+            equal_them(ABC, A1B1C1)
+            if {triangle1, triangle2} not in similarity:
+                similarity.append({triangle1, triangle2})
+                if k != 1:
+                    print(f"Треугольник {A.name}{B.name}{C.name} подобен треугольнику {A1.name}{B1.name}{C1.name} с коэффицентом {k:.5f} по двум сторонам и углу между ними")
+                else:
+                    print(f"Треугольник {A.name}{B.name}{C.name} равен треугольнику {A1.name}{B1.name}{C1.name} по двум сторонам и углу между ними")
+    if (equal(ABC, A1B1C1) and equal(CAB, C1A1B1) and one_step_similarity(CA, C1A1))\
+        or (equal(ABC, A1B1C1) and equal(BCA, B1C1A1) and one_step_similarity(AB, A1B1))\
+        or (equal(CAB, C1A1B1) and equal(BCA, B1C1A1) and one_step_similarity(BC, B1C1)):
+            k = one_step_similarity(AB, A1B1)
+            if not k:
+                k = one_step_similarity(BC, B1C1)
+                if not k:
+                    k = one_step_similarity(CA, C1A1)
+            simil_them(AB, A1B1, k)
+            simil_them(BC, B1C1, k)
+            simil_them(CA, C1A1, k)
+            equal_them(BCA, B1C1A1)
+            equal_them(CAB, C1A1B1)
+            equal_them(ABC, A1B1C1)
+            if {triangle1, triangle2} not in similarity:
+                similarity.append({triangle1, triangle2})
+                if k != 1:
+                    print(f"Треугольник {A.name}{B.name}{C.name} подобен треугольнику {A1.name}{B1.name}{C1.name} с коэффицентом {k:.5f} по трем углам")
+                else:
+                    print(f"Треугольник {A.name}{B.name}{C.name} равен треугольнику {A1.name}{B1.name}{C1.name} по стороне и двум углам")
+    if (one_step_similarity(CA, C1A1) == one_step_similarity(AB, A1B1) and one_step_similarity(BC, B1C1) == one_step_similarity(AB, A1B1) and one_step_similarity(AB, A1B1)):
+            k = one_step_similarity(AB, A1B1)
+            if not k:
+                k = one_step_similarity(BC, B1C1)
+                if not k:
+                    k = one_step_similarity(CA, C1A1)
+            simil_them(AB, A1B1, k)
+            simil_them(BC, B1C1, k)
+            simil_them(CA, C1A1, k)
+            equal_them(BCA, B1C1A1)
+            equal_them(CAB, C1A1B1)
+            equal_them(ABC, A1B1C1)
+            if {triangle1, triangle2} not in similarity:
+                similarity.append({triangle1, triangle2})
+                if k != 1:
+                    print(f"Треугольник {A.name}{B.name}{C.name} подобен треугольнику {A1.name}{B1.name}{C1.name} с коэффицентом {k:.5f} по всем сторонам")
+                else:
+                    print(f"Треугольник {A.name}{B.name}{C.name} равен треугольнику {A1.name}{B1.name}{C1.name} по всем сторонам")
+
+def fix_all_triangles():
+    isosceles_triangles()
+    for triangle1 in polygons:
+        if len(triangle1.points) == 3:
+            for triangle2 in polygons:
+                if len(triangle2.points) == 3 and triangle1 != triangle2:
+                    [A, B, C, AB, BC, CA, ABC, BCA, CAB] = search_triangle(triangle1)
+                    [A1, B1, C1, A1B1, B1C1, C1A1, A1B1C1, B1C1A1, C1A1B1] = search_triangle(triangle2)
+                    similaritys_triangles(triangle1, triangle2, C, B, A, C1, B1, A1, AB, CA, BC, BCA, ABC, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, C, A, B, C1, B1, A1, AB, BC, CA, BCA, CAB, ABC, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, A, C, B, C1, B1, A1, BC, AB, CA, CAB, BCA, ABC, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, A, B, C, C1, B1, A1, BC, CA, AB, CAB, ABC, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, B, C, A, C1, B1, A1, CA, AB, BC, ABC, BCA, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, B, A, C, C1, B1, A1, CA, BC, AB, ABC, CAB, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+
+def solving_process():
+    iterations = 1
+    for i in range(iterations):
+        fix_all_angles()
+        fix_all_triangles()
+
+    for line in lines:
+        print(line)
+
+    for point in points:
+        print(point)
+
+    for angle in angles:
+        print(angle)
+
+    for segment in segments:
+        print(segment)
+
+solving_process()
