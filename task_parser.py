@@ -16,31 +16,38 @@ class Point:
 
 
 class Line:
-    def __init__(self, points_on_line={}):
-        self.points = points_on_line
+    def __init__(self, points):
+        self.points = points
 
     def __str__(self):
         return f'points: {get_points_names_from_list(self.points)}'
 
 
 class Angle:
-    def __init__(self, line_one, line_two, size=None, relations={}):
+    def __init__(self, line_one, line_two, size=None):
         self.lines = [line_one, line_two]
         self.size = size
-        self.relations = relations
+        self.relations = dict()
 
     def __str__(self):
         return f'size: {self.size}'
 
 
 class Segment:
-    def __init__(self, point_one, point_two, size=None, relations={}):
+    def __init__(self, point_one, point_two, size=None):
         self.points = {point_one, point_two}
         self.size = size
-        self.relations = relations
+        self.relations = dict()
 
     def __str__(self):
-        return f'points: {get_points_names_from_list(self.points)}, size: {self.size}'
+        str_relations = ''
+        for rel in self.relations:
+            str_relations += f'{get_points_names_from_list(rel.points)}: {self.relations[rel]} '
+
+        if not str_relations:
+            str_relations = 'None '
+
+        return f'points: {get_points_names_from_list(self.points)}, size: {self.size}, relations: {str_relations}'
 
 
 class Polygon:
@@ -113,12 +120,12 @@ def polygons_create(text):
                     BS = find_segment_with_points(B.name, S.name)
                     CS = find_segment_with_points(C.name, S.name)
 
-                    update_relations(AS, BS, Fraction(1))
-                    update_relations(BS, AS, Fraction(1))
-                    update_relations(AS, CS, Fraction(1))
-                    update_relations(CS, AS, Fraction(1))
-                    update_relations(CS, BS, Fraction(1))
-                    update_relations(BS, CS, Fraction(1))
+                    AS.relations[BS] = Fraction(1)
+                    BS.relations[AS] = Fraction(1)
+                    AS.relations[CS] = Fraction(1)
+                    CS.relations[AS] = Fraction(1)
+                    CS.relations[BS] = Fraction(1)
+                    BS.relations[CS] = Fraction(1)
 
                 if polygon.split()[1] == 'I':
                     AS = find_line_with_points(A, S)
@@ -127,18 +134,17 @@ def polygons_create(text):
 
                     SAC = find_angle_with_lines(AS, CA)
                     BAS = find_angle_with_lines(AB, AS)
-                    update_relations(SAC, BAS, Fraction(1))
-                    update_relations(BAS, SAC, Fraction(1))
-
                     SBA = find_angle_with_lines(BS, AB)
                     CBS = find_angle_with_lines(BC, BS)
-                    update_relations(SBA, CBS, Fraction(1))
-                    update_relations(CBS, SBA, Fraction(1))
-
                     SCB = find_angle_with_lines(CS, BC)
                     ACS = find_angle_with_lines(CA, CS)
-                    update_relations(SCB, ACS, Fraction(1))
-                    update_relations(ACS, SCB, Fraction(1))
+
+                    SAC.relations[BAS] = Fraction(1)
+                    BAS.realtions[SAC] = Fraction(1)
+                    SBA.relations[CBS] = Fraction(1)
+                    CBS.relations[SBA] = Fraction(1)
+                    SCB.relations[ACS] = Fraction(1)
+                    ACS.relations[SCB] = Fraction(1)
 
 
 def segments_create(text):
@@ -186,55 +192,30 @@ def segments_relations_create(text):
                 seg_2 = find_segment_with_points(relation.split()[0], relation.split()[1][1])
 
                 line = find_line_with_points(relation.split()[1][0], relation.split()[1][1])
-                new_points = set_copy_create(line.points)
-                new_points.add(find_point_with_name(relation.split()[0]))
-                setattr(line, 'points', new_points)
+                line.points.add(find_point_with_name(relation.split()[0]))
 
             if len(relation.split()[1]) == 1:
                 seg_1 = find_segment_with_points(relation.split()[1], relation.split()[0][0])
                 seg_2 = find_segment_with_points(relation.split()[1], relation.split()[0][1])
 
                 line = find_line_with_points(relation.split()[0][0], relation.split()[0][1])
-                new_points = set_copy_create(line.points)
-                new_points.add(find_point_with_name(relation.split()[1]))
-                setattr(line, 'points', new_points)
+                line.points.add(find_point_with_name(relation.split()[1]))
 
             rel = relation.split()[2]
-            new_relations = dict_copy_create(seg_1.relations)
-            if seg_2 in new_relations:
-                new_relations[seg_2] = 1/Fraction(rel)
-            else:
-                new_relations.setdefault(seg_2, 1/Fraction(rel))
-            setattr(seg_1, 'relations', new_relations)
-
-            new_relations = dict_copy_create(seg_2.relations)
-            if seg_1 in new_relations:
-                new_relations[seg_1] = Fraction(rel)
-            else:
-                new_relations.setdefault(seg_1, Fraction(rel))
-            setattr(seg_2, 'relations', new_relations)
+            seg_1.relations[seg_2] = 1 / Fraction(rel)
+            seg_2.relations[seg_1] = Fraction(rel)
 
 
 def angles_relations_create(text):
     if len(text.split()) > 0:
         for relation in text.split(','):
             ang_1, ang_2, rel = relation.split()
+
             ang_1 = find_angle_with_points(ang_1[0], ang_1[1], ang_1[2])
             ang_2 = find_angle_with_points(ang_2[0], ang_2[1], ang_2[2])
 
-            new_relations = dict_copy_create(ang_1.relations)
-            if ang_2 in new_relations:
-                new_relations[ang_2] = 1/Fraction(rel)
-            else:
-                new_relations.setdefault(ang_2, 1/Fraction(rel))
-            setattr(ang_1, 'relations', new_relations)
-
-            new_relations = dict_copy_create(ang_2.relations)
-            if ang_1 in new_relations:
-                new_relations[ang_1] = Fraction(rel)
-            else:
-                new_relations.setdefault(ang_1, Fraction(rel))
-            setattr(ang_2, 'relations', new_relations)
+            ang_1.relations[ang_2] = 1/Fraction(rel)
+            ang_2.relations[ang_1] = Fraction(rel)
 
 
 def line_intersection_create(text):
@@ -244,15 +225,11 @@ def line_intersection_create(text):
 
             l1 = find_line_with_segment(find_segment_with_points(l1[0], l1[1]))
             if find_point_with_name(P) not in l1.points:
-                new_points = set_copy_create(l1.points)
-                new_points.add(find_point_with_name(P))
-                setattr(l1, 'points', new_points)
+                l1.points.add(find_point_with_name(P))
 
             l2 = find_line_with_segment(find_segment_with_points(l2[0], l2[1]))
             if find_point_with_name(P) not in l2.points:
-                new_points = set_copy_create(l2.points)
-                new_points.add(find_point_with_name(P))
-                setattr(l2, 'points', new_points)
+                l2.points.add(find_point_with_name(P))
 
 
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
@@ -342,7 +319,7 @@ def get_points_names_from_list(points_list):
 def find_same_lines(lines_list, line):
     for lin in lines_list:
         if len(lin.points & line.points) >= 2:
-            setattr(lin, 'points', lin.points | line.points)
+            lin.points.update(line.points)
 
     else:
         lines_list.append(line)
@@ -394,26 +371,6 @@ def relations_processing(relations_set, parametr):
             ret.setdefault(f"object_{segments.index(obj)+len(points)+len(lines)+len(angles)+1}", str(relations_set[obj]))
 
     return ret
-
-
-def set_copy_create(input_set):
-    ret = set()
-    for element in input_set:
-        ret.add(element)
-    return ret
-
-
-def dict_copy_create(input_dict):
-    ret = dict()
-    for key in input_dict:
-        ret[key] = input_dict[key]
-    return ret
-
-
-def update_relations(obj, key, value):
-    rel = dict_copy_create(obj.relations)
-    rel[key] = value
-    obj.relations = rel
 
 
 # создание выходной json-ки
