@@ -200,9 +200,9 @@ def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA,
                     print(f"Треугольник {A.name}{B.name}{C.name} подобен треугольнику {A1.name}{B1.name}{C1.name} с коэффицентом {k:.5f} по двум сторонам и углу между ними")
                 else:
                     print(f"Треугольник {A.name}{B.name}{C.name} равен треугольнику {A1.name}{B1.name}{C1.name} по двум сторонам и углу между ними")
-    if (equal(ABC, A1B1C1) and equal(CAB, C1A1B1) and one_step_similarity(CA, C1A1))\
-        or (equal(ABC, A1B1C1) and equal(BCA, B1C1A1) and one_step_similarity(AB, A1B1))\
-        or (equal(CAB, C1A1B1) and equal(BCA, B1C1A1) and one_step_similarity(BC, B1C1)):
+    if (equal(ABC, A1B1C1) and equal(CAB, C1A1B1) and one_step_similarity(AB, A1B1))\
+        or (equal(ABC, A1B1C1) and equal(BCA, B1C1A1) and one_step_similarity(BC, B1C1))\
+        or (equal(CAB, C1A1B1) and equal(BCA, B1C1A1) and one_step_similarity(CA, C1A1)):
             k = one_step_similarity(AB, A1B1)
             if not k:
                 k = one_step_similarity(BC, B1C1)
@@ -253,6 +253,7 @@ def fix_all_triangles():
                     similaritys_triangles(triangle1, triangle2, A, B, C, C1, B1, A1, BC, CA, AB, CAB, ABC, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
                     similaritys_triangles(triangle1, triangle2, B, C, A, C1, B1, A1, CA, AB, BC, ABC, BCA, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
                     similaritys_triangles(triangle1, triangle2, B, A, C, C1, B1, A1, CA, BC, AB, ABC, CAB, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    break
 
 def solving_process():
     iterations = 1
