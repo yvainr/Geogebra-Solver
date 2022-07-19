@@ -30,7 +30,19 @@ class Angle:
         self.relations = dict()
 
     def __str__(self):
-        return f'size: {self.size}'
+        str_lines = ''
+        str_relations = ''
+
+        for line in self.lines:
+            str_lines += f' {get_points_names_from_list(line.points)}'
+
+        for rel in self.relations:
+            str_relations += f'{get_points_names_from_list(rel.lines[0].points)} {get_points_names_from_list(rel.lines[1].points)} {self.relations[rel]} '
+
+        if not str_relations:
+            str_relations = 'None '
+
+        return f'lines:{str_lines}, size: {self.size}, relations: {str_relations}'
 
 
 class Segment:
@@ -41,6 +53,7 @@ class Segment:
 
     def __str__(self):
         str_relations = ''
+
         for rel in self.relations:
             str_relations += f'{get_points_names_from_list(rel.points)}: {self.relations[rel]} '
 
@@ -168,10 +181,14 @@ def angles_create(text):
                 angle_name, angle_size = angle
                 A, B, C = list(angle_name)
                 if A != B != C != A:
+                    A, B, C = check_angle_in_polygon(A, B, C)
+
                     l1 = find_line_with_points(A, B)
                     l2 = find_line_with_points(B, C)
+
                     find_angle_with_lines(l1, l2).size = float(Fraction(angle_size))
                     find_angle_with_lines(l2, l1).size = 180 - float(Fraction(angle_size))
+
             if len(angle) == 3:
                 l1, l2, angle_size = angle
                 l1 = find_line_with_points(l1[0], l1[1])
@@ -202,8 +219,8 @@ def segments_relations_create(text):
                 line.points.add(find_point_with_name(relation.split()[1]))
 
             rel = relation.split()[2]
-            seg_1.relations[seg_2] = 1 / Fraction(rel)
-            seg_2.relations[seg_1] = Fraction(rel)
+            seg_1.relations[seg_2] = Fraction(rel)
+            seg_2.relations[seg_1] = 1 / Fraction(rel)
 
 
 def angles_relations_create(text):
@@ -211,11 +228,11 @@ def angles_relations_create(text):
         for relation in text.split(','):
             ang_1, ang_2, rel = relation.split()
 
-            ang_1 = find_angle_with_points(ang_1[0], ang_1[1], ang_1[2])
-            ang_2 = find_angle_with_points(ang_2[0], ang_2[1], ang_2[2])
+            ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[0], ang_1[1], ang_1[2]))
+            ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2]))
 
-            ang_1.relations[ang_2] = 1/Fraction(rel)
-            ang_2.relations[ang_1] = Fraction(rel)
+            ang_1.relations[ang_2] = Fraction(rel)
+            ang_2.relations[ang_1] = 1 / Fraction(rel)
 
 
 def line_intersection_create(text):
@@ -343,6 +360,20 @@ def find_same_angles(angles_list, angle):
         angles_list.append(angle)
 
 
+def check_angle_in_polygon(A, B, C):
+    for polygon in polygons:
+        for i in range(len(polygon.points)):
+            uA, uB, uC = polygon.points[i - 2].name, polygon.points[i - 1].name, polygon.points[i].name
+
+            if uA == A and uB == B and uC == C:
+                return C, B, A
+
+            if uA == C and uB == B and uC == A:
+                return A, B, C
+
+    return A, B, C
+
+
 # модуль обработки данных при создании json
 # вспомогательная функция для получения номеров объектов списка точек
 def points_processing(points_list):
@@ -451,16 +482,16 @@ def json_create():
     return output
 
 
-def UseRelations(objects, seg_check=True):
+def UseRelations(objects):
     none_count = 0
 
     for obj in objects:
         if not obj.size:
             none_count += 1
 
-    if seg_check and none_count == len(objects) != 0:
-        objects[0].size = 3
-        none_count -= 1
+    #if seg_check and none_count == len(objects) != 0:
+        #objects[0].size = 3
+        #none_count -= 1
 
     for n in range(none_count):
 
@@ -473,7 +504,6 @@ def UseRelations(objects, seg_check=True):
 
                     if obj_2.size:
                         try:
-                            obj_1.size = float(obj_2.size * obj_2.relations[obj_1])
+                            obj_1.size = float(obj_2.size / obj_2.relations[obj_1])
                         except Exception:
                             pass
-                        
