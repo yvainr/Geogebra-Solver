@@ -1,4 +1,4 @@
-mport sys
+import sys
 import task_parser as tp
 from math import*
 
