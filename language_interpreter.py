@@ -1,3 +1,4 @@
+from re import *
 #number of output strings = 6
 
 def text_analyze(inp_str, output_num=6):
@@ -43,21 +44,33 @@ def distillation(part):
     return new_part.strip()
 
 
+def equality_of_elem(part):
+    """finding equal figures and transforming into output format""" 
+    part = sub(r"([A-Z][A-Z][A-Z])( = )([A-Z][A-Z][A-Z])", r'\1 \3 1/1', part)
+    part = sub(r"([A-Z][A-Z])( = )([A-Z][A-Z])", r'\1 \3 1/1', part)
+    return part
+
+
 def remarkable_point_processing(part):
     """smth for points"""
     if "опис" in part:
         part = part.replace("опис", "O")
-    elif "медиан" in part:
+    elif "медиан" in part or "центроид" in part:
+        part = sub("центроид", "медиан", part)
         part = part.replace("медиан", "M")
-    elif "бисс" in part:
+    elif "бисс" in part or "инцентр" in part or "впис" in part:
+        part = sub("инцентр", "бисс", part)
+        part = sub("впис", "бисс", part)
         part = part.replace("бисс", "I")
-    elif "высот" in part:
+    elif "высот" in part or "ортоцен" in part:
+        part = sub("ортоцен", "высот", part)
         part = part.replace("высот", "H")
     return part
 
 
 def class_analyze(part):
     """analyzing to which class this part belong"""
+    part = equality_of_elem(part)
     part = part.split()
     points_parts = 0
     segments_parts = 0
@@ -73,6 +86,7 @@ def class_analyze(part):
                 let_parts += 1
         elif 45 < ord(object[0]) < 59:
             num_parts += 1
+
     ret = "polygon"
     if let_parts == 1 and points_parts == 0 and segments_parts == 0 and num_parts == 0:
         ret = "polygon"
@@ -102,6 +116,7 @@ def new_assign_to_classes(inp_str):
 
     for part in inp_str:
         cla = class_analyze(part)
+        part = equality_of_elem(part)
         if cla == "polygon":
             polygons.append(distillation(part))
         elif cla == "segment_rel":
@@ -120,5 +135,7 @@ def new_assign_to_classes(inp_str):
 
     return polygons, segments, angles, segments_relations, angles_relations, lines_intersection
 
-inp = 'треугольник ABC, AB = 5, сторона BC = 4.5, AB относится к AC как 5/3,  ACB равен 90, I точка пересечения биссектрисс в ABC'
+inp = 'треугольник ABC, AB = 5, сторона BC = 4, AB = AC,  ACB равен 90, I инцентр в ABC'
 print(text_analyze(inp))
+
+
