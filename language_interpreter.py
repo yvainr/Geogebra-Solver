@@ -1,16 +1,23 @@
 from re import *
-#number of output strings = 6
+#number of output strings = 8
 
-def text_analyze(inp_str, output_num=6):
+def text_analyze(inp_str, output_num=7):
     """main function"""
-    inp_str = string_split(inp_str)
-    ret = new_assign_to_classes(inp_str)
+    inp_str = inp_str.split("\n")
+    statement = inp_str[0]
+    question = inp_str[1]
+    statement = string_split(statement)
+    ret = new_assign_to_classes(statement)
     ret = list(ret)
+    ret.append(question_processing(question))
     for i in range(output_num):
         ret[i] = str(ret[i])
     output_text = ''
     for object_class in ret:
-        output_text += (''.join(object_class) + '\n')
+        if "[" in object_class:
+            output_text += (', '.join(list(eval(object_class))) + '\n')
+        else:
+            output_text += object_class
 
     return output_text
 
@@ -24,11 +31,17 @@ def string_split(inp_str):
 def spaces_normalize(part):
     """deleting extra spaces"""
     part = part.split()
-    n_part = ''
+    new_part = ''
     for word in part:
-        n_part += word
-        n_part += " "
-    return n_part
+        new_part += word
+        new_part += " "
+    return new_part
+
+
+def output_formatting(part):
+    """putting segment relation in correct order"""
+    part = sub(r"(^[A-Z]\s)([A-Z][A-Z])", r'\2 \1', part)
+    return part
 
 
 def distillation(part):
@@ -36,11 +49,12 @@ def distillation(part):
     new_part = ""
     for i in range(len(part)):
         try:
-            if (45 < ord(part[i])< 58) or (64 < ord(part[i]) < 91) or (96 < ord(part[i]) < 123) or ord(part[i]) == 32:
+            if ord(part[i]) == 42 or (45 < ord(part[i])< 58) or (64 < ord(part[i]) < 91) or (96 < ord(part[i]) < 123) or ord(part[i]) == 32:
                 new_part = new_part[:] + str(part[i])
         except:
             pass
     new_part = spaces_normalize(new_part)
+    new_part = output_formatting(new_part)
     return new_part.strip()
 
 
@@ -70,6 +84,11 @@ def remarkable_point_processing(part):
 
 def class_analyze(part):
     """analyzing to which class this part belong"""
+
+    poly = False
+    if "угольн" in part:
+        poly = True
+
     part = equality_of_elem(part)
     part = part.split()
     points_parts = 0
@@ -88,14 +107,19 @@ def class_analyze(part):
             num_parts += 1
 
     ret = "polygon"
+
     if let_parts == 1 and points_parts == 0 and segments_parts == 0 and num_parts == 0:
         ret = "polygon"
     elif let_parts == 0 and points_parts == 0 and segments_parts == 1 and num_parts == 1:
         ret = "segment"
     elif let_parts == 1 and points_parts == 0 and segments_parts == 0 and num_parts == 1:
         ret = "angle"
+    elif let_parts == 2 and points_parts == 0 and segments_parts == 0 and num_parts == 1 and poly:
+        ret = "polygon_rel"
     elif let_parts == 2 and points_parts == 0 and segments_parts == 0 and num_parts == 1:
         ret = "angle_rel"
+    elif let_parts == 0 and points_parts == 1 and segments_parts == 1 and num_parts == 1:
+        ret = "segment_rel"
     elif let_parts == 0 and points_parts == 0 and segments_parts == 2 and num_parts == 1:
         ret = "segment_rel"
     elif let_parts == 0 and points_parts == 1 and segments_parts == 2 and num_parts == 0:
@@ -112,12 +136,14 @@ def new_assign_to_classes(inp_str):
     angles = []
     segments_relations = []
     angles_relations = []
+    polygon_relation = []
     lines_intersection = []
 
     for part in inp_str:
         cla = class_analyze(part)
         part = equality_of_elem(part)
         if cla == "polygon":
+            part = sub("невыпукл", "*", part)
             polygons.append(distillation(part))
         elif cla == "segment_rel":
             segments_relations.append(distillation(part))
@@ -132,10 +158,30 @@ def new_assign_to_classes(inp_str):
             lines_intersection.append(distillation(part))
         elif cla == "angle":
             angles.append(distillation(part))
+        elif cla == "polygon_rel":
+            polygon_relation.append(distillation(part))
 
-    return polygons, segments, angles, segments_relations, angles_relations, lines_intersection
+    return polygons, segments, angles, segments_relations, angles_relations, polygon_relation, lines_intersection
 
-inp = 'треугольник ABC, AB = 5, сторона BC = 4, AB = AC,  ACB равен 90, I инцентр в ABC'
+
+def question_processing(question):
+    """putting a question in the output format"""
+    poly = False
+    if "угольн" in question:
+        poly = True
+    question = equality_of_elem(question)
+    question = distillation(question)
+    if poly:
+        question = sub(r"(^\w+)(\s)(\w*)(\s)(\d)", r'/\1 \3 \5', question)
+        question = sub(r"(^\w+)(\s)(\w*$)", r'/\1 \3 ?', question)
+    else:
+        question = sub(r"(^\w+)(\s)(\w*)(\s)(\d+)", r'\1 \3 \5', question)
+        question = sub(r"(^\w+)(\s)(\w*$)", r'\1 \3 ?', question)
+    return question
+
+
+
+inp = 'треугольники ABC = HFG, ABCD невыпуклый, AB = 5, сторона BC равна 4, AB = AC,  ACB равен 90, I инцентр в ABC, точкой M сторона AB делится в отношении 1/2 \n доказать что треугольник ABC DEF 1/2'
 print(text_analyze(inp))
 
 
