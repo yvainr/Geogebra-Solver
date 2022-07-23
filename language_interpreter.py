@@ -5,7 +5,10 @@ def text_analyze(inp_str, output_num=7):
     """main function"""
     inp_str = inp_str.split("\n")
     statement = inp_str[0]
-    question = inp_str[1]
+    try:
+        question = inp_str[1]
+    except:
+        question = ""
     statement = string_split(statement)
     ret = new_assign_to_classes(statement)
     ret = list(ret)
@@ -49,7 +52,7 @@ def distillation(part):
     new_part = ""
     for i in range(len(part)):
         try:
-            if ord(part[i]) == 42 or (45 < ord(part[i])< 58) or (64 < ord(part[i]) < 91) or (96 < ord(part[i]) < 123) or ord(part[i]) == 32:
+            if ord(part[i]) == 42 or (45 < ord(part[i])< 58) or (64 < ord(part[i]) < 91) or ord(part[i]) == 32:
                 new_part = new_part[:] + str(part[i])
         except:
             pass
@@ -86,7 +89,7 @@ def class_analyze(part):
     """analyzing to which class this part belong"""
 
     poly = False
-    if "угольн" in part:
+    if "угольн" in part or "подоб" in part:
         poly = True
 
     part = equality_of_elem(part)
@@ -167,7 +170,7 @@ def new_assign_to_classes(inp_str):
 def question_processing(question):
     """putting a question in the output format"""
     poly = False
-    if "угольн" in question:
+    if "угольн" in question or "подоб" in question:
         poly = True
     question = equality_of_elem(question)
     question = distillation(question)
@@ -180,8 +183,8 @@ def question_processing(question):
     return question
 
 
-
-inp = 'треугольники ABC = HFG, ABCD невыпуклый, AB = 5, сторона BC равна 4, AB = AC,  ACB равен 90, I инцентр в ABC, точкой M сторона AB делится в отношении 1/2 \n доказать что треугольник ABC DEF 1/2'
+inpu = 'ABC, DEF, ABC подобен DEF с коэффициентом 1/2, relation of sides AB and BC is 1/2'
+inp = 'треугольники ABC = HFG, ABCD невыпуклый, AB = 5, сторона BC равна 4, AB = AC,  ACB равен 90, I инцентр в ABC, точкой M сторона AB делится в отношении 1/2 \n доказать что подобны ABC DEF 1/2'
 print(text_analyze(inp))
 
 
