@@ -99,7 +99,7 @@ class Fact:
                  ):
         self.id = id
         self.generation = generation  # ступень дерева
-        self.fact_type = fact_type  # existence (существование), relation (отношение), size (значение)
+        self.fact_type = fact_type  # relation (отношение), size (значение)
         self.objects = objects
         self.value = value
         self.question = question
@@ -113,6 +113,8 @@ lines = list()
 angles = list()
 segments = list()
 polygons = list()
+facts = list()
+questions = list()
 
 
 def polygons_create(text):
@@ -301,6 +303,40 @@ def line_intersection_create(text):
             l2 = find_line_with_segment(find_segment_with_points(l2[0], l2[1]))
             if find_point_with_name(P) not in l2.points:
                 l2.points.add(find_point_with_name(P))
+
+
+def questions_create(text):
+    if len(text.split()) > 0:
+        for question in text.split(','):
+            if len(question.split()) == 2:
+                if len(question.split()[0]) == 2:
+                    seg = find_segment_with_points(question.split()[0][0], question.split()[0][1])
+                    questions.append(Fact(len(questions), None, 'size', [seg], None, True))
+                if len(question.split()[0]) == 3:
+                    ang = find_angle_with_points(check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2]))
+                    questions.append(Fact(len(questions), None, 'size', [ang], None, True))
+            if len(question.split()) == 3:
+                if len(question.split()[0]) == 2 and len(question.split()[1]) == 2:
+                    seg_1 = find_segment_with_points(question.split()[0][0], question.split()[0][1])
+                    seg_2 = find_segment_with_points(question.split()[1][0], question.split()[1][1])
+                    if question.split()[2] == '?':
+                        questions.append(Fact(len(questions), None, 'relation', [seg_1, seg_2], None, True))
+                    else:
+                        questions.append(Fact(len(questions), None, 'relation', [seg_1, seg_2], Fraction(question.split()[2]), True))
+                if question.split()[0][0] != '/' and len(question.split()[0]) == 3 and len(question.split()[1]) == 3:
+                    ang_1 = find_angle_with_points(check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2]))
+                    ang_2 = find_angle_with_points(check_angle_in_polygon(question.split()[1][0], question.split()[1][1], question.split()[1][2]))
+                    if question.split()[2] == '?':
+                        questions.append(Fact(len(questions), None, 'relation', [ang_1, ang_2], None, True))
+                    else:
+                        questions.append(Fact(len(questions), None, 'relation', [ang_1, ang_2], Fraction(question.split()[2]), True))
+                else:
+                    polygon_1 = find_polygon_with_points(list(question.split()[0])[1:])
+                    polygon_2 = find_polygon_with_points(list(question.split()[1]))
+                    if question.split()[2] == '?':
+                        questions.append(Fact(len(questions), None, 'relation', [polygon_1, polygon_2], None, True))
+                    else:
+                        questions.append(Fact(len(questions), None, 'relation', [polygon_1, polygon_2], Fraction(question.split()[2]), True))
 
 
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
