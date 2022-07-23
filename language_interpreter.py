@@ -1,7 +1,7 @@
 from re import *
 #number of output strings = 8
 
-def text_analyze(inp_str, output_num=7):
+def text_analyze(inp_str, output_num=8):
     """main function"""
     inp_str = inp_str.split("\n")
     statement = inp_str[0]
