@@ -104,8 +104,8 @@ class Fact:
         self.value = value
         self.question = question
         self.description = str()
-        self.root_facts = list()  # список фактов-причин
-        self.following_facts = list()  # список фактов-следствий
+        self.root_facts = set()  # список фактов-причин
+        self.following_facts = set()  # список фактов-следствий
 
 
 points = list()
