@@ -4,7 +4,12 @@ from random import uniform
 
 
 class Point:
-    def __init__(self, name, specific_properties_point=None, specific_properties_triangle=None, cord_x=None, cord_y=None):
+    def __init__(self,
+                 name,
+                 specific_properties_point=None,
+                 specific_properties_triangle=None,
+                 cord_x=None,
+                 cord_y=None):
         self.name = name
         self.specific_properties_point = specific_properties_point
         self.specific_properties_triangle = specific_properties_triangle
@@ -16,7 +21,8 @@ class Point:
 
 
 class Line:
-    def __init__(self, points):
+    def __init__(self,
+                 points):
         self.points = points
 
     def __str__(self):
@@ -24,7 +30,10 @@ class Line:
 
 
 class Angle:
-    def __init__(self, line_one, line_two, size=None):
+    def __init__(self,
+                 line_one,
+                 line_two,
+                 size=None):
         self.lines = [line_one, line_two]
         self.size = size
         self.relations = dict()
@@ -46,7 +55,10 @@ class Angle:
 
 
 class Segment:
-    def __init__(self, point_one, point_two, size=None):
+    def __init__(self,
+                 point_one,
+                 point_two,
+                 size=None):
         self.points = {point_one, point_two}
         self.size = size
         self.relations = dict()
@@ -64,13 +76,36 @@ class Segment:
 
 
 class Polygon:
-    def __init__(self, vertices, convex=True):
+    def __init__(self,
+                 vertices,
+                 convex=True):
         self.points = vertices
         self.convex = convex
+        self.relations = dict()
         # ?добавить точки внутри?
 
     def __str__(self):
         return f'points: {get_points_names_from_list(self.points)}, convex: {self.convex}'
+
+
+class Fact:
+    def __init__(self,
+                 id,
+                 generation,
+                 fact_type,
+                 objects,
+                 value=None,
+                 question=False
+                 ):
+        self.id = id
+        self.generation = generation  # ступень дерева
+        self.fact_type = fact_type  # existence (существование), relation (отношение), size (значение)
+        self.objects = objects
+        self.value = value
+        self.question = question
+        self.description = str()
+        self.root_facts = list()  # список фактов-причин
+        self.following_facts = list()  # список фактов-следствий
 
 
 points = list()
@@ -112,26 +147,26 @@ def polygons_create(text):
                 S.specific_properties_point = polygon.split()[1]
                 S.specific_properties_triangle = polygon.split()[2]
 
-                A = find_point_with_name(polygon.split()[2][0])
-                B = find_point_with_name(polygon.split()[2][1])
-                C = find_point_with_name(polygon.split()[2][2])
+                A = find_point_with_name(polygon.split()[2][0]).name
+                B = find_point_with_name(polygon.split()[2][1]).name
+                C = find_point_with_name(polygon.split()[2][2]).name
 
                 AB = find_line_with_points(A, B)
                 BC = find_line_with_points(C, B)
                 CA = find_line_with_points(A, C)
 
                 if polygon.split()[1] == 'H':
-                    find_angle_with_lines(AB, find_line_with_points(C, S)).size = 90
-                    find_angle_with_lines(find_line_with_points(C, S), AB).size = 90
-                    find_angle_with_lines(BC, find_line_with_points(A, S)).size = 90
-                    find_angle_with_lines(find_line_with_points(A, S), BC).size = 90
-                    find_angle_with_lines(CA, find_line_with_points(B, S)).size = 90
-                    find_angle_with_lines(find_line_with_points(B, S), CA).size = 90
+                    find_angle_with_lines(AB, find_line_with_points(C, S.name)).size = 90
+                    find_angle_with_lines(find_line_with_points(C, S.name), AB).size = 90
+                    find_angle_with_lines(BC, find_line_with_points(A, S.name)).size = 90
+                    find_angle_with_lines(find_line_with_points(A, S.name), BC).size = 90
+                    find_angle_with_lines(CA, find_line_with_points(B, S.name)).size = 90
+                    find_angle_with_lines(find_line_with_points(B, S.name), CA).size = 90
 
                 if polygon.split()[1] == 'O':
-                    AS = find_segment_with_points(A.name, S.name)
-                    BS = find_segment_with_points(B.name, S.name)
-                    CS = find_segment_with_points(C.name, S.name)
+                    AS = find_segment_with_points(A, S.name)
+                    BS = find_segment_with_points(B, S.name)
+                    CS = find_segment_with_points(C, S.name)
 
                     AS.relations[BS] = Fraction(1)
                     BS.relations[AS] = Fraction(1)
@@ -141,9 +176,9 @@ def polygons_create(text):
                     BS.relations[CS] = Fraction(1)
 
                 if polygon.split()[1] == 'I':
-                    AS = find_line_with_points(A, S)
-                    BS = find_line_with_points(B, S)
-                    CS = find_line_with_points(C, S)
+                    AS = find_line_with_points(A, S.name)
+                    BS = find_line_with_points(B, S.name)
+                    CS = find_line_with_points(C, S.name)
 
                     SAC = find_angle_with_lines(AS, CA)
                     BAS = find_angle_with_lines(AB, AS)
@@ -153,7 +188,7 @@ def polygons_create(text):
                     ACS = find_angle_with_lines(CA, CS)
 
                     SAC.relations[BAS] = Fraction(1)
-                    BAS.realtions[SAC] = Fraction(1)
+                    BAS.relations[SAC] = Fraction(1)
                     SBA.relations[CBS] = Fraction(1)
                     CBS.relations[SBA] = Fraction(1)
                     SCB.relations[ACS] = Fraction(1)
@@ -235,6 +270,25 @@ def angles_relations_create(text):
             ang_2.relations[ang_1] = 1 / Fraction(rel)
 
 
+def polygons_relations_create(text):
+    if len(text.split()) > 0:
+        for relation in text.split(','):
+            polygon_1, polygon_2, rel = relation.split()
+
+            for i in range(len(polygon_1)):
+                side_1 = find_segment_with_points(polygon_1[i - 1], polygon_1[i])
+                side_2 = find_segment_with_points(polygon_2[i - 1], polygon_2[i])
+
+                side_1.relations[side_2] = Fraction(rel)
+                side_2.relations[side_1] = 1 / Fraction(rel)
+
+            polygon_1 = find_polygon_with_points(list(polygon_1))
+            polygon_2 = find_polygon_with_points(list(polygon_2))
+
+            polygon_1.relations[polygon_2] = Fraction(rel)
+            polygon_2.relations[polygon_1] = 1 / Fraction(rel)
+
+
 def line_intersection_create(text):
     if len(text.split()) > 0:
         for intersection in text.split(','):
@@ -258,10 +312,9 @@ def find_segment_with_points(A, B):
         if {a, b} == seg.points:
             return seg
 
-    else:
-        new_segment = Segment(a, b)
-        segments.append(new_segment)
-        return new_segment
+    new_segment = Segment(a, b)
+    segments.append(new_segment)
+    return new_segment
 
 
 # вспомогательная функция для поиска прямой по точкам на ней, указываются имена точек
@@ -273,10 +326,9 @@ def find_line_with_points(A, B):
         if {a, b} <= set(line.points):
             return line
 
-    else:
-        new_line = Line({a, b})
-        lines.append(new_line)
-        return new_line
+    new_line = Line({a, b})
+    lines.append(new_line)
+    return new_line
 
 
 # вспомогательная функция для поиска прямой по отрезку на ней
@@ -291,10 +343,9 @@ def find_angle_with_lines(l1, l2):
         if [set(get_points_names_from_list(l1.points)), set(get_points_names_from_list(l2.points))] == [set(get_points_names_from_list(angle.lines[0].points)), set(get_points_names_from_list(angle.lines[1].points))]:
             return angle
 
-    else:
-        new_angle = Angle(l1, l2)
-        angles.append(new_angle)
-        return new_angle
+    new_angle = Angle(l1, l2)
+    angles.append(new_angle)
+    return new_angle
 
 
 # вспомогательная функция для поиска угла по точкам
@@ -306,10 +357,23 @@ def find_angle_with_points(A, B, C):
         if angle.lines == [l1, l2]:
             return angle
 
-    else:
-        new_angle = Angle(l1, l2)
-        angles.append(new_angle)
-        return new_angle
+    new_angle = Angle(l1, l2)
+    angles.append(new_angle)
+    return new_angle
+
+
+# вспомогательная функция для поиска многоугольника по его вершинам
+def find_polygon_with_points(points):
+    for polygon in polygons:
+        if set(get_points_names_from_list(polygon.points)) == set(points):
+            return polygon
+
+    new_points = list()
+    for point in points:
+        new_points.append(find_point_with_name(point))
+    new_polygon = Polygon(new_points)
+    polygons.append(new_polygon)
+    return new_polygon
 
 
 # вспомогательная функция для поиска точки по её имени
@@ -318,10 +382,9 @@ def find_point_with_name(A):
         if A == point.name:
             return point
 
-    else:
-        new_point = Point(A)
-        points.append(new_point)
-        return new_point
+    new_point = Point(A)
+    points.append(new_point)
+    return new_point
 
 
 # вспомогательная функция для получения списка имен точек из списка
@@ -331,33 +394,6 @@ def get_points_names_from_list(points_list):
         ret.append(point.name)
 
     return ret
-
-
-def find_same_lines(lines_list, line):
-    for lin in lines_list:
-        if len(lin.points & line.points) >= 2:
-            lin.points.update(line.points)
-
-    else:
-        lines_list.append(line)
-
-
-def find_same_segments(segments_list, segment):
-    for seg in segments_list:
-        if seg.points == segment.points:
-            break
-
-    else:
-        segments_list.append(segment)
-
-
-def find_same_angles(angles_list, angle):
-    for ang in angles_list:
-        if ang.lines == angle.lines:
-            break
-
-    else:
-        angles_list.append(angle)
 
 
 def check_angle_in_polygon(A, B, C):
@@ -372,6 +408,33 @@ def check_angle_in_polygon(A, B, C):
                 return A, B, C
 
     return A, B, C
+
+
+def UseRelations(objects):
+    none_count = 0
+
+    for obj in objects:
+        if not obj.size:
+            none_count += 1
+
+    #if seg_check and none_count == len(objects) != 0:
+        #objects[0].size = 3
+        #none_count -= 1
+
+    for n in range(none_count):
+
+        for i in range(len(objects)):
+            obj_1 = objects[i]
+
+            if not obj_1.size:
+                for j in range(len(objects)):
+                    obj_2 = objects[j]
+
+                    if obj_2.size:
+                        try:
+                            obj_1.size = float(obj_2.size / obj_2.relations[obj_1])
+                        except Exception:
+                            pass
 
 
 # модуль обработки данных при создании json
@@ -480,30 +543,3 @@ def json_create():
         object_index += 1
 
     return output
-
-
-def UseRelations(objects):
-    none_count = 0
-
-    for obj in objects:
-        if not obj.size:
-            none_count += 1
-
-    #if seg_check and none_count == len(objects) != 0:
-        #objects[0].size = 3
-        #none_count -= 1
-
-    for n in range(none_count):
-
-        for i in range(len(objects)):
-            obj_1 = objects[i]
-
-            if not obj_1.size:
-                for j in range(len(objects)):
-                    obj_2 = objects[j]
-
-                    if obj_2.size:
-                        try:
-                            obj_1.size = float(obj_2.size / obj_2.relations[obj_1])
-                        except Exception:
-                            pass
