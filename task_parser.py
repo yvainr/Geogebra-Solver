@@ -501,7 +501,10 @@ def UseRelations(objects):
                         try:
                             obj_1.size = float(obj_2.size / obj_2.relations[obj_1])
                         except Exception:
-                            pass
+                            try:
+                                obj_1.size = obj_2.size - obj_2.difference[obj_1]
+                            except Exception:
+                                pass
 
 
 # модуль обработки данных при создании json
