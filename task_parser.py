@@ -272,7 +272,7 @@ def segments_relations_create(text):
             seg_1.relations[seg_2] = Fraction(rel)
             seg_2.relations[seg_1] = 1 / Fraction(rel)
 
-            if len(relation.split()[0]) == 3 and len(relation.split()[1]) == 2:
+            if len(relation.split()[0]) == 3:
                 seg_1 = find_segment_with_points(relation.split()[0][1], relation.split()[0][2])
                 seg_2 = find_segment_with_points(relation.split()[1][0], relation.split()[1][1])
 
