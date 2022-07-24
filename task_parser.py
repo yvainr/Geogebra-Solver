@@ -131,7 +131,7 @@ class Fact:
                  ):
         self.id = id
         self.generation = generation  # ступень дерева
-        self.fact_type = fact_type  # relation (отношение), size (значение), difference (вычитание), addition (сложение)
+        self.fact_type = fact_type  # relation (отношение), size (значение), difference (вычитание), additions (сложение)
         self.objects = objects
         self.value = value
         self.question = question
@@ -299,52 +299,40 @@ def segments_relations_create(text):
                 seg_1.relations[seg_2] = Fraction(rel)
                 seg_2.relations[seg_1] = 1 / Fraction(rel)
 
-            if relation.split()[0][0] == '-' and len(relation.split()[0]) == 3 and len(relation.split()[1]) == 2:
-                seg_1 = find_segment_with_points(relation.split()[0][1], relation.split()[0][2])
+            if len(relation.split()[0]) == 3 and len(relation.split()[1]) == 2:
+                seg_1 = find_segment_with_points(relation.split()[0][0], relation.split()[0][1])
                 seg_2 = find_segment_with_points(relation.split()[1][0], relation.split()[1][1])
-
-                dif = relation.split()[2]
-                seg_1.difference[seg_2] = Fraction(dif)
-                seg_2.difference[seg_1] = - Fraction(dif)
-
-            if relation.split()[0][0] == '+' and len(relation.split()[0]) == 3 and len(relation.split()[1]) == 2:
-                seg_1 = find_segment_with_points(relation.split()[0][1], relation.split()[0][2])
-                seg_2 = find_segment_with_points(relation.split()[1][0], relation.split()[1][1])
-
-                add = relation.split()[2]
-                seg_1.addition[seg_2] = Fraction(add)
-                seg_2.addition[seg_1] = Fraction(add)
+                    
+                if relation.split()[0][2] == '-':
+                    dif = relation.split()[2]
+                    seg_1.difference[seg_2] = Fraction(dif)
+                    seg_2.difference[seg_1] = - Fraction(dif)
+                    
+                if relation.split()[0][2] == '+':
+                    add = relation.split()[2]
+                    seg_1.addition[seg_2] = Fraction(add)
+                    seg_2.addition[seg_1] = Fraction(add)
 
 
 def angles_relations_create(text):
     if len(text.split()) > 0:
         for relation in text.split(','):
+            ang_1, ang_2, val = relation.split()
+
+            ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[0], ang_1[1], ang_1[2]))
+            ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2]))
+
             if len(relation.split()[0]) == len(relation.split()[1]) == 3:
-                ang_1, ang_2, rel = relation.split()
+                ang_1.relations[ang_2] = Fraction(val)
+                ang_2.relations[ang_1] = 1 / Fraction(val)
 
-                ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[0], ang_1[1], ang_1[2]))
-                ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2]))
+            if relation.split()[0][3] == '-' and len(relation.split()[0]) == 4 and len(relation.split()[1]) == 3:
+                ang_1.difference[ang_2] = Fraction(val)
+                ang_2.difference[ang_1] = - Fraction(val)
 
-                ang_1.relations[ang_2] = Fraction(rel)
-                ang_2.relations[ang_1] = 1 / Fraction(rel)
-
-            if relation.split()[0][0] == '-' and len(relation.split()[0]) == 4 and len(relation.split()[1]) == 3:
-                ang_1, ang_2, dif = relation.split()
-
-                ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[1], ang_1[2], ang_1[3]))
-                ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2]))
-
-                ang_1.difference[ang_2] = Fraction(dif)
-                ang_2.difference[ang_1] = - Fraction(dif)
-
-            if relation.split()[0][0] == '-' and len(relation.split()[0]) == 4 and len(relation.split()[1]) == 3:
-                ang_1, ang_2, add = relation.split()
-
-                ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[1], ang_1[2], ang_1[3]))
-                ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2]))
-
-                ang_1.addition[ang_2] = Fraction(add)
-                ang_2.addition[ang_1] = Fraction(add)
+            if relation.split()[0][3] == '+' and len(relation.split()[0]) == 4 and len(relation.split()[1]) == 3:
+                ang_1.addition[ang_2] = Fraction(val)
+                ang_2.addition[ang_1] = Fraction(val)
 
 
 def polygons_relations_create(text):
