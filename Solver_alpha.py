@@ -5,15 +5,13 @@ Cos_theorem_allowed = True
 Sin_theorem_allowed = True
 
 #Индекс последнего добавленного факта
-
 ind = 0
 facts = []
 facts_indexes = []
 
-not_none_angles = []
 #Это нужно чтобы не перебирать None углы, если угол в результате вычислений становится не None - он сюда добавляется
+not_none_angles = []
 
-similarity = []
 
 #Неприятная функция, добавляющая все возможные прямые, отрезки, треугольники и углы
 def first():
@@ -69,7 +67,6 @@ def first():
             facts.append(Fact(ind, -1, "size", [seg], seg.size))
             ind += 1
 
-first()
 
 #Находит факт по объектам в нём (если strict - то конкретно с этими объектами, иначе он находит факт где мы находим значение этого объекта)
 def find_in_facts_with_obj(obj, not_strict = False):
@@ -103,10 +100,10 @@ def fix_vertical_angles():
                         ang_2.size = 180 - ang_1.size
                         not_none_angles.append(ang_2)
 
-                        roof1 = find_in_facts_with_obj([ang_1], "not")
-                        roofs = {roof1}
+                        root1 = find_in_facts_with_obj([ang_1], "not")
+                        roots = {root1}
 
-                        update_facts(ind, [ang_1, ang_2], ang_2.size, roofs, "Мы еще не добавили Смежные углы")
+                        update_facts(ind, [ang_1, ang_2], ang_2.size, roots, "addition")
 
 #Рассматривает как и вертикальные углы, так и суммы двух соседних углов, в результате чего корректирует все углы
 def fix_all_angles():
@@ -124,10 +121,10 @@ def fix_all_angles():
                             ang3.size = (ang1 + ang2) % 180
                             not_none_angles.append(ang3)
 
-                            roof1, roof2 = find_in_facts_with_obj([ang1], "not"), find_in_facts_with_obj([ang2], "not")
-                            roofs = {roof1, roof2}
+                            root1, root2 = find_in_facts_with_obj([ang1], "not"), find_in_facts_with_obj([ang2], "not")
+                            roots = {root1, root2}
 
-                            update_facts(ind, [ang3, ang1, ang2], ang3.size, roofs, "Мы еще не добавили Сумма двух углов")
+                            update_facts(ind, [ang3, ang1, ang2], ang3.size, roots, "addition")
 
     fix_vertical_angles()
 
@@ -156,37 +153,37 @@ def correct_size(ABC, BCA, AB, CA):
         if CA.size and not AB.size:
             AB.size = CA.size
 
-            roof1, roof2 = find_in_facts_with_obj([ABC, BCA]), find_in_facts_with_obj([CA], "not")
-            roofs = {roof1, roof2}
+            root1, root2 = find_in_facts_with_obj([ABC, BCA]), find_in_facts_with_obj([CA], "not")
+            roots = {root1, root2}
 
-            update_facts(ind, [AB, CA], AB.size, roofs, "relation")
+            update_facts(ind, [AB, CA], AB.size, roots, "relation")
 
         elif AB.size and not CA.size:
             CA.size = AB.size
 
-            roof1, roof2 = find_in_facts_with_obj([ABC, BCA]), find_in_facts_with_obj([AB], "not")
-            roofs = {roof1, roof2}
+            root1, root2 = find_in_facts_with_obj([ABC, BCA]), find_in_facts_with_obj([AB], "not")
+            roots = {root1, root2}
 
-            update_facts(ind, [CA, AB], CA.size, roofs, "relation")
+            update_facts(ind, [CA, AB], CA.size, roots, "relation")
 
     if AB.size == CA.size and AB.size:
         if BCA.size and not ABC.size:
             ABC.size = BCA.size
             not_none_angles.append(ABC)
 
-            roof1, roof2 = find_in_facts_with_obj([AB, CA]), find_in_facts_with_obj([BCA], "not")
-            roofs = {roof1, roof2}
+            root1, root2 = find_in_facts_with_obj([AB, CA]), find_in_facts_with_obj([BCA], "not")
+            roots = {root1, root2}
 
-            update_facts(ind, [ABC, BCA], ABC.size, roofs, "relation")
+            update_facts(ind, [ABC, BCA], ABC.size, roots, "relation")
 
         elif ABC.size and not BCA.size:
             BCA.size = ABC.size
             not_none_angles.append(BCA)
 
-            roof1, roof2 = find_in_facts_with_obj([AB, CA]), find_in_facts_with_obj([ABC], "not")
-            roofs = {roof1, roof2}
+            root1, root2 = find_in_facts_with_obj([AB, CA]), find_in_facts_with_obj([ABC], "not")
+            roots = {root1, root2}
 
-            update_facts(ind, [BCA, ABC], BCA.size, roofs, "relation")
+            update_facts(ind, [BCA, ABC], BCA.size, roots, "relation")
 
 #Проверяет равенство величин объектов, при их не None_овости
 def equal(AB, BC):
@@ -262,50 +259,50 @@ def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA,
             return 0
 
     if (similarity_if_not_None(AB, A1B1) == similarity_if_not_None(BC, B1C1) and equal(ABC, A1B1C1) and similarity_if_not_None(AB, A1B1)):
-        roof1, roof2, roof3 = find_in_facts_with_obj([AB, A1B1]), find_in_facts_with_obj([ABC, A1B1C1]), find_in_facts_with_obj([BC, B1C1])
-        roofs = {roof1, roof2, roof3}
+        root1, root2, root3 = find_in_facts_with_obj([AB, A1B1]), find_in_facts_with_obj([ABC, A1B1C1]), find_in_facts_with_obj([BC, B1C1])
+        roots = {root1, root2, root3}
 
-        update_facts(ind, [triangle1, triangle2], None, roofs, "relation")
+        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
     elif (similarity_if_not_None(AB, A1B1) == similarity_if_not_None(CA, C1A1) and equal(CAB, C1A1B1) and similarity_if_not_None(AB, A1B1)):
-        roof1, roof2, roof3 = find_in_facts_with_obj([AB, A1B1]), find_in_facts_with_obj([CAB, C1A1B1]), find_in_facts_with_obj([CA, C1A1])
-        roofs = {roof1, roof2, roof3}
+        root1, root2, root3 = find_in_facts_with_obj([AB, A1B1]), find_in_facts_with_obj([CAB, C1A1B1]), find_in_facts_with_obj([CA, C1A1])
+        roots = {root1, root2, root3}
 
-        update_facts(ind, [triangle1, triangle2], None, roofs, "relation")
+        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
     elif (similarity_if_not_None(BC, B1C1) ==  similarity_if_not_None(CA, C1A1) and equal(BCA, B1C1A1) and similarity_if_not_None(BC, B1C1)):
-        roof1, roof2, roof3 = find_in_facts_with_obj([BC, B1C1]), find_in_facts_with_obj([BCA, B1C1A1]), find_in_facts_with_obj([CA, C1A1])
-        roofs = {roof1, roof2, roof3}
+        root1, root2, root3 = find_in_facts_with_obj([BC, B1C1]), find_in_facts_with_obj([BCA, B1C1A1]), find_in_facts_with_obj([CA, C1A1])
+        roots = {root1, root2, root3}
 
-        update_facts(ind, [triangle1, triangle2], None, roofs, "relation")
+        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
     elif (equal(ABC, A1B1C1) and equal(CAB, C1A1B1) and similarity_if_not_None(AB, A1B1)):
-        roof1, roof2, roof3 = find_in_facts_with_obj([ABC, A1B1C1]), find_in_facts_with_obj([CAB, C1A1B1]), find_in_facts_with_obj([AB, A1B1])
-        roofs = {roof1, roof2, roof3}
+        root1, root2, root3 = find_in_facts_with_obj([ABC, A1B1C1]), find_in_facts_with_obj([CAB, C1A1B1]), find_in_facts_with_obj([AB, A1B1])
+        roots = {root1, root2, root3}
 
-        update_facts(ind, [triangle1, triangle2], None, roofs, "relation")
+        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
     elif (equal(ABC, A1B1C1) and equal(BCA, B1C1A1) and similarity_if_not_None(BC, B1C1)):
-        roof1, roof2, roof3 = find_in_facts_with_obj([ABC, A1B1C1]), find_in_facts_with_obj([BCA, B1C1A1]), find_in_facts_with_obj([BC, B1C1])
-        roofs = {roof1, roof2, roof3}
+        root1, root2, root3 = find_in_facts_with_obj([ABC, A1B1C1]), find_in_facts_with_obj([BCA, B1C1A1]), find_in_facts_with_obj([BC, B1C1])
+        roots = {root1, root2, root3}
 
-        update_facts(ind, [triangle1, triangle2], None, roofs, "relation")
+        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
     elif (similarity_if_not_None(CA, C1A1) == similarity_if_not_None(AB, A1B1) and similarity_if_not_None(BC, B1C1) == similarity_if_not_None(AB, A1B1) and similarity_if_not_None(AB, A1B1)):
-        roof1, roof2, roof3 = find_in_facts_with_obj([AB, A1B1]), find_in_facts_with_obj([CA, C1A1]), find_in_facts_with_obj([BC, B1C1])
-        roofs = {roof1, roof2, roof3}
+        root1, root2, root3 = find_in_facts_with_obj([AB, A1B1]), find_in_facts_with_obj([CA, C1A1]), find_in_facts_with_obj([BC, B1C1])
+        roots = {root1, root2, root3}
 
-        update_facts(ind, [triangle1, triangle2], None, roofs, "relation")
+        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
@@ -326,10 +323,21 @@ def fix_all_triangles():
                     similaritys_triangles(triangle1, triangle2, B, A, C, C1, B1, A1, CA, BC, AB, ABC, CAB, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
                     break
 
-#Сам процесс решения
+#Поиск решения вопроса среди фактов
+def find_ans(q):
+    for fact in facts:
+        if fact.objects == q.objects and fact.value == q.value:
+            return fact.id
+    return None
+
+#Сам процесс решения, проверяет все ли вопросы учтены
 def solving_process():
-    iterations = 1
-    for i in range(iterations):
+    first()
+    q_indexes = {}
+    while len(q_indexes) != len(questions):
+        for q in questions:
+            if find_ans(q):
+                q_indexes.add(find_ans(q))
         fix_all_angles()
         fix_all_triangles()
 
