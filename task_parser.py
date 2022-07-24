@@ -53,10 +53,10 @@ class Angle:
             str_relations += f'{get_points_names_from_list(rel.lines[0].points)} {get_points_names_from_list(rel.lines[1].points)} {self.relations[rel]} '
 
         for dif in self.difference:
-            str_difference += f'{get_points_names_from_list(dif.lines[0].points)} {get_points_names_from_list(dif.lines[1].points)} {self.relations[dif]} '
+            str_difference += f'{get_points_names_from_list(dif.lines[0].points)} {get_points_names_from_list(dif.lines[1].points)} {self.difference[dif]} '
 
         for add in self.addition:
-            str_addition += f'{get_points_names_from_list(add.lines[0].points)} {get_points_names_from_list(add.lines[1].points)} {self.relations[add]} '
+            str_addition += f'{get_points_names_from_list(add.lines[0].points)} {get_points_names_from_list(add.lines[1].points)} {self.addition[add]} '
 
         if not str_relations:
             str_relations = 'None '
@@ -90,10 +90,10 @@ class Segment:
             str_relations += f'{get_points_names_from_list(rel.points)}: {self.relations[rel]} '
 
         for dif in self.difference:
-            str_difference += f'{get_points_names_from_list(dif.points)}: {self.relations[dif]} '
+            str_difference += f'{get_points_names_from_list(dif.points)}: {self.difference[dif]} '
 
         for add in self.addition:
-            str_addition += f'{get_points_names_from_list(add.points)}: {self.relations[add]} '
+            str_addition += f'{get_points_names_from_list(add.points)}: {self.addition[add]} '
 
         if not str_relations:
             str_relations = 'None '
