@@ -37,10 +37,12 @@ class Angle:
         self.lines = [line_one, line_two]
         self.size = size
         self.relations = dict()
+        self.difference = dict()
 
     def __str__(self):
         str_lines = ''
         str_relations = ''
+        str_difference = ''
 
         for line in self.lines:
             str_lines += f' {get_points_names_from_list(line.points)}'
@@ -48,10 +50,16 @@ class Angle:
         for rel in self.relations:
             str_relations += f'{get_points_names_from_list(rel.lines[0].points)} {get_points_names_from_list(rel.lines[1].points)} {self.relations[rel]} '
 
+        for dif in self.difference:
+            str_difference += f'{get_points_names_from_list(dif.lines[0].points)} {get_points_names_from_list(dif.lines[1].points)} {self.relations[dif]} '
+
         if not str_relations:
             str_relations = 'None '
 
-        return f'lines:{str_lines}, size: {self.size}, relations: {str_relations}'
+        if not str_difference:
+            str_relations = 'None '
+
+        return f'lines:{str_lines}, size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}'
 
 
 class Segment:
@@ -62,17 +70,22 @@ class Segment:
         self.points = {point_one, point_two}
         self.size = size
         self.relations = dict()
+        self.difference = dict()
 
     def __str__(self):
         str_relations = ''
+        str_difference = ''
 
         for rel in self.relations:
             str_relations += f'{get_points_names_from_list(rel.points)}: {self.relations[rel]} '
 
+        for dif in self.difference:
+            str_difference += f'{get_points_names_from_list(dif.points)}: {self.relations[dif]} '
+
         if not str_relations:
             str_relations = 'None '
 
-        return f'points: {get_points_names_from_list(self.points)}, size: {self.size}, relations: {str_relations}'
+        return f'points: {get_points_names_from_list(self.points)}, size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}'
 
 
 class Polygon:
@@ -133,14 +146,14 @@ def polygons_create(text):
             if len(vertices_list) > 3:
                 try:
                     convex = polygon.split()[1]
-                    if convex == 'невыпуклый':
+                    if convex == '*':
                         polygons.append(Polygon(vertices_class_list, False))
                     else:
                         polygons.append(Polygon(vertices_class_list))
                 except IndexError:
                     polygons.append(Polygon(vertices_class_list))
 
-            if len(vertices_list) == 3:
+            if len(vertices_list) == 3 or len(vertices_list) == 2:
                 polygons.append(Polygon(vertices_class_list))
 
             if len(vertices_list) == 1:
@@ -259,17 +272,35 @@ def segments_relations_create(text):
             seg_1.relations[seg_2] = Fraction(rel)
             seg_2.relations[seg_1] = 1 / Fraction(rel)
 
+            if len(relation.split()[0]) == 3 and len(relation.split()[1]) == 2:
+                seg_1 = find_segment_with_points(relation.split()[0][1], relation.split()[0][2])
+                seg_2 = find_segment_with_points(relation.split()[1][0], relation.split()[1][1])
+
+                dif = relation.split()[2]
+                seg_1.difference[seg_2] = Fraction(dif)
+                seg_2.difference[seg_1] = - Fraction(dif)
+
 
 def angles_relations_create(text):
     if len(text.split()) > 0:
         for relation in text.split(','):
-            ang_1, ang_2, rel = relation.split()
+            if len(relation.split()[0]) == len(relation.split()[1]) == 3:
+                ang_1, ang_2, rel = relation.split()
 
-            ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[0], ang_1[1], ang_1[2]))
-            ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2]))
+                ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[0], ang_1[1], ang_1[2]))
+                ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2]))
 
-            ang_1.relations[ang_2] = Fraction(rel)
-            ang_2.relations[ang_1] = 1 / Fraction(rel)
+                ang_1.relations[ang_2] = Fraction(rel)
+                ang_2.relations[ang_1] = 1 / Fraction(rel)
+
+            if len(relation.split()[0]) == 4 and len(relation.split()[1]) == 3:
+                ang_1, ang_2, dif = relation.split()
+
+                ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[1], ang_1[2], ang_1[3]))
+                ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2]))
+
+                ang_1.relations[ang_2] = Fraction(dif)
+                ang_2.relations[ang_1] = - Fraction(dif)
 
 
 def polygons_relations_create(text):
@@ -313,7 +344,7 @@ def questions_create(text):
                     seg = find_segment_with_points(question.split()[0][0], question.split()[0][1])
                     questions.append(Fact(len(questions), None, 'size', [seg], None, True))
                 if len(question.split()[0]) == 3:
-                    ang = find_angle_with_points(check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2]))
+                    ang = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2]))
                     questions.append(Fact(len(questions), None, 'size', [ang], None, True))
             if len(question.split()) == 3:
                 if len(question.split()[0]) == 2 and len(question.split()[1]) == 2:
@@ -324,8 +355,8 @@ def questions_create(text):
                     else:
                         questions.append(Fact(len(questions), None, 'relation', [seg_1, seg_2], Fraction(question.split()[2]), True))
                 if question.split()[0][0] != '/' and len(question.split()[0]) == 3 and len(question.split()[1]) == 3:
-                    ang_1 = find_angle_with_points(check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2]))
-                    ang_2 = find_angle_with_points(check_angle_in_polygon(question.split()[1][0], question.split()[1][1], question.split()[1][2]))
+                    ang_1 = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2]))
+                    ang_2 = find_angle_with_points(*check_angle_in_polygon(question.split()[1][0], question.split()[1][1], question.split()[1][2]))
                     if question.split()[2] == '?':
                         questions.append(Fact(len(questions), None, 'relation', [ang_1, ang_2], None, True))
                     else:
