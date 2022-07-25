@@ -358,6 +358,7 @@ def return_roots(ind):
 
             return n_roots
 
+#Печать факта для юзера
 def to_str(self, roots=True, nfacts = facts,):
     global facts
     out = ""
