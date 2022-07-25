@@ -138,65 +138,24 @@ class Fact:
         self.description = str()
         self.root_facts = set()  # список фактов-причин
         self.following_facts = set()  # список фактов-следствий
-        
+
     def __str__(self):
         list_root_facts = list()
         list_following_facts = list()
-        
+
         for root_fact in self.root_facts:
             str_root_facts.append(root_fact.id)
-            
+
         for following_fact in self.following_facts:
             str_root_facts.append(following_fact.id)
-            
+
         if not list_root_facts:
             list_root_facts = None
-        
+
         if not list_following_facts:
             list_following_facts = None
-        
-        return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {self.objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}, following_facts: {list_following_facts}'
-    
-        def to_str(self, roots=True):
-            out = ""
 
-            if self.fact_type == "relation":
-                if type(self.objects[0]) != "Triangle":
-                    out += f"{self.objects[0]} относится к {self.objects[1]} с коэффицентом {self.objects[0].size / self.objects[1].size}"
-                    if roots:
-                        out += f"так как"
-                        nlist = []
-                        for root in self.root_facts:
-                           nlist.append(f"{facts[root]}")
-                        out += ", ".join(nlist)
-                else:
-                    out += f"{self.objects[0]} подобен {self.objects[1]} с коэффицентом {self.objects[0].size / self.objects[1].size}"
-                    if roots:
-                        out += f"так как"
-                        nlist = []
-                        for root in self.root_facts:
-                           nlist.append(f"{facts[root]}")
-                        out += ", ".join(nlist)
-            elif self.fact_type == "size":
-                out += f"{self.objects[0]} равен {self.objects[0].size} по условию"
-            elif self.fact_type == "additions":
-                if len(self.objects) == 2:
-                    out += f"{self.objects[0]} равен {self.objects[0].size} как смежный с {self.objects[1]}"
-                    if roots:
-                        out += f"так как"
-                        nlist = []
-                        for root in self.root_facts:
-                           nlist.append(f"{facts[root]}")
-                        out += ", ".join(nlist)
-                elif len(self.objects) == 3:
-                    out += f"{self.objects[0]} равен {self.objects[0].size} как сумма {self.objects[1]} и {self.objects[2]}"
-                    if roots:
-                        out += f"так как"
-                        nlist = []
-                        for root in self.root_facts:
-                           nlist.append(f"{facts[root]}")
-                        out += ", ".join(nlist)
-            return out
+        return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {self.objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}, following_facts: {list_following_facts}'
 
 
 points = list()
@@ -409,7 +368,7 @@ def polygons_relations_create(text):
             for i in range(len(polygon_1)):
                 ang_1 = find_angle_with_points(polygon_1[i], polygon_1[i - 1], polygon_1[i - 2])
                 ang_2 = find_angle_with_points(polygon_2[i], polygon_2[i - 1], polygon_2[i - 2])
-                
+
                 ang_1.relations[ang_2] = Fraction(1)
                 ang_2.relations[ang_1] = Fraction(1)
 
