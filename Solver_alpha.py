@@ -4,14 +4,13 @@ Proportion_theorem = True
 Cos_theorem_allowed = True
 Sin_theorem_allowed = True
 
-#Индекс последнего добавленного факта
+# Индекс последнего добавленного факта
 ind = 0
 facts = []
 facts_indexes = []
 
-#Это нужно чтобы не перебирать None углы, если угол в результате вычислений становится не None - он сюда добавляется
+# Это нужно чтобы не перебирать None углы, если угол в результате вычислений становится не None - он сюда добавляется
 not_none_angles = []
-
 
 #Неприятная функция, добавляющая все возможные прямые, отрезки, треугольники и углы
 def first():
@@ -69,6 +68,7 @@ def first():
             facts[-1].root_facts.add(ind)
             ind += 1
 
+first()
 
 #Находит факт по объектам в нём (если strict - то конкретно с этими объектами, иначе он находит факт где мы находим значение этого объекта)
 def find_in_facts_with_obj(obj, not_strict = False):
@@ -265,45 +265,45 @@ def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA,
             return 0
 
     if (similarity_if_not_None(AB, A1B1) == similarity_if_not_None(BC, B1C1) and equal(ABC, A1B1C1) and similarity_if_not_None(AB, A1B1)):
-        roots = {find_in_facts_with_obj([AB], "not"), find_in_facts_with_obj([ABC], "not"), find_in_facts_with_obj([BC], "not"), find_in_facts_with_obj([A1B1], "not"), find_in_facts_with_obj([A1B1C1], "not"), find_in_facts_with_obj([B1C1], "not")}
+        roots = {find_in_facts_with_obj([AB], "not"), find_in_facts_with_obj([ABC], "not"),  find_in_facts_with_obj([BC], "not"),find_in_facts_with_obj([A1B1], "not"), find_in_facts_with_obj([A1B1C1], "not"), find_in_facts_with_obj([B1C1], "not")}
 
-        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
+        update_facts(ind, [triangle1, triangle2], AB.size / A1B1.size , roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
     elif (similarity_if_not_None(AB, A1B1) == similarity_if_not_None(CA, C1A1) and equal(CAB, C1A1B1) and similarity_if_not_None(AB, A1B1)):
-        roots = {find_in_facts_with_obj([AB], "not"), find_in_facts_with_obj([A1B1], "not"), find_in_facts_with_obj([CAB], "not"), find_in_facts_with_obj([C1A1B1], "not"), find_in_facts_with_obj([CA], "not"),  find_in_facts_with_obj([C1A1], "not")}
+        roots = { find_in_facts_with_obj([CAB], "not"),find_in_facts_with_obj([AB], "not"), find_in_facts_with_obj([CA], "not"), find_in_facts_with_obj([A1B1], "not"), find_in_facts_with_obj([C1A1B1], "not"),  find_in_facts_with_obj([C1A1], "not")}
 
 
-        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
+        update_facts(ind, [triangle1, triangle2], AB.size / A1B1.size, roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
     elif (similarity_if_not_None(BC, B1C1) ==  similarity_if_not_None(CA, C1A1) and equal(BCA, B1C1A1) and similarity_if_not_None(BC, B1C1)):
         roots = {find_in_facts_with_obj([BC], "not"), find_in_facts_with_obj([BCA], "not"), find_in_facts_with_obj([CA], "not"), find_in_facts_with_obj([B1C1], "not"), find_in_facts_with_obj([B1C1A1], "not"), find_in_facts_with_obj([C1A1], "not")}
 
-        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
+        update_facts(ind, [triangle1, triangle2], BC.size / B1C1.size, roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
     elif (equal(ABC, A1B1C1) and equal(CAB, C1A1B1) and similarity_if_not_None(AB, A1B1)):
         roots = {find_in_facts_with_obj([ABC], "not"), find_in_facts_with_obj([CAB], "not"), find_in_facts_with_obj([AB], "not"), find_in_facts_with_obj([ABC], "not"), find_in_facts_with_obj([C1A1B1], "not"), find_in_facts_with_obj([A1B1], "not")}
 
-        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
+        update_facts(ind, [triangle1, triangle2], AB.size / A1B1.size, roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
     elif (equal(ABC, A1B1C1) and equal(BCA, B1C1A1) and similarity_if_not_None(BC, B1C1)):
         roots = {find_in_facts_with_obj([ABC], "not"), find_in_facts_with_obj([BCA], "not"), find_in_facts_with_obj([BC], "not"), find_in_facts_with_obj([A1B1C1], "not"), find_in_facts_with_obj([B1C1A1], "not"), find_in_facts_with_obj([B1C1], "not")}
 
-        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
+        update_facts(ind, [triangle1, triangle2], BC.size / B1C1.size, roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
     elif (similarity_if_not_None(CA, C1A1) == similarity_if_not_None(AB, A1B1) and similarity_if_not_None(BC, B1C1) == similarity_if_not_None(AB, A1B1) and similarity_if_not_None(AB, A1B1)):
         roots = {find_in_facts_with_obj([AB], "not"), find_in_facts_with_obj([CA], "not"), find_in_facts_with_obj([BC], "not"), find_in_facts_with_obj([A1B1], "not"), find_in_facts_with_obj([C1A1], "not"), find_in_facts_with_obj([B1C1], "not")}
 
-        update_facts(ind, [triangle1, triangle2], None, roots, "relation")
+        update_facts(ind, [triangle1, triangle2], BC.size / B1C1.size, roots, "relation")
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
@@ -360,8 +360,11 @@ def return_roots(ind):
 
 #Сам процесс решения, проверяет все ли вопросы учтены, выводит нужные факты, формирует словарик с нужными фактами
 def solving_process():
+    global ind, facts_indexes, not_none_angles
     first()
     q_indexes = set([])
+
+    print(facts)
     while len(q_indexes) != len(questions):
         for q in questions:
             ans[q] = []
@@ -370,12 +373,14 @@ def solving_process():
         fix_all_angles()
         fix_all_triangles()
 
+
+
     return_facts = {}
     for q_ind in q_indexes:
         return_facts[facts[q_ind]] = return_roots(q_ind)
 
-    #for fact in facts:
-        #print(fact.fact_type, fact.value, fact.objects)
+    for fact in facts:
+        print(to_str(fact, facts))
 
     return return_facts
 
