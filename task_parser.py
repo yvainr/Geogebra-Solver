@@ -144,10 +144,10 @@ class Fact:
         list_following_facts = list()
 
         for root_fact in self.root_facts:
-            str_root_facts.append(root_fact.id)
+            list_root_facts.append(root_fact.id)
 
         for following_fact in self.following_facts:
-            str_root_facts.append(following_fact.id)
+            list_root_facts.append(following_fact.id)
 
         if not list_root_facts:
             list_root_facts = None
