@@ -18,6 +18,7 @@ class Point:
 
     def __str__(self):
         return f'name: {self.name}, specific_properties_point: {self.specific_properties_point}, specific_properties_triangle: {self.specific_properties_triangle}, x: {self.x}, y: {self.y}'
+   
 
 
 class Line:
@@ -157,8 +158,11 @@ class Fact:
             list_following_facts = None
 
         return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {self.objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}, following_facts: {list_following_facts}'
-    def to_str(self, roots=True):
+    
+def to_str(self, nfacts, roots=True):
         out = ""
+
+        print(facts)
 
         if self.fact_type == "relation":
             a = type(self.objects[0])
@@ -168,7 +172,7 @@ class Fact:
                     out += f"так как"
                     nlist = []
                     for root in self.root_facts:
-                        nlist.append(f"{facts[root]}")
+                        nlist.append(f"{nfacts[root]}")
                     out += ", ".join(nlist)
             else:
                 out += f"{self.objects[0]} подобен {self.objects[1]} с коэффицентом {self.objects[0].size / self.objects[1].size}"
@@ -176,7 +180,7 @@ class Fact:
                     out += f"так как"
                     nlist = []
                     for root in self.root_facts:
-                        nlist.append(f"{facts[root]}")
+                        nlist.append(f"{nfacts[root]}")
                     out += ", ".join(nlist)
         elif self.fact_type == "size":
             out += f"{self.objects[0]} равен {self.objects[0].size} по условию"
@@ -187,7 +191,7 @@ class Fact:
                     out += f"так как"
                     nlist = []
                     for root in self.root_facts:
-                        nlist.append(f"{facts[root]}")
+                        nlist.append(f"{nfacts[root]}")
                     out += ", ".join(nlist)
             elif len(self.objects) == 3:
                 out += f"{self.objects[0]} равен {self.objects[0].size} как сумма {self.objects[1]} и {self.objects[2]}"
@@ -195,7 +199,7 @@ class Fact:
                     out += f"так как"
                     nlist = []
                     for root in self.root_facts:
-                        nlist.append(f"{facts[root]}")
+                        nlist.append(f"{s.facts[root]}")
                     out += ", ".join(nlist)
         return out
 
