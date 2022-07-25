@@ -60,11 +60,13 @@ def first():
         if ang.size:
             not_none_angles.append(ang)
             facts.append(Fact(ind, -1, "size", [ang], ang.size))
+            facts[-1].root_facts.add(ind)
             ind += 1
 
     for seg in segments:
         if seg.size:
             facts.append(Fact(ind, -1, "size", [seg], seg.size))
+            facts[-1].root_facts.add(ind)
             ind += 1
 
 
@@ -331,7 +333,32 @@ def find_ans(q):
 
 #Ответ в виде словаря, в котором ключи - сами вопросы, значения - факты доказывающие этот вопрос, лежащие
 ans = {}
-#Сам процесс решения, проверяет все ли вопросы учтены
+
+#Возвращает корни данного факта
+def return_roots(ind):
+    roots = []
+    current_index = facts[ind].root_facts
+    upd_roots = [0]
+    while len(upd_roots) != 0:
+        new_indexes = set()
+        upd_roots = []
+        for index in current_index:
+            new_indexes &= facts[index].root_facts
+            upd_roots.append(index)
+            roots.append(index)
+        current_index = new_indexes
+        if len(upd_roots) == 0:
+            roots.reverse()
+            n_roots = []
+            root_main = set()
+            for key in roots:
+                if key not in root_main:
+                    root_main.add(key)
+                    n_roots.append(facts[key])
+
+            return n_roots
+
+#Сам процесс решения, проверяет все ли вопросы учтены, выводит нужные факты, формирует словарик с нужными фактами
 def solving_process():
     first()
     q_indexes = set([])
@@ -343,8 +370,14 @@ def solving_process():
         fix_all_angles()
         fix_all_triangles()
 
-    for fact in facts:
-        print(fact.fact_type, fact.value, fact.objects)
+    return_facts = {}
+    for q_ind in q_indexes:
+        return_facts[facts[q_ind]] = return_roots(q_ind)
 
+    #for fact in facts:
+        #print(fact.fact_type, fact.value, fact.objects)
 
-solving_process()
+    return return_facts
+
+#In_to_file и передаётся далее
+In_to_file = solving_process()
