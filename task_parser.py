@@ -168,7 +168,7 @@ class Fact:
                         nlist = []
                         for root in self.root_facts:
                            nlist.append(f"{facts[root]}")
-                        out += nlist.join(", ")
+                        out += ", ".join(nlist)
                 else:
                     out += f"{self.objects[0]} подобен {self.objects[1]} с коэффицентом {self.objects[0].size / self.objects[1].size}"
                     if roots:
@@ -176,7 +176,7 @@ class Fact:
                         nlist = []
                         for root in self.root_facts:
                            nlist.append(f"{facts[root]}")
-                        out += nlist.join(", ")
+                        out += ", ".join(nlist)
             elif self.fact_type == "size":
                 out += f"{self.objects[0]} равен {self.objects[0].size} по условию"
             elif self.fact_type == "additions":
