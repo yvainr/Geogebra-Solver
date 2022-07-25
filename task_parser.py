@@ -162,8 +162,6 @@ class Fact:
 def to_str(self, nfacts, roots=True):
         out = ""
 
-        print(facts)
-
         if self.fact_type == "relation":
             a = type(self.objects[0])
             if type(self.objects[0]) != "task_parser.polygon":
@@ -199,7 +197,7 @@ def to_str(self, nfacts, roots=True):
                     out += f"так как"
                     nlist = []
                     for root in self.root_facts:
-                        nlist.append(f"{s.facts[root]}")
+                        nlist.append(f"{nfacts[root]}")
                     out += ", ".join(nlist)
         return out
 
