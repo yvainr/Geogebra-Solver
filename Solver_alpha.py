@@ -1,5 +1,4 @@
 from task_parser import*
-from to_str import*
 
 Proportion_theorem = True
 Cos_theorem_allowed = True
@@ -359,6 +358,49 @@ def return_roots(ind):
 
             return n_roots
 
+def to_str(self, roots=True, nfacts = facts,):
+    global facts
+    out = ""
+
+    if self.fact_type == "relation":
+        a = type(self.objects[0])
+        if type(self.objects[0]) != "task_parser.polygon":
+            out += f"{self.objects[0]} относится к {self.objects[1]} с коэффицентом {self.value}"
+            if roots:
+                out += f" так как "
+                nlist = []
+                for root in self.root_facts:
+                    nlist.append(f"{nfacts[root]}")
+                out += ", ".join(nlist)
+        else:
+            out += f"{self.objects[0]} подобен {self.objects[1]} с коэффицентом {self.objects[0].size / self.objects[1].size}"
+            if roots:
+                out += f"так как"
+                nlist = []
+                for root in self.root_facts:
+                    nlist.append(f"{nfacts[root]}")
+                out += ", ".join(nlist)
+    elif self.fact_type == "size":
+        out += f"{self.objects[0]} равен {self.objects[0].size} по условию"
+    elif self.fact_type == "additions":
+        if len(self.objects) == 2:
+            out += f"{self.objects[0]} равен {self.objects[0].size} как смежный с {self.objects[1]}"
+            if roots:
+                out += f"так как"
+                nlist = []
+                for root in self.root_facts:
+                    nlist.append(f"{nfacts[root]}")
+                out += ", ".join(nlist)
+        elif len(self.objects) == 3:
+            out += f"{self.objects[0]} равен {self.objects[0].size} как сумма {self.objects[1]} и {self.objects[2]}"
+            if roots:
+                out += f"так как"
+                nlist = []
+                for root in self.root_facts:
+                    nlist.append(f"{nfacts[root]}")
+                out += ", ".join(nlist)
+    return out
+
 #Сам процесс решения, проверяет все ли вопросы учтены, выводит нужные факты, формирует словарик с нужными фактами
 def solving_process():
     global ind, facts_indexes, not_none_angles
@@ -380,7 +422,7 @@ def solving_process():
         return_facts[facts[q_ind]] = return_roots(q_ind)
 
     for fact in facts:
-        print(to_str(fact, facts))
+        print(to_str(fact))
 
     return return_facts
 
