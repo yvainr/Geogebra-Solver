@@ -70,6 +70,16 @@ def DistanceBetweenPoints(A, B):
 #точка, делящая отрезок в заданном отношении k
 def DividingPoint(A, B, k):
 	return MyPoint((A.x + k*B.x)/(1+k), (A.y + k*B.y)/(1+k))
+
+
+def MediansIntersection(A, B, C):
+	M = DividingPoint(A, B, 1)
+	N = DividingPoint(B, C, 1)
+
+	CM = TwoPointsLine(C, M)
+	AN = TwoPointsLine(A, N)
+
+	return LineIntersectionPoint(CM, AN)
 	
 
 def CircumscribedCircleCenter(A, B, C):
@@ -141,26 +151,22 @@ def LineWithTiltAngle(P, alpha):
 
 def LineAndCircleIntersectionPoints(l, O, r):
 	P = LineIntersectionPoint(l, PerpendicularLineWithPoint(O, l))
-	
-	try:	
-		d = sqrt(r**2 - DistanceBetweenPoints(P, O)**2)
-		k = -l.a/l.b
-		b = -l.c/l.b
+
+	d = sqrt(r**2 - DistanceBetweenPoints(P, O)**2)
+	k = -l.a/l.b
+	b = -l.c/l.b
 		
-		w = 1 + k**2
-		p = 2*k*b - 2*k*P.y - 2*P.x
-		q = b**2 + P.x**2 + P.y**2 - 2*b*P.y - d**2
+	w = 1 + k**2
+	p = 2*k*b - 2*k*P.y - 2*P.x
+	q = b**2 + P.x**2 + P.y**2 - 2*b*P.y - d**2
 		
-		x1 = (-p + sqrt(p**2 - 4*q*w))/(2*w)
-		x2 = (-p - sqrt(p**2 - 4*q*w))/(2*w)
+	x1 = (-p + sqrt(p**2 - 4*q*w))/(2*w)
+	x2 = (-p - sqrt(p**2 - 4*q*w))/(2*w)
 		
-		y1 = k*x1 + b
-		y2 = k*x2 + b
+	y1 = k*x1 + b
+	y2 = k*x2 + b
 		
-		return MyPoint(x1, y1), MyPoint(x2, y2)
-	
-	except Exception:
-		return None
+	return MyPoint(x1, y1), MyPoint(x2, y2)
 
 
 def CheckSegmentsIntersection(side1, side2):
@@ -179,19 +185,56 @@ def CheckSegmentsIntersection(side1, side2):
 
 
 def CheckTrianglesIntersection(tr1, tr2):
+	M1 = MediansIntersection(*tr1)
+	M2 = MediansIntersection(*tr2)
+
+	for point in tr1:
+		if DistanceBetweenPoints(M2, point) < (max(DistanceBetweenPoints(M2, tr2[0]), DistanceBetweenPoints(M2, tr2[1]), DistanceBetweenPoints(M2, tr2[2])) + 1):
+			return True
+
+	for point in tr2:
+		if DistanceBetweenPoints(M1, point) < (max(DistanceBetweenPoints(M1, tr1[0]), DistanceBetweenPoints(M1, tr1[1]), DistanceBetweenPoints(M1, tr1[2])) + 1):
+			return True
+
 	for side1 in combinations(tr1, 2):
 		for side2 in combinations(tr2, 2):
 			if CheckSegmentsIntersection(side1, side2):
 				return True
 
-	# + проверять, лежат ли вершины внутри
-
 	return False
+
+
+def RandomRotation(A, B, C):
+	O = CircumscribedCircleCenter(A, B, C)
+
+	A.x -= O.x
+	A.y -= O.y
+	B.x -= O.x
+	B.y -= O.y
+	C.x -= O.x
+	C.y -= O.y
+
+	phi = uniform(-pi, pi)
+
+	A.x, A.y = A.x * cos(phi) - A.y * sin(phi), A.y * cos(phi) + A.x * sin(phi)
+	B.x, B.y = B.x * cos(phi) - B.y * sin(phi), B.y * cos(phi) + B.x * sin(phi)
+	C.x, C.y = C.x * cos(phi) - C.y * sin(phi), C.y * cos(phi) + C.x * sin(phi)
+
+	A.x += O.x
+	A.y += O.y
+	B.x += O.x
+	B.y += O.y
+	C.x += O.x
+	C.y += O.y
+
+	return A, B, C
 		
 	
 def Shift(new_A, new_B, new_C):
 
-	phi = uniform(0, 2 * pi)
+	new_A, new_B, new_C = RandomRotation(new_A, new_B, new_C)
+
+	phi = uniform(-pi, pi)
 	vec = (cos(phi) * 2, sin(phi) * 2)
 
 	if set(taskp.get_points_names_from_list(taskp.polygons[0].points)) != {new_A.name, new_B.name, new_C.name}:
@@ -225,7 +268,7 @@ def PointSymmetryAboutLine(P, l1):
 	l2 = PerpendicularLineWithPoint(P, l1)
 	Q = LineIntersectionPoint(l1, l2)
 	
-	return MyPoint(2*Q.x - P.x, 2*Q.y - P.y)
+	return MyPoint(2*Q.x - P.x, 2*Q.y - P.y, P.name)
 
 
 def SaveTriangleData(A, B, C):
@@ -292,8 +335,8 @@ def CreateTriangleWithThreeSides(a, b, c, angle):
 
 def CreateTriangleWithSideAndContraAngle(a, alpha, alpha_name):
 	alph = alpha * pi / 180
-	C = MyPoint(0, 0, alpha_name[0])
-	B = MyPoint(a, 0, alpha_name[2])
+	C = MyPoint(0, 0, alpha_name[2])
+	B = MyPoint(a, 0, alpha_name[0])
 	if alpha != 90:
 		O = MyPoint(a/2, (1/tan(alph))*(a/2))
 	else:
@@ -309,11 +352,11 @@ def CreateTriangleWithSideAndContraAngle(a, alpha, alpha_name):
 
 
 def CreateTriangleWithOneSideAndTwoAngles(a, beta, gamma, beta_name, gamma_name):
-	C = MyPoint(0, 0, gamma_name[1])
-	B = MyPoint(a, 0, beta_name[1])
+	B = MyPoint(0, 0, beta_name[1])
+	C = MyPoint(a, 0, gamma_name[1])
 	
-	l1 = LineWithTiltAngle(C, gamma)
-	l2 = LineWithTiltAngle(B, 180 - beta)
+	l1 = LineWithTiltAngle(C, 180 - gamma)
+	l2 = LineWithTiltAngle(B, beta)
 	
 	A = LineIntersectionPoint(l1, l2)
 	
@@ -326,13 +369,13 @@ def CreateTriangleWithOneSideAndTwoAngles(a, beta, gamma, beta_name, gamma_name)
 
 
 def CreateTriangleWithTwoSidesAndAngleBetweenThem(a, b, gamma, a_name, gamma_name):
-	C = MyPoint(0, 0, gamma_name[1])
-	B = MyPoint(a, 0)
+	C = MyPoint(0, 0)
+	B = MyPoint(a, 0, gamma_name[1])
 	
 	if a_name[0] != gamma_name[1]:
-		B.name = a_name[0]
+		C.name = a_name[0]
 	else:
-		B.name = a_name[1]
+		C.name = a_name[1]
 	
 	l = LineWithTiltAngle(C, gamma)
 	
@@ -350,23 +393,21 @@ def CreateTriangleWithTwoSidesAndAngleBetweenThem(a, b, gamma, a_name, gamma_nam
 	if gamma_name[0] not in a_name:
 		A.name = gamma_name[0]
 	else:
-		A.name = gamma_name[2]	
+		A.name = gamma_name[2]
+
+	A = PointSymmetryAboutLine(A, PerpendicularLineWithPoint(DividingPoint(B, C, 1), TwoPointsLine(B, C)))
 	
 	return Shift(A, B, C)
 
 
 def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, a_name, gamma_name):
-	C = MyPoint(0, 0, gamma_name[1])
+	C = MyPoint(0, 0)
 	B = MyPoint(a, 0)
-	
-	if a_name[0] != gamma_name[1]:
-		B.name = a_name[0]
-	else:
-		B.name = a_name[1]
 		
 	l = LineWithTiltAngle(C, gamma)
+
 	A1, A2 = LineAndCircleIntersectionPoints(l, B, c)
-	
+
 	if a > c:
 		A = choice([A1, A2])
 	else:
@@ -374,12 +415,20 @@ def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, a_name, gamma_
 			A = A1
 		else:
 			A = A2
-			
+
 	if gamma_name[0] not in a_name:
 		A.name = gamma_name[0]
 	else:
-		A.name = gamma_name[2]	
-	
+		A.name = gamma_name[2]
+
+	if a_name[0] != gamma_name[1]:
+		C.name = gamma_name[1]
+		B.name = a_name[0]
+	else:
+		C.name = a_name[1]
+		B.name = gamma_name[1]
+		A = PointSymmetryAboutLine(A, PerpendicularLineWithPoint(DividingPoint(B, C, 1), TwoPointsLine(B, C)))
+
 	return Shift(A, B, C)
 	
 	
