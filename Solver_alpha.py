@@ -364,7 +364,6 @@ def solving_process():
     first()
     q_indexes = set([])
 
-    print(facts)
     while len(q_indexes) != len(questions):
         for q in questions:
             ans[q] = []
