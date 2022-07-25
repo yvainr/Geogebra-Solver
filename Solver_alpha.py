@@ -1,4 +1,5 @@
 from task_parser import*
+from to_str import*
 
 Proportion_theorem = True
 Cos_theorem_allowed = True
