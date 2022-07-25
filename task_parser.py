@@ -18,7 +18,6 @@ class Point:
 
     def __str__(self):
         return f'name: {self.name}, specific_properties_point: {self.specific_properties_point}, specific_properties_triangle: {self.specific_properties_triangle}, x: {self.x}, y: {self.y}'
-   
 
 
 class Line:
@@ -69,7 +68,6 @@ class Angle:
             str_addition = 'None '
 
         return f'lines:{str_lines}, size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
-  
 
 
 class Segment:
@@ -158,48 +156,6 @@ class Fact:
             list_following_facts = None
 
         return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {self.objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}, following_facts: {list_following_facts}'
-    
-def to_str(self, nfacts, roots=True):
-        out = ""
-
-        if self.fact_type == "relation":
-            a = type(self.objects[0])
-            if type(self.objects[0]) != "task_parser.polygon":
-                out += f"{self.objects[0]} относится к {self.objects[1]} с коэффицентом {self.value}"
-                if roots:
-                    out += f"так как"
-                    nlist = []
-                    for root in self.root_facts:
-                        nlist.append(f"{nfacts[root]}")
-                    out += ", ".join(nlist)
-            else:
-                out += f"{self.objects[0]} подобен {self.objects[1]} с коэффицентом {self.objects[0].size / self.objects[1].size}"
-                if roots:
-                    out += f"так как"
-                    nlist = []
-                    for root in self.root_facts:
-                        nlist.append(f"{nfacts[root]}")
-                    out += ", ".join(nlist)
-        elif self.fact_type == "size":
-            out += f"{self.objects[0]} равен {self.objects[0].size} по условию"
-        elif self.fact_type == "additions":
-            if len(self.objects) == 2:
-                out += f"{self.objects[0]} равен {self.objects[0].size} как смежный с {self.objects[1]}"
-                if roots:
-                    out += f"так как"
-                    nlist = []
-                    for root in self.root_facts:
-                        nlist.append(f"{nfacts[root]}")
-                    out += ", ".join(nlist)
-            elif len(self.objects) == 3:
-                out += f"{self.objects[0]} равен {self.objects[0].size} как сумма {self.objects[1]} и {self.objects[2]}"
-                if roots:
-                    out += f"так как"
-                    nlist = []
-                    for root in self.root_facts:
-                        nlist.append(f"{nfacts[root]}")
-                    out += ", ".join(nlist)
-        return out
 
 
 points = list()
@@ -609,111 +565,3 @@ def UseRelations(objects):
                                     obj_1.size = obj_2.addition[obj_1] - obj_2.size
                                 except Exception:
                                     pass
-
-
-# модуль обработки данных при создании json
-# вспомогательная функция для получения номеров объектов списка точек
-def points_processing(points_list):
-    ret = []
-    for point in points_list:
-        ret.append(f"object_{get_points_names_from_list(points).index(point.name)+1}")
-
-    return ret
-
-
-# вспомогательная функция для получения номеров объектов списка прямых
-def lines_processing(lines_list):
-    ret = []
-    for line in lines_list:
-        ret.append(f"object_{lines.index(line)+len(points)+1}")
-
-    return ret
-
-
-def relations_processing(relations_set, parametr):
-    ret = {}
-    for obj in relations_set:
-        if parametr == "angle":
-            ret.setdefault(f"object_{angles.index(obj)+len(points)+len(lines)+1}", str(relations_set[obj]))
-        if parametr == "segment":
-            ret.setdefault(f"object_{segments.index(obj)+len(points)+len(lines)+len(angles)+1}", str(relations_set[obj]))
-
-    return ret
-
-
-# создание выходной json-ки
-def json_create():
-    output = dict()
-    object_index = 1
-
-    for point in points:
-        object = dict()
-
-        object['name'] = point.name
-        object['type'] = 'point'
-        object['points_on_object'] = None
-        object['angle_between_lines'] = None
-        object['size'] = None
-        object['relations'] = None
-        object['convex'] = None
-
-        output[f"object_{object_index}"] = object
-        object_index += 1
-
-    for line in lines:
-        object = dict()
-
-        object['name'] = None
-        object['type'] = 'line'
-        object['points_on_object'] = points_processing(line.points)
-        object['angle_between_lines'] = None
-        object['size'] = None
-        object['relations'] = None
-        object['convex'] = None
-
-        output[f"object_{object_index}"] = object
-        object_index += 1
-
-    for angle in angles:
-        object = dict()
-
-        object['name'] = None
-        object['type'] = 'angle'
-        object['points_on_object'] = None
-        object['angle_between_lines'] = lines_processing(angle.lines)
-        object['size'] = angle.size
-        object['relations'] = relations_processing(angle.relations, 'angle')
-        object['convex'] = None
-
-        output[f"object_{object_index}"] = object
-        object_index += 1
-
-    for segment in segments:
-        object = {}
-
-        object['name'] = None
-        object['type'] = 'segment'
-        object['points_on_object'] = points_processing(segment.points)
-        object['angle_between_lines'] = None
-        object['size'] = segment.size
-        object['relations'] = relations_processing(segment.relations, 'segment')
-        object['convex'] = None
-
-        output[f"object_{object_index}"] = object
-        object_index += 1
-
-    for polygon in polygons:
-        object = dict()
-
-        object['name'] = None
-        object['type'] = 'polygon'
-        object['points_on_object'] = points_processing(polygon.points)
-        object['angle_between_lines'] = None
-        object['size'] = None
-        object['relations'] = None
-        object['convex'] = polygon.convex
-
-        output[f"object_{object_index}"] = object
-        object_index += 1
-
-    return output
