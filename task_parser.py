@@ -62,10 +62,10 @@ class Angle:
             str_relations = 'None '
 
         if not str_difference:
-            str_relations = 'None '
+            str_difference = 'None '
 
         if not str_addition:
-            str_relations = 'None '
+            str_addition = 'None '
 
         return f'lines:{str_lines}, size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
 
@@ -99,10 +99,10 @@ class Segment:
             str_relations = 'None '
 
         if not str_difference:
-            str_relations = 'None '
+            str_difference = 'None '
 
         if not str_addition:
-            str_relations = 'None '
+            str_addition = 'None '
 
         return f'points: {get_points_names_from_list(self.points)}, size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
 
@@ -138,6 +138,24 @@ class Fact:
         self.description = str()
         self.root_facts = set()  # список фактов-причин
         self.following_facts = set()  # список фактов-следствий
+        
+    def __str__(self):
+        list_root_facts = list()
+        list_following_facts = list()
+        
+        for root_fact in self.root_facts:
+            str_root_facts.append(root_fact.id)
+            
+        for following_fact in self.following_facts:
+            str_root_facts.append(following_fact.id)
+            
+        if not list_root_facts:
+            list_root_facts = None
+        
+        if not list_following_facts:
+            list_following_facts = None
+        
+        return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {self.objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}, following_facts: {list_following_facts}'
 
 
 points = list()
@@ -302,12 +320,12 @@ def segments_relations_create(text):
             if len(relation.split()[0]) == 3 and len(relation.split()[1]) == 2:
                 seg_1 = find_segment_with_points(relation.split()[0][0], relation.split()[0][1])
                 seg_2 = find_segment_with_points(relation.split()[1][0], relation.split()[1][1])
-                    
+
                 if relation.split()[0][2] == '-':
                     dif = relation.split()[2]
                     seg_1.difference[seg_2] = Fraction(dif)
                     seg_2.difference[seg_1] = - Fraction(dif)
-                    
+
                 if relation.split()[0][2] == '+':
                     add = relation.split()[2]
                     seg_1.addition[seg_2] = Fraction(add)
@@ -346,6 +364,13 @@ def polygons_relations_create(text):
 
                 side_1.relations[side_2] = Fraction(rel)
                 side_2.relations[side_1] = 1 / Fraction(rel)
+
+            for i in range(len(polygon_1)):
+                ang_1 = find_angle_with_points(polygon_1[i], polygon_1[i - 1], polygon_1[i - 2])
+                ang_2 = find_angle_with_points(polygon_2[i], polygon_2[i - 1], polygon_2[i - 2])
+                
+                ang_1.relations[ang_2] = Fraction(1)
+                ang_2.relations[ang_1] = Fraction(1)
 
             polygon_1 = find_polygon_with_points(list(polygon_1))
             polygon_2 = find_polygon_with_points(list(polygon_2))
