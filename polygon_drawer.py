@@ -90,38 +90,50 @@ def create_polygon(vertices):
         A, B, C = triad.CreateTriangle(get_triangle_parameter(perspective_triangle[0], perspective_triangle[1], perspective_triangle[2]))
 
 
-realize_data = list()
+def text_splitter(text):
+    realize_data = list()
 
-# Волчкевич страница 26 задача 1
-text1 = 'ABC, DEF'  # многоугольники
-text2 = 'AB 10'  # дополнительные отрезки
-text3 = ''  # углы по трем точкам или между прямыми
-text4 = ''  # отношения отрезков
-text5 = ''  # отношения углов
-text6 = 'ABC DEF 2'  # отношения многоугольников
-text7 = ''  # точки пересечения прямых
+    taskp.points.clear()
+    taskp.lines.clear()
+    taskp.angles.clear()
+    taskp.segments.clear()
+    taskp.polygons.clear()
+    taskp.facts.clear()
+    taskp.questions.clear()
 
-taskp.polygons_create(text1)
-taskp.segments_create(text2)
-taskp.angles_create(text3)
-taskp.segments_relations_create(text4)
-taskp.angles_relations_create(text5)
-taskp.polygons_relations_create(text6)
-taskp.line_intersection_create(text7)
+    text = text.replace('\r', '').split('\n')
 
-for polygon in taskp.polygons:
     try:
-        taskp.UseRelations(taskp.segments)
-        taskp.UseRelations(taskp.angles)
-        draw_polygon(create_polygon(taskp.get_points_names_from_list(polygon.points)), realize_data)
+        taskp.polygons_create(text[0])
+        taskp.segments_create(text[1])
+        taskp.angles_create(text[2])
+        taskp.segments_relations_create(text[3])
+        taskp.angles_relations_create(text[4])
+        taskp.polygons_relations_create(text[5])
+        taskp.line_intersection_create(text[6])
+        taskp.questions_create(text[7])
     except IndexError:
         pass
 
-draw_specific_points(realize_data)
+    for polygon in taskp.polygons:
+        try:
+            taskp.UseRelations(taskp.segments)
+            taskp.UseRelations(taskp.angles)
+            ret = create_polygon(taskp.get_points_names_from_list(polygon.points))
+            if type(ret) == str:
+                return ret
 
-try:
-    draw_lines_intersections(text7, realize_data)
-except IndexError:
-    pass
+            draw_polygon(ret, realize_data)
+        except IndexError:
+            pass
 
-geogebra_html_generator.insert_commands(realize_data)
+    draw_specific_points(realize_data)
+
+    try:
+        draw_lines_intersections(text[6], realize_data)
+    except IndexError:
+        pass
+
+    geogebra_html_generator.insert_commands(realize_data)
+
+    return 200
