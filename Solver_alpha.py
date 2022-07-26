@@ -369,9 +369,12 @@ def beautiful_object(object):
     elif type(object) == type(angles[0]):
         for p1 in points:
             for p2 in points:
-                for p3 in points:
-                    if find_angle_with_points(p1.name, p2.name, p3.name) == object:
-                        return (p1.name + p2.name + p3.name)
+                if p2 != p1:
+                    for p3 in points:
+                        if p3 != p1 and p3 != p2:
+                            if find_angle_with_points(p1.name, p2.name, p3.name) == object:
+                                return (p1.name + p2.name + p3.name)
+
 
 
 #Делает факт красивым
