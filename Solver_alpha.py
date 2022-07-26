@@ -12,6 +12,7 @@ facts_indexes = []
 # Это нужно чтобы не перебирать None углы, если угол в результате вычислений становится не None - он сюда добавляется
 not_none_angles = []
 
+
 #Неприятная функция, добавляющая все возможные прямые, отрезки, треугольники и углы
 def first():
     global ind
@@ -366,7 +367,7 @@ def to_str(self, roots=True, nfacts = facts,):
     if self.fact_type == "relation":
         a = type(self.objects[0])
         if type(self.objects[0]) != "task_parser.polygon":
-            out += f"{self.objects[0]} относится к {self.objects[1]} с коэффицентом {self.value}"
+            out += f"{better_name(self.objects[0])} относится к {better_name(self.objects[1])} с коэффицентом {self.value}"
             if roots:
                 out += f" так как "
                 nlist = []
@@ -374,7 +375,7 @@ def to_str(self, roots=True, nfacts = facts,):
                     nlist.append(f"{nfacts[root]}")
                 out += ", ".join(nlist)
         else:
-            out += f"{self.objects[0]} подобен {self.objects[1]} с коэффицентом {self.objects[0].size / self.objects[1].size}"
+            out += f"{better_name(self.objects[0])} подобен {better_name(self.objects[1])} с коэффицентом {self.objects[0].size / self.objects[1].size}"
             if roots:
                 out += f"так как"
                 nlist = []
@@ -382,10 +383,10 @@ def to_str(self, roots=True, nfacts = facts,):
                     nlist.append(f"{nfacts[root]}")
                 out += ", ".join(nlist)
     elif self.fact_type == "size":
-        out += f"{self.objects[0]} равен {self.objects[0].size} по условию"
+        out += f"{better_name(self.objects[0])} равен {self.objects[0].size} по условию"
     elif self.fact_type == "additions":
         if len(self.objects) == 2:
-            out += f"{self.objects[0]} равен {self.objects[0].size} как смежный с {self.objects[1]}"
+            out += f"{better_name(self.objects[0])} равен {self.objects[0].size} как смежный с {better_name(self.objects[1])}"
             if roots:
                 out += f"так как"
                 nlist = []
@@ -393,7 +394,7 @@ def to_str(self, roots=True, nfacts = facts,):
                     nlist.append(f"{nfacts[root]}")
                 out += ", ".join(nlist)
         elif len(self.objects) == 3:
-            out += f"{self.objects[0]} равен {self.objects[0].size} как сумма {self.objects[1]} и {self.objects[2]}"
+            out += f"{better_name(self.objects[0])} равен {self.objects[0].size} как сумма {better_name(self.objects[1])} и {better_name(self.objects[2])}"
             if roots:
                 out += f"так как"
                 nlist = []
@@ -401,6 +402,16 @@ def to_str(self, roots=True, nfacts = facts,):
                     nlist.append(f"{nfacts[root]}")
                 out += ", ".join(nlist)
     return out
+
+def better_name(obj):
+    print(type(obj))
+    if type(obj) == "task_parser.Segment" or type(obj) == "task_parser.Polygon":
+        return ''.join(obj.points)
+    elif type(obj) == "task_parser.Angle":
+        ret = ""
+        for line in obj.lines:
+            ret += f' {get_points_names_from_list(line.points)}'
+        return ret
 
 #Сам процесс решения, проверяет все ли вопросы учтены, выводит нужные факты, формирует словарик с нужными фактами
 def solving_process():
@@ -426,6 +437,3 @@ def solving_process():
         print(to_str(fact))
 
     return return_facts
-
-#In_to_file и передаётся далее
-In_to_file = solving_process()
