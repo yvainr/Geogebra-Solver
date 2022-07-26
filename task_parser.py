@@ -200,8 +200,8 @@ class Fact:
                 draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0"')
                 draw_data.append(f'SetColor({self.objects[1].name}, "#1565C0"')
             if self.objects[0].__class__.__name__ == 'Angle':
-                draw_data.append(f'Delete(Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines)[1].points[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name})))')
-                draw_data.append(f'Delete(Angle(Line({list(self.objects[1].lines[1].points)[0].name}, {list(self.objects[1].lines)[1].points[1].name}), Line({list(self.objects[1].lines[0].points)[0].name}, {list(self.objects[1].lines[0].points)[1].name})))')
+                draw_data.append(f'Delete(Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name})))')
+                draw_data.append(f'Delete(Angle(Line({list(self.objects[1].lines[1].points)[0].name}, {list(self.objects[1].lines[1].points)[1].name}), Line({list(self.objects[1].lines[0].points)[0].name}, {list(self.objects[1].lines[0].points)[1].name})))')
             if self.objects[0].__class__.__name__ == 'Polygon':
                 draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0")')
                 draw_data.append(f'SetColor({self.objects[1].name}, "#1565C0")')
