@@ -1,20 +1,20 @@
 import geogebra_html_generator
 import triangle_drawer as triad
-import task_parser as taskp
+from task_parser import *
 from math import *
 from itertools import combinations
 
 
 def get_triangle_parameter(A, B, C):
-    AB = taskp.find_segment_with_points(A, B).size
-    BC = taskp.find_segment_with_points(B, C).size
-    CA = taskp.find_segment_with_points(C, A).size
+    AB = find_segment_with_points(A, B).size
+    BC = find_segment_with_points(B, C).size
+    CA = find_segment_with_points(C, A).size
 
     sides, sides_names = [BC, CA, AB], [f"{B}{C}", f"{C}{A}", f"{A}{B}"]
 
-    CBA = taskp.find_angle_with_points(C, B, A).size
-    ACB = taskp.find_angle_with_points(A, C, B).size
-    BAC = taskp.find_angle_with_points(B, A, C).size
+    CBA = find_angle_with_points(C, B, A).size
+    ACB = find_angle_with_points(A, C, B).size
+    BAC = find_angle_with_points(B, A, C).size
 
     angles, angles_names = [BAC, CBA, ACB], [f"{B}{A}{C}", f"{C}{B}{A}", f"{A}{C}{B}"]
 
@@ -36,11 +36,11 @@ def draw_polygon(points, realize_data):
 
 
 def draw_specific_points(realize_data):
-    for point in taskp.points:
+    for point in points:
         if point.specific_properties_point:
-            A = taskp.find_point_with_name(point.specific_properties_triangle[0])
-            B = taskp.find_point_with_name(point.specific_properties_triangle[1])
-            C = taskp.find_point_with_name(point.specific_properties_triangle[2])
+            A = find_point_with_name(point.specific_properties_triangle[0])
+            B = find_point_with_name(point.specific_properties_triangle[1])
+            C = find_point_with_name(point.specific_properties_triangle[2])
 
             for draw_data in triad.SpecificPointGeneration(point.name, point.specific_properties_point, A, B, C):
                 realize_data.append(draw_data)
@@ -98,33 +98,33 @@ def create_polygon(vertices):
 def text_splitter(text):
     realize_data = list()
 
-    taskp.points.clear()
-    taskp.lines.clear()
-    taskp.angles.clear()
-    taskp.segments.clear()
-    taskp.polygons.clear()
-    taskp.facts.clear()
-    taskp.questions.clear()
+    points.clear()
+    lines.clear()
+    angles.clear()
+    segments.clear()
+    polygons.clear()
+    facts.clear()
+    questions.clear()
 
     text = text.replace('\r', '').split('\n')
 
     try:
-        taskp.polygons_create(text[0])
-        taskp.segments_create(text[1])
-        taskp.angles_create(text[2])
-        taskp.segments_relations_create(text[3])
-        taskp.angles_relations_create(text[4])
-        taskp.polygons_relations_create(text[5])
-        taskp.line_intersection_create(text[6])
-        taskp.questions_create(text[7])
+        polygons_create(text[0])
+        segments_create(text[1])
+        angles_create(text[2])
+        segments_relations_create(text[3])
+        angles_relations_create(text[4])
+        polygons_relations_create(text[5])
+        line_intersection_create(text[6])
+        questions_create(text[7])
     except IndexError:
         pass
 
     for polygon in taskp.polygons:
         try:
-            taskp.UseRelations(taskp.segments)
-            taskp.UseRelations(taskp.angles)
-            ret = create_polygon(taskp.get_points_names_from_list(polygon.points))
+            UseRelations(segments)
+            UseRelations(angles)
+            ret = create_polygon(get_points_names_from_list(polygon.points))
             if type(ret) == str:
                 return ret
 
