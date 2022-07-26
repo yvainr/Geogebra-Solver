@@ -22,12 +22,17 @@ def get_triangle_parameter(A, B, C):
 
 
 def draw_polygon(points, realize_data):
-    ans_polygon = 'Polygon('
+    ans_polygon = f'{find_polygon_with_points(get_points_names_from_list(points)).name}=Polygon('
     for point in points:
         realize_data.append(f"{point.name}({triad.Equal(point.x)}, {triad.Equal(point.y)})")
         ans_polygon += f"{point.name}, "
     ans_polygon = ans_polygon[:-2] + ')'
     realize_data.append(ans_polygon)
+    for i in range(len(points)):
+        seg = find_segment_with_points(points[i].name, points[i-1].name)
+        A, B = seg.points
+        realize_data.append(f"{seg.name}=Segment({A.name}, {B.name})")
+        realize_data.append(f"SetVisibleInView({seg.name}, 1, false)")
 
 
 def draw_specific_points(realize_data):
