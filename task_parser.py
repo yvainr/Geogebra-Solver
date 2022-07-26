@@ -157,6 +157,41 @@ class Fact:
 
         return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {self.objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}, following_facts: {list_following_facts}'
 
+    def show_fact_on_drawing(self):
+        draw_data = ''
+
+        if len(self.objects) == 2:
+            if self.objects[0].__class__.__name__ == 'Segment':
+                draw_data += f'SetColor(Segment({self.objects[0].points[0].name}, {self.objects[0].points[1].name}), 200, 0, 0), SetColor(Segment({self.objects[1].points[0].name}, {self.objects[1].points[1].name}), 200, 0, 0)'
+            if self.objects[0].__class__.__name__ == 'Angle':
+                draw_data += f'Angle(Line({self.objects[0].lines[1].points[0].name, self.objects[0].lines[1].points[1].name}), Line({self.objects[0].lines[0].points[0].name, self.objects[0].lines[0].points[1].name})), Angle(Line({self.objects[1].lines[1].points[0].name, self.objects[1].lines[1].points[1].name}), Line({self.objects[1].lines[0].points[0].name, self.objects[1].lines[0].points[1].name}))'
+            if self.objects[0].__class__.__name__ == 'Polygon':
+                points_names_1 = ''
+                points_names_2 = ''
+
+                for point_name in get_points_names_from_list(self.objects[0].points):
+                    points_names_1 += f'{point_name}, '
+
+                for point_name in get_points_names_from_list(self.objects[1].points):
+                    points_names_2 += f'{point_name}, '
+
+                draw_data += f'SetColor(Polygon({points_names_1[:-2]}), 200, 0, 0), SetColor(Polygon({points_names_2[:-2]}), 200, 0, 0)'
+
+        if len(self.objects) == 1:
+            if self.objects[0].__class__.__name__ == 'Segment':
+                draw_data += f'SetColor(Segment({self.objects[0].points[0].name}, {self.objects[0].points[1].name}), 200, 0, 0)'
+            if self.objects[0].__class__.__name__ == 'Angle':
+                draw_data += f'Angle(Line({self.objects[0].lines[1].points[0].name, self.objects[0].lines[1].points[1].name}), Line({self.objects[0].lines[0].points[0].name, self.objects[0].lines[0].points[1].name}))'
+            if self.objects[0].__class__.__name__ == 'Polygon':
+                points_names = ''
+
+                for point_name in get_points_names_from_list(self.objects[0].points):
+                    points_names += f'{point_name}, '
+
+                draw_data += f'SetColor(Polygon({points_names[:-2]}), 200, 0, 0)'
+
+        return draw_data
+
 
 points = list()
 lines = list()
