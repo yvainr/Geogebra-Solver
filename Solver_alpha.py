@@ -60,13 +60,11 @@ def first():
         if ang.size:
             not_none_angles.append(ang)
             facts.append(Fact(ind, -1, "size", [ang], ang.size))
-            facts[-1].root_facts.add(ind)
             ind += 1
 
     for seg in segments:
         if seg.size:
             facts.append(Fact(ind, -1, "size", [seg], seg.size))
-            facts[-1].root_facts.add(ind)
             ind += 1
 
 first()
@@ -359,59 +357,55 @@ def return_roots(ind):
 
             return n_roots
 
-#Печать факта для юзера
-def to_str(self, roots=True, nfacts = facts,):
-    global facts
-    out = ""
 
-    if self.fact_type == "relation":
-        a = type(self.objects[0])
-        if type(self.objects[0]) != "task_parser.polygon":
-            out += f"{better_name(self.objects[0])} относится к {better_name(self.objects[1])} с коэффицентом {self.value}"
-            if roots:
-                out += f" так как "
-                nlist = []
-                for root in self.root_facts:
-                    nlist.append(f"{nfacts[root]}")
-                out += ", ".join(nlist)
+#Делает имя объекта красивым
+def beautiful_object(object):
+    if type(object) == type(segments[0]) or type(object) == type(polygons[0]):
+        name = ""
+        for point in object.points:
+            name += point.name
+        return name
+
+    elif type(object) == type(angles[0]):
+        for p1 in points:
+            for p2 in points:
+                for p3 in points:
+                    if find_angle_with_points(p1.name, p2.name, p3.name) == object:
+                        return (p1.name + p2.name + p3.name)
+
+
+#Делает факт красивым
+def beautiful_fact(fact):
+    obj = fact.objects
+    if fact.fact_type == "relation":
+        if type(obj[0]) != type(polygons[0]):
+            return (f"{beautiful_object(obj[0])} / {beautiful_object(obj[1])} = {fact.value}")
         else:
-            out += f"{better_name(self.objects[0])} подобен {better_name(self.objects[1])} с коэффицентом {self.objects[0].size / self.objects[1].size}"
-            if roots:
-                out += f"так как"
-                nlist = []
-                for root in self.root_facts:
-                    nlist.append(f"{nfacts[root]}")
-                out += ", ".join(nlist)
-    elif self.fact_type == "size":
-        out += f"{better_name(self.objects[0])} равен {self.objects[0].size} по условию"
-    elif self.fact_type == "additions":
-        if len(self.objects) == 2:
-            out += f"{better_name(self.objects[0])} равен {self.objects[0].size} как смежный с {better_name(self.objects[1])}"
-            if roots:
-                out += f"так как"
-                nlist = []
-                for root in self.root_facts:
-                    nlist.append(f"{nfacts[root]}")
-                out += ", ".join(nlist)
-        elif len(self.objects) == 3:
-            out += f"{better_name(self.objects[0])} равен {self.objects[0].size} как сумма {better_name(self.objects[1])} и {better_name(self.objects[2])}"
-            if roots:
-                out += f"так как"
-                nlist = []
-                for root in self.root_facts:
-                    nlist.append(f"{nfacts[root]}")
-                out += ", ".join(nlist)
+            return (f"{beautiful_object(obj[0])} similars {beautiful_object(obj[1])} with ratio {fact.value}")
+    elif fact.fact_type == "size":
+        return(f"{beautiful_object(obj[0])} equals {obj[0].size} because of task")
+    elif fact.fact_type == "additions":
+        return f"{beautiful_object(obj[0])} equals {obj[0].size} as adjacent with {beautiful_object(obj[1])}"
+
+
+#Печать факта для юзера
+def to_str(fact, roots=True):
+    out = ""
+    if not roots:
+        return beautiful_fact(fact)
+
+    else:
+        out += beautiful_fact(fact)
+        nlist = []
+        for root in fact.root_facts:
+            nlist.append(f"{beautiful_fact(facts[root])}")
+        if len(nlist) != 0:
+            out += " because of: "
+            out += ", ".join(nlist)
+
     return out
 
-def better_name(obj):
-    print(type(obj))
-    if type(obj) == "task_parser.Segment" or type(obj) == "task_parser.Polygon":
-        return ''.join(obj.points)
-    elif type(obj) == "task_parser.Angle":
-        ret = ""
-        for line in obj.lines:
-            ret += f' {get_points_names_from_list(line.points)}'
-        return ret
+
 
 #Сам процесс решения, проверяет все ли вопросы учтены, выводит нужные факты, формирует словарик с нужными фактами
 def solving_process():
@@ -433,7 +427,10 @@ def solving_process():
     for q_ind in q_indexes:
         return_facts[facts[q_ind]] = return_roots(q_ind)
 
+
     for fact in facts:
         print(to_str(fact))
+
+
 
     return return_facts
