@@ -31,21 +31,22 @@ class Line:
 
 class Ray:
     def __init__(self,
-                 points,
-                 main_point):
+                 main_point,
+                 points: set):
         self.main_point = main_point
         self.points = points
+        self.points.add(main_point)
 
     def __str__(self):
-        return f'points: {get_points_names_from_list(self.points)}'
+        return f'main_point: {self.main_point.name}, points: {get_points_names_from_list(self.points)}'
 
 
 class Angle:
     def __init__(self,
-                 line_one,
-                 line_two,
+                 ray_one,
+                 ray_two,
                  size=None):
-        self.lines = [line_one, line_two]
+        self.rays = [ray_one, ray_two]
         self.size = size
         self.relations = dict()
         self.difference = dict()
@@ -174,83 +175,64 @@ class Fact:
 
         return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {list_objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}, following_facts: {list_following_facts}'
 
-    def description_create(self):
-        if not self.root_facts:
-            self.description = beautiful_fact(self)
-            return beautiful_fact(self)
-
-        ret = ''
-        ret += beautiful_fact(self)
-        nlist = []
-        for root in self.root_facts:
-            nlist.append(f'{beautiful_fact(facts[root])}')
-
-        if nlist:
-            ret += ' because of: '
-            ret += ', '.join(nlist)
-
-        self.description = ret
-        return ret
-
-    def show_fact(self):
-        draw_data = list()
-
-        if len(self.objects) == 2:
-            if self.objects[0].__class__.__name__ == 'Segment':
-                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
-                draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, true)')
-                draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
-                draw_data.append(f'SetColor({self.objects[1].name}, 200, 0, 0)')
-            if self.objects[0].__class__.__name__ == 'Angle':
-                draw_data.append(f'Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name}))')
-                draw_data.append(f'Angle(Line({list(self.objects[1].lines[1].points)[0].name}, {list(self.objects[1].lines[1].points)[1].name}), Line({list(self.objects[1].lines[0].points)[0].name}, {list(self.objects[1].lines[0].points)[1].name}))')
-            if self.objects[0].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
-                draw_data.append(f'SetColor({self.objects[1].name}, 200, 0, 0)')
-
-        if len(self.objects) == 1:
-            if self.objects[0].__class__.__name__ == 'Segment':
-                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
-                draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
-            if self.objects[0].__class__.__name__ == 'Angle':
-                draw_data.append(f'Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name}))')
-            if self.objects[0].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
-
-        return draw_data
-
-    def hide_fact(self):
-        draw_data = list()
-
-        if len(self.objects) == 2:
-            if self.objects[0].__class__.__name__ == 'Segment':
-                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
-                draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, false)')
-                draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0"')
-                draw_data.append(f'SetColor({self.objects[1].name}, "#1565C0"')
-            if self.objects[0].__class__.__name__ == 'Angle':
-                draw_data.append(f'Delete(Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name})))')
-                draw_data.append(f'Delete(Angle(Line({list(self.objects[1].lines[1].points)[0].name}, {list(self.objects[1].lines[1].points)[1].name}), Line({list(self.objects[1].lines[0].points)[0].name}, {list(self.objects[1].lines[0].points)[1].name})))')
-            if self.objects[0].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0")')
-                draw_data.append(f'SetColor({self.objects[1].name}, "#1565C0")')
-
-        if len(self.objects) == 1:
-            if self.objects[0].__class__.__name__ == 'Segment':
-                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
-                draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0")')
-            if self.objects[0].__class__.__name__ == 'Angle':
-                draw_data.append(f'Delete(Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name})))')
-            if self.objects[0].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0")')
-
-        return draw_data
-
-
+    # def show_fact(self):
+    #     draw_data = list()
+    #
+    #     if len(self.objects) == 2:
+    #         if self.objects[0].__class__.__name__ == 'Segment':
+    #             draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
+    #             draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, true)')
+    #             draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
+    #             draw_data.append(f'SetColor({self.objects[1].name}, 200, 0, 0)')
+    #         if self.objects[0].__class__.__name__ == 'Angle':
+    #             draw_data.append(f'Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name}))')
+    #             draw_data.append(f'Angle(Line({list(self.objects[1].lines[1].points)[0].name}, {list(self.objects[1].lines[1].points)[1].name}), Line({list(self.objects[1].lines[0].points)[0].name}, {list(self.objects[1].lines[0].points)[1].name}))')
+    #         if self.objects[0].__class__.__name__ == 'Polygon':
+    #             draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
+    #             draw_data.append(f'SetColor({self.objects[1].name}, 200, 0, 0)')
+    #
+    #     if len(self.objects) == 1:
+    #         if self.objects[0].__class__.__name__ == 'Segment':
+    #             draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
+    #             draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
+    #         if self.objects[0].__class__.__name__ == 'Angle':
+    #             draw_data.append(f'Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name}))')
+    #         if self.objects[0].__class__.__name__ == 'Polygon':
+    #             draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
+    #
+    #     return draw_data
+    #
+    # def hide_fact(self):
+    #     draw_data = list()
+    #
+    #     if len(self.objects) == 2:
+    #         if self.objects[0].__class__.__name__ == 'Segment':
+    #             draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
+    #             draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, false)')
+    #             draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0"')
+    #             draw_data.append(f'SetColor({self.objects[1].name}, "#1565C0"')
+    #         if self.objects[0].__class__.__name__ == 'Angle':
+    #             draw_data.append(f'Delete(Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name})))')
+    #             draw_data.append(f'Delete(Angle(Line({list(self.objects[1].lines[1].points)[0].name}, {list(self.objects[1].lines[1].points)[1].name}), Line({list(self.objects[1].lines[0].points)[0].name}, {list(self.objects[1].lines[0].points)[1].name})))')
+    #         if self.objects[0].__class__.__name__ == 'Polygon':
+    #             draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0")')
+    #             draw_data.append(f'SetColor({self.objects[1].name}, "#1565C0")')
+    #
+    #     if len(self.objects) == 1:
+    #         if self.objects[0].__class__.__name__ == 'Segment':
+    #             draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
+    #             draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0")')
+    #         if self.objects[0].__class__.__name__ == 'Angle':
+    #             draw_data.append(f'Delete(Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name})))')
+    #         if self.objects[0].__class__.__name__ == 'Polygon':
+    #             draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0")')
+    #
+    #     return draw_data
 
 
 points = list()
 lines = list()
+rays = list()
 angles = list()
 segments = list()
 polygons = list()
@@ -284,58 +266,58 @@ def polygons_create(text):
             if len(vertices_list) == 3:
                 polygons.append(Polygon(vertices_class_list))
 
-            if len(vertices_list) == 1:
-                S = vertices_class_list[0]
-
-                S.specific_properties_point = polygon.split()[1]
-                S.specific_properties_triangle = polygon.split()[2]
-
-                A = find_point_with_name(polygon.split()[2][0]).name
-                B = find_point_with_name(polygon.split()[2][1]).name
-                C = find_point_with_name(polygon.split()[2][2]).name
-
-                AB = find_line_with_points(A, B)
-                BC = find_line_with_points(C, B)
-                CA = find_line_with_points(A, C)
-
-                if polygon.split()[1] == 'H':
-                    find_angle_with_lines(AB, find_line_with_points(C, S.name)).size = 90
-                    find_angle_with_lines(find_line_with_points(C, S.name), AB).size = 90
-                    find_angle_with_lines(BC, find_line_with_points(A, S.name)).size = 90
-                    find_angle_with_lines(find_line_with_points(A, S.name), BC).size = 90
-                    find_angle_with_lines(CA, find_line_with_points(B, S.name)).size = 90
-                    find_angle_with_lines(find_line_with_points(B, S.name), CA).size = 90
-
-                if polygon.split()[1] == 'O':
-                    AS = find_segment_with_points(A, S.name)
-                    BS = find_segment_with_points(B, S.name)
-                    CS = find_segment_with_points(C, S.name)
-
-                    AS.relations[BS] = Fraction(1)
-                    BS.relations[AS] = Fraction(1)
-                    AS.relations[CS] = Fraction(1)
-                    CS.relations[AS] = Fraction(1)
-                    CS.relations[BS] = Fraction(1)
-                    BS.relations[CS] = Fraction(1)
-
-                if polygon.split()[1] == 'I':
-                    AS = find_line_with_points(A, S.name)
-                    BS = find_line_with_points(B, S.name)
-                    CS = find_line_with_points(C, S.name)
-
-                    SAC = find_angle_with_lines(AS, CA)
-                    BAS = find_angle_with_lines(AB, AS)
-                    SBA = find_angle_with_lines(BS, AB)
-                    CBS = find_angle_with_lines(BC, BS)
-                    SCB = find_angle_with_lines(CS, BC)
-                    ACS = find_angle_with_lines(CA, CS)
-
-                    SAC.relations[BAS] = Fraction(1)
-                    BAS.relations[SAC] = Fraction(1)
-                    SBA.relations[CBS] = Fraction(1)
-                    CBS.relations[SBA] = Fraction(1)
-                    SCB.relations[ACS] = Fraction(1)
-                    ACS.relations[SCB] = Fraction(1)
+            # if len(vertices_list) == 1:
+            #     S = vertices_class_list[0]
+            #
+            #     S.specific_properties_point = polygon.split()[1]
+            #     S.specific_properties_triangle = polygon.split()[2]
+            #
+            #     A = find_point_with_name(polygon.split()[2][0]).name
+            #     B = find_point_with_name(polygon.split()[2][1]).name
+            #     C = find_point_with_name(polygon.split()[2][2]).name
+            #
+            #     AB = find_line_with_points(A, B)
+            #     BC = find_line_with_points(C, B)
+            #     CA = find_line_with_points(A, C)
+            #
+            #     if polygon.split()[1] == 'H':
+            #         find_angle_with_lines(AB, find_line_with_points(C, S.name)).size = 90
+            #         find_angle_with_lines(find_line_with_points(C, S.name), AB).size = 90
+            #         find_angle_with_lines(BC, find_line_with_points(A, S.name)).size = 90
+            #         find_angle_with_lines(find_line_with_points(A, S.name), BC).size = 90
+            #         find_angle_with_lines(CA, find_line_with_points(B, S.name)).size = 90
+            #         find_angle_with_lines(find_line_with_points(B, S.name), CA).size = 90
+            #
+            #     if polygon.split()[1] == 'O':
+            #         AS = find_segment_with_points(A, S.name)
+            #         BS = find_segment_with_points(B, S.name)
+            #         CS = find_segment_with_points(C, S.name)
+            #
+            #         AS.relations[BS] = Fraction(1)
+            #         BS.relations[AS] = Fraction(1)
+            #         AS.relations[CS] = Fraction(1)
+            #         CS.relations[AS] = Fraction(1)
+            #         CS.relations[BS] = Fraction(1)
+            #         BS.relations[CS] = Fraction(1)
+            #
+            #     if polygon.split()[1] == 'I':
+            #         AS = find_line_with_points(A, S.name)
+            #         BS = find_line_with_points(B, S.name)
+            #         CS = find_line_with_points(C, S.name)
+            #
+            #         SAC = find_angle_with_lines(AS, CA)
+            #         BAS = find_angle_with_lines(AB, AS)
+            #         SBA = find_angle_with_lines(BS, AB)
+            #         CBS = find_angle_with_lines(BC, BS)
+            #         SCB = find_angle_with_lines(CS, BC)
+            #         ACS = find_angle_with_lines(CA, CS)
+            #
+            #         SAC.relations[BAS] = Fraction(1)
+            #         BAS.relations[SAC] = Fraction(1)
+            #         SBA.relations[CBS] = Fraction(1)
+            #         CBS.relations[SBA] = Fraction(1)
+            #         SCB.relations[ACS] = Fraction(1)
+            #         ACS.relations[SCB] = Fraction(1)
 
 
 def segments_create(text):
@@ -355,24 +337,13 @@ def angles_create(text):
     if len(text.split()) > 0:
         for angle in text.split(','):
             angle = angle.split()
-            if len(angle) == 2:
-                angle_name, angle_size = angle
-                A, B, C = list(angle_name)
-                if A != B != C != A:
-                    A, B, C = check_angle_in_polygon(A, B, C)
+            angle_name, angle_size = angle
+            A, B, C = list(angle_name)
+            if A != B != C != A:
+                A, B, C = check_angle_in_polygon(A, B, C)
 
-                    l1 = find_line_with_points(A, B)
-                    l2 = find_line_with_points(B, C)
-
-                    find_angle_with_lines(l1, l2).size = float(Fraction(angle_size))
-                    find_angle_with_lines(l2, l1).size = 180 - float(Fraction(angle_size))
-
-            if len(angle) == 3:
-                l1, l2, angle_size = angle
-                l1 = find_line_with_points(l1[0], l1[1])
-                l2 = find_line_with_points(l2[0], l2[1])
-                find_angle_with_lines(l1, l2).size = float(Fraction(angle_size))
-                find_angle_with_lines(l2, l1).size = 180 - float(Fraction(angle_size))
+                find_angle_with_points(A, B, C).size = float(Fraction(angle_size))
+                find_angle_with_points(C, B, A).size = 360 - float(Fraction(angle_size))
 
 
 def segments_relations_create(text):
@@ -564,26 +535,39 @@ def find_line_with_segment(seg):
 
 
 # вспомогательная функция для поиска угла по прямым, его задающим
-def find_angle_with_lines(l1, l2):
+def find_angle_with_rays(r1, r2):
     for angle in angles:
-        if [set(get_points_names_from_list(l1.points)), set(get_points_names_from_list(l2.points))] == [set(get_points_names_from_list(angle.lines[0].points)), set(get_points_names_from_list(angle.lines[1].points))]:
+        if angle.rays == [r1, r2]:
             return angle
 
-    new_angle = Angle(l1, l2)
+    new_angle = Angle(r1, r2)
     angles.append(new_angle)
     return new_angle
 
 
+def find_ray_with_points(A, B):
+    a = find_point_with_name(A)
+    b = find_point_with_name(B)
+
+    for ray in rays:
+        if a == ray.main_point and {b} <= set(ray.points):
+            return ray
+
+    new_ray = Ray(a, {b})
+    rays.append(new_ray)
+    return new_ray
+
+
 # вспомогательная функция для поиска угла по точкам
 def find_angle_with_points(A, B, C):
-    l1 = find_line_with_points(A, B)
-    l2 = find_line_with_points(B, C)
+    r1 = find_ray_with_points(B, A)
+    r2 = find_ray_with_points(B, C)
 
     for angle in angles:
-        if angle.lines == [l1, l2]:
+        if angle.rays == [r1, r2]:
             return angle
 
-    new_angle = Angle(l1, l2)
+    new_angle = Angle(r1, r2)
     angles.append(new_angle)
     return new_angle
 
@@ -667,33 +651,3 @@ def UseRelations(objects):
                                     obj_1.size = obj_2.addition[obj_1] - obj_2.size
                                 except Exception:
                                     pass
-
-
-def beautiful_fact(fact):
-    obj = fact.objects
-    if fact.fact_type == "relation":
-        if type(obj[0]) != type(polygons[0]):
-            return f"{beautiful_object(obj[0])} / {beautiful_object(obj[1])} = {fact.value}"
-        else:
-            return f"{beautiful_object(obj[0])} similars {beautiful_object(obj[1])} with ratio {fact.value}"
-    elif fact.fact_type == "size":
-        return f"{beautiful_object(obj[0])} equals {obj[0].size} because of task"
-    elif fact.fact_type == "addition":
-        return f"{beautiful_object(obj[0])} equals {obj[0].size} as adjacent with {beautiful_object(obj[1])}"
-
-
-def beautiful_object(obj):
-    if obj.__class__.__name__ == 'Segment' or obj.__class__.__name__ == 'Polygon':
-        name = ''
-        for point in obj.points:
-            name += point.name
-        return name
-
-    elif obj.__class__.__name__ == 'Angle':
-        for p1 in points:
-            for p2 in points:
-                if p2 != p1:
-                    for p3 in points:
-                        if p3 != p1 and p3 != p2:
-                            if find_angle_with_points(p1.name, p2.name, p3.name) == obj:
-                                return f'{p1.name}{p2.name}{p3.name}'
