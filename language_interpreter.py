@@ -228,11 +228,11 @@ def question_processing(question):
     else:
         question = distillation(question)
         question = sub(r"(^\w+)(\s)(\w*)(\s)(\d+)", r'\1 \3 \5', question)
-        question = sub(r"(^\w+)(\s)(\w*$)", r'\1 \3 ?', question)
+        question = sub(r"(^\w+)(\s*)(\w*$)", r'\1 \3 ?', question)
     return question
 
-
+# inputt = "Треугольник ABC, AB = 10, угол BAC равен 40, AC относится к AB как 3/5, I - точка пересечения биссектрис ABC \n Найти угол ABC"
 # inpu = 'ABC, DEF, ABC подобен DEF с коэффициентом 1/2, relation of sides AB and DE is 1/2 \n prove that BC relate EF like 1/2'
 # inp = 'треугольники ABC = HFG, ABCD невыпуклый, AB = 5, сторона BC равна 4, AB = AC, angle RUS меньше и UTS стороны на 5, ACB равен 90, I -- инцентр в ABC, точкой M сторона AB делится в отношении 1/2 \n найти сумму ABC DEF'
-# print(text_analyze(inp))
+# print(text_analyze(inputt))
 
