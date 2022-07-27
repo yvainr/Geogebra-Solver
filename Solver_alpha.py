@@ -6,7 +6,6 @@ Sin_theorem_allowed = True
 
 # Индекс последнего добавленного факта
 ind = 0
-facts = []
 facts_indexes = []
 
 # Это нужно чтобы не перебирать None углы, если угол в результате вычислений становится не None - он сюда добавляется
@@ -22,6 +21,7 @@ def first():
             if p1 != p2:
                 further_line = True
                 further_segment = True
+                further_ray = True
                 for p3 in points:
                     if p3 != p1 and p3 != p2:
                         further = True
@@ -38,19 +38,28 @@ def first():
                         break
                 if further_line:
                     lines.append(Line({p1, p2}))
+
                 for segment in segments:
                     if {p1, p2} == segment.points:
                         further_segment = False
                         break
                 if further_segment:
                     segments.append(Segment(p1, p2))
+
+                for ray in rays:
+                    if p1 == ray.main_point and p2 in ray.points:
+                        further_ray = False
+                        break
+                if further_ray:
+                    rays.append(Ray(p1, {p2}))
+
     #Перебирает пары прямых, проверяет существеут ли между ними угол, если нет - добавляет.
-    for l1 in lines:
-        for l2 in lines:
+    for l1 in rays:
+        for l2 in rays:
             futher_angle = True
             if l1 != l2:
                 for ang in angles:
-                    if [l1, l2] == ang.lines:
+                    if [l1, l2] == ang.rays:
                         futher_angle = False
                 if futher_angle:
                     angles.append(Angle(l1, l2))
@@ -67,7 +76,6 @@ def first():
             facts.append(Fact(ind, -1, "size", [seg], seg.size))
             ind += 1
 
-first()
 
 #Находит факт по объектам в нём (если strict - то конкретно с этими объектами, иначе он находит факт где мы находим значение этого объекта)
 def find_in_facts_with_obj(obj, not_strict = False):
@@ -95,8 +103,8 @@ def fix_vertical_angles():
     for ang_1 in not_none_angles:
         for ang_2 in angles:
             if ang_1 != ang_2:
-                lines1 = ang_1.lines
-                lines2 = ang_2.lines
+                lines1 = ang_1.rays
+                lines2 = ang_2.rays
                 if set(lines1) == set(lines2):
                     if not ang_2.size:
                         ang_2.size = 180 - ang_1.size
@@ -117,9 +125,9 @@ def fix_all_angles():
             if ang1 != ang2 :
                 for ang3 in angles:
                     if ang3 != ang2 and ang3 != ang1 and not ang3:
-                        lines1 = ang1.lines
-                        lines2 = ang2.lines
-                        lines3 = ang3.lines
+                        lines1 = ang1.rays
+                        lines2 = ang2.rays
+                        lines3 = ang3.rays
                         if lines1[1] == lines2[0] and [lines[0], lines2[1]] == lines3:
                             ang3.size = (ang1 + ang2) % 180
                             not_none_angles.append(ang3)
@@ -141,13 +149,9 @@ def search_triangle(triangle):
     BC = find_segment_with_points(B.name, C.name)
     CA = find_segment_with_points(C.name, A.name)
 
-    A2B2 = find_line_with_points(A.name, B.name)
-    B2C2 = find_line_with_points(B.name, C.name)
-    C2A2 = find_line_with_points(C.name, A.name)
-
-    ABC = find_angle_with_lines(B2C2, A2B2)
-    BCA = find_angle_with_lines(C2A2, B2C2)
-    CAB = find_angle_with_lines(A2B2, C2A2)
+    ABC = find_angle_with_points(C.name, B.name, A.name)
+    BCA = find_angle_with_points(B.name, A.name, C.name)
+    CAB = find_angle_with_points(A.name, C.name, B.name)
 
     return [A, B, C, AB, BC, CA, ABC, BCA, CAB]
 
@@ -315,6 +319,7 @@ def fix_all_triangles():
                 if len(triangle2.points) == 3 and triangle1 != triangle2:
                     [A, B, C, AB, BC, CA, ABC, BCA, CAB] = search_triangle(triangle1)
                     [A1, B1, C1, A1B1, B1C1, C1A1, A1B1C1, B1C1A1, C1A1B1] = search_triangle(triangle2)
+
                     similaritys_triangles(triangle1, triangle2, C, B, A, C1, B1, A1, AB, CA, BC, BCA, ABC, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
                     similaritys_triangles(triangle1, triangle2, C, A, B, C1, B1, A1, AB, BC, CA, BCA, CAB, ABC, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
                     similaritys_triangles(triangle1, triangle2, A, C, B, C1, B1, A1, BC, AB, CA, CAB, BCA, ABC, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
@@ -424,16 +429,12 @@ def solving_process():
         fix_all_angles()
         fix_all_triangles()
 
-
-
     return_facts = {}
     for q_ind in q_indexes:
         return_facts[facts[q_ind]] = return_roots(q_ind)
 
-
     for fact in facts:
         print(to_str(fact))
 
-
-
     return return_facts
+
