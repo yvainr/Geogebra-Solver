@@ -11,7 +11,6 @@ facts_indexes = []
 # Это нужно чтобы не перебирать None углы, если угол в результате вычислений становится не None - он сюда добавляется
 not_none_angles = []
 
-
 #Неприятная функция, добавляющая все возможные прямые, отрезки, треугольники и углы
 def first():
     global ind
@@ -155,6 +154,7 @@ def search_triangle(triangle):
 
     return [A, B, C, AB, BC, CA, ABC, BCA, CAB]
 
+
 #Корректирует равенства сторон и углов в равнобедренном треугольнике
 def correct_size(ABC, BCA, AB, CA):
     if ABC.size == BCA.size and ABC.size:
@@ -201,6 +201,7 @@ def equal(AB, BC):
     else:
         return False
 
+    
 #Делает углы, где один из них None, а другой - нет, равными (из подобия треугольников)
 def equal_them(A, B, fact):
     if A.size and not B.size:
@@ -218,6 +219,7 @@ def equal_them(A, B, fact):
 
         not_none_angles.append(A)
 
+        
 #Делает стороны, где один из них None, а другой - нет, подобными (из подобия треугольников)
 def simil_them(AB, A1B1, k, fact):
     if AB.size and not A1B1.size:
@@ -230,6 +232,7 @@ def simil_them(AB, A1B1, k, fact):
 
         update_facts(ind, [AB, A1B1], AB.size / A1B1.size, {fact}, "relation")
 
+        
 #Находит все стороны и углы, которые может из равнобедренности, во всех р/б треугольниках
 def isosceles_triangles():
     for triangle in polygons:
@@ -239,6 +242,7 @@ def isosceles_triangles():
             correct_size(ABC, CAB, BC, CA)
             correct_size(CAB, BCA, BC, AB)
  
+
 #Возвращает отношение двух объектов, если это нужно (когда они оба не None)
 def similarity_if_not_None(AB, BC):
     if AB.size and BC.size:
@@ -246,6 +250,7 @@ def similarity_if_not_None(AB, BC):
     else:
         return None
 
+    
 #Добавляет новые факты следующие из подобия треугольников
 def consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1):
     k = similarity_if_not_None(AB, A1B1)
@@ -310,6 +315,7 @@ def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA,
 
         consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1)
 
+        
 #Проверяет все треугольники и ищет среди них подобные и равные перебирая вершины одного из треугольников всеми возможными способами
 def fix_all_triangles():
     isosceles_triangles()
@@ -328,6 +334,7 @@ def fix_all_triangles():
                     similaritys_triangles(triangle1, triangle2, B, A, C, C1, B1, A1, CA, BC, AB, ABC, CAB, BCA, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
                     break
 
+                    
 #Поиск решения вопроса среди фактов
 def find_ans(q):
     for fact in facts:
@@ -335,8 +342,6 @@ def find_ans(q):
             return fact.id
     return None
 
-#Ответ в виде словаря, в котором ключи - сами вопросы, значения - факты доказывающие этот вопрос, лежащие
-ans = {}
 
 #Возвращает корни данного факта
 def return_roots(ind):
@@ -380,8 +385,7 @@ def beautiful_object(object):
                             if find_angle_with_points(p1.name, p2.name, p3.name) == object:
                                 return (p1.name + p2.name + p3.name)
 
-
-
+                            
 #Делает факт красивым
 def beautiful_fact(fact):
     obj = fact.objects
@@ -412,7 +416,6 @@ def to_str(fact, roots=True):
             out += ", ".join(nlist)
 
     return out
-
 
 
 #Сам процесс решения, проверяет все ли вопросы учтены, выводит нужные факты, формирует словарик с нужными фактами
