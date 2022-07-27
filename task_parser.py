@@ -29,6 +29,17 @@ class Line:
         return f'points: {get_points_names_from_list(self.points)}'
 
 
+class Ray:
+    def __init__(self,
+                 points,
+                 main_point):
+        self.main_point = main_point
+        self.points = points
+
+    def __str__(self):
+        return f'points: {get_points_names_from_list(self.points)}'
+
+
 class Angle:
     def __init__(self,
                  line_one,
@@ -133,7 +144,7 @@ class Fact:
                  ):
         self.id = id
         self.generation = generation  # ступень дерева
-        self.fact_type = fact_type  # relation (отношение), size (значение), difference (вычитание), addition (сложение)
+        self.fact_type = fact_type  # relation (отношение), size (значение), difference (вычитание), additions (сложение)
         self.objects = objects
         self.value = value
         self.question = question
@@ -162,6 +173,24 @@ class Fact:
             list_following_facts = None
 
         return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {list_objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}, following_facts: {list_following_facts}'
+
+    def description_create(self):
+        if not self.root_facts:
+            self.description = ret
+            return beautiful_fact(self)
+
+        ret = ''
+        ret += beautiful_fact(self)
+        nlist = []
+        for root in self.root_facts:
+            nlist.append(f'{beautiful_fact(facts[root])}')
+            
+        if nlist:
+            ret += ' because of: '
+            ret += ', '.join(nlist)
+        
+        self.description = ret
+        return ret
 
     def show_fact(self):
         draw_data = list()
@@ -216,6 +245,8 @@ class Fact:
                 draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0")')
 
         return draw_data
+
+
 
 
 points = list()
@@ -636,3 +667,33 @@ def UseRelations(objects):
                                     obj_1.size = obj_2.addition[obj_1] - obj_2.size
                                 except Exception:
                                     pass
+
+
+def beautiful_fact(fact):
+    obj = fact.objects
+    if fact.fact_type == "relation":
+        if type(obj[0]) != type(polygons[0]):
+            return f"{beautiful_object(obj[0])} / {beautiful_object(obj[1])} = {fact.value}"
+        else:
+            return f"{beautiful_object(obj[0])} similars {beautiful_object(obj[1])} with ratio {fact.value}"
+    elif fact.fact_type == "size":
+        return f"{beautiful_object(obj[0])} equals {obj[0].size} because of task"
+    elif fact.fact_type == "addition":
+        return f"{beautiful_object(obj[0])} equals {obj[0].size} as adjacent with {beautiful_object(obj[1])}"
+
+
+def beautiful_object(obj):
+    if obj.__class_name__ == 'Segment' or obj.__class_name__ == 'Polygon':
+        name = ""
+        for point in object.points:
+            name += point.name
+        return name
+
+    elif obj.__class_name__ == 'Angle':
+        for p1 in points:
+            for p2 in points:
+                if p2 != p1:
+                    for p3 in points:
+                        if p3 != p1 and p3 != p2:
+                            if find_angle_with_points(p1.name, p2.name, p3.name) == obj:
+                                return f'{p1.name}{p2.name}{p3.name}'
