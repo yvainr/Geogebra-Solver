@@ -144,7 +144,7 @@ class Fact:
                  ):
         self.id = id
         self.generation = generation  # ступень дерева
-        self.fact_type = fact_type  # relation (отношение), size (значение), difference (вычитание), additions (сложение)
+        self.fact_type = fact_type  # relation (отношение), size (значение), difference (вычитание), addition (сложение)
         self.objects = objects
         self.value = value
         self.question = question
