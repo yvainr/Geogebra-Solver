@@ -176,7 +176,7 @@ class Fact:
 
     def description_create(self):
         if not self.root_facts:
-            self.description = ret
+            self.description = beautiful_fact(self)
             return beautiful_fact(self)
 
         ret = ''
@@ -184,11 +184,11 @@ class Fact:
         nlist = []
         for root in self.root_facts:
             nlist.append(f'{beautiful_fact(facts[root])}')
-            
+
         if nlist:
             ret += ' because of: '
             ret += ', '.join(nlist)
-        
+
         self.description = ret
         return ret
 
