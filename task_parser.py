@@ -683,13 +683,13 @@ def beautiful_fact(fact):
 
 
 def beautiful_object(obj):
-    if obj.__class_name__ == 'Segment' or obj.__class_name__ == 'Polygon':
-        name = ""
-        for point in object.points:
+    if obj.__class__.__name__ == 'Segment' or obj.__class__.__name__ == 'Polygon':
+        name = ''
+        for point in obj.points:
             name += point.name
         return name
 
-    elif obj.__class_name__ == 'Angle':
+    elif obj.__class__.__name__ == 'Angle':
         for p1 in points:
             for p2 in points:
                 if p2 != p1:
