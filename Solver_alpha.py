@@ -161,7 +161,7 @@ def correct_size(ABC, BCA, AB, CA):
             roots = {root1, root2, root3}
 
 
-            update_facts(ind, [AB, CA], AB.size, roots, "relation")
+            update_facts(ind, [AB, CA], AB.size / CA.size, roots, "relation")
 
         elif AB.size and not CA.size:
             CA.size = AB.size
@@ -169,7 +169,7 @@ def correct_size(ABC, BCA, AB, CA):
             root1, root2, root3 = find_in_facts_with_obj([ABC], "not"), find_in_facts_with_obj([BCA], "not"), find_in_facts_with_obj([AB], "not")
             roots = {root1, root2, root3}
 
-            update_facts(ind, [CA, AB], CA.size, roots, "relation")
+            update_facts(ind, [CA, AB], CA.size / AB.size, roots, "relation")
 
     if AB.size == CA.size and AB.size:
         if BCA.size and not ABC.size:
@@ -179,7 +179,7 @@ def correct_size(ABC, BCA, AB, CA):
             root1, root2, root3 = find_in_facts_with_obj([AB], "not"), find_in_facts_with_obj([CA], "not"), find_in_facts_with_obj([BCA], "not")
             roots = {root1, root2, root3}
 
-            update_facts(ind, [ABC, BCA], ABC.size, roots, "relation")
+            update_facts(ind, [ABC, BCA], ABC.size / BCA.size, roots, "relation")
 
         elif ABC.size and not BCA.size:
             BCA.size = ABC.size
@@ -188,7 +188,7 @@ def correct_size(ABC, BCA, AB, CA):
             root1, root2, root3 = find_in_facts_with_obj([AB], "not"), find_in_facts_with_obj([CA], "not"), find_in_facts_with_obj([ABC], "not")
             roots = {root1, root2, root3}
 
-            update_facts(ind, [BCA, ABC], BCA.size, roots, "relation")
+            update_facts(ind, [BCA, ABC], BCA.size / ABC.size, roots, "relation")
 
 #Проверяет равенство величин объектов, при их не None_овости
 def equal(AB, BC):
@@ -202,7 +202,7 @@ def equal_them(A, B, fact):
     if A.size and not B.size:
         B.size = A.size
 
-        update_facts(ind, [B, A], A.size, {fact}, "relation")
+        update_facts(ind, [B, A], A.size / B.size, {fact}, "relation")
 
         not_none_angles.append(B)
 
@@ -210,7 +210,7 @@ def equal_them(A, B, fact):
         A.size = B.size
         not_none_angles.append(A)
 
-        update_facts(ind, [A, B], B.size, {fact}, "relation")
+        update_facts(ind, [A, B], A.size / B.size, {fact}, "relation")
 
         not_none_angles.append(A)
 
@@ -219,12 +219,12 @@ def simil_them(AB, A1B1, k, fact):
     if AB.size and not A1B1.size:
         A1B1.size = AB.size / k
 
-        update_facts(ind, [A1B1, AB], A1B1.size, {fact}, "relation")
+        update_facts(ind, [A1B1, AB], A1B1.size / AB.size, {fact}, "relation")
 
     if A1B1.size and not AB.size:
         AB.size = A1B1.size * k
 
-        update_facts(ind, [AB, A1B1], AB.size, {fact}, "relation")
+        update_facts(ind, [AB, A1B1], AB.size / A1B1.size, {fact}, "relation")
 
 #Находит все стороны и углы, которые может из равнобедренности, во всех р/б треугольниках
 def isosceles_triangles():
@@ -387,7 +387,7 @@ def beautiful_fact(fact):
             return (f"{beautiful_object(obj[0])} similars {beautiful_object(obj[1])} with ratio {fact.value}")
     elif fact.fact_type == "size":
         return(f"{beautiful_object(obj[0])} equals {obj[0].size} because of task")
-    elif fact.fact_type == "additions":
+    elif fact.fact_type == "addition":
         return f"{beautiful_object(obj[0])} equals {obj[0].size} as adjacent with {beautiful_object(obj[1])}"
 
 
