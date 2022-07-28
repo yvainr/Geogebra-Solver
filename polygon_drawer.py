@@ -122,8 +122,8 @@ def text_splitter(text):
 
     for polygon in taskp.polygons:
         try:
-            UseRelations(segments)
-            UseRelations(angles)
+            create_new_data_in_parser(segments)
+            create_new_data_in_parser(angles)
             ret = create_polygon(get_points_names_from_list(polygon.points))
             if type(ret) == str:
                 return ret
