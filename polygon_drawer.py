@@ -105,14 +105,6 @@ def text_splitter(text):
   
     realize_data = list()
 
-    tp.points.clear()
-    tp.lines.clear()
-    tp.angles.clear()
-    tp.angles.clear()
-    tp.segments.clear()
-    tp.polygons.clear()
-    tp.facts.clear()
-    tp.questions.clear()
     tp.task_data = None
     tp.drawer_data = Objects()
     tp.solver_data = None
