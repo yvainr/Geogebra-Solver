@@ -1,5 +1,4 @@
 from fractions import Fraction
-from pprint import pprint
 from random import uniform
 from objects_types import Objects
 
