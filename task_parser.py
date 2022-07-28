@@ -35,7 +35,6 @@ class Ray:
                  points: set):
         self.main_point = main_point
         self.points = points
-        self.points.add(main_point)
 
     def __str__(self):
         return f'main_point: {self.main_point.name}, points: {get_points_names_from_list(self.points)}'
@@ -51,15 +50,16 @@ class Angle:
         self.relations = dict()
         self.difference = dict()
         self.addition = dict()
+        self.name = f'angle_{len(angles)}'
 
     def __str__(self):
-        str_lines = ''
+        str_rays = ''
         str_relations = ''
         str_difference = ''
         str_addition = ''
 
-        for line in self.lines:
-            str_lines += f' {get_points_names_from_list(line.points)}'
+        for ray in self.rays:
+            str_rays += f' {get_points_names_from_list(ray.points)}'
 
         for rel in self.relations:
             str_relations += f'{get_points_names_from_list(rel.lines[0].points)} {get_points_names_from_list(rel.lines[1].points)} {self.relations[rel]} '
@@ -79,7 +79,7 @@ class Angle:
         if not str_addition:
             str_addition = 'None '
 
-        return f'lines:{str_lines}, size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
+        return f'name: {self.name}, rays:{str_rays}, size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
 
 
 class Segment:
@@ -175,59 +175,61 @@ class Fact:
 
         return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {list_objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}, following_facts: {list_following_facts}'
 
-    # def show_fact(self):
-    #     draw_data = list()
-    #
-    #     if len(self.objects) == 2:
-    #         if self.objects[0].__class__.__name__ == 'Segment':
-    #             draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
-    #             draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, true)')
-    #             draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
-    #             draw_data.append(f'SetColor({self.objects[1].name}, 200, 0, 0)')
-    #         if self.objects[0].__class__.__name__ == 'Angle':
-    #             draw_data.append(f'Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name}))')
-    #             draw_data.append(f'Angle(Line({list(self.objects[1].lines[1].points)[0].name}, {list(self.objects[1].lines[1].points)[1].name}), Line({list(self.objects[1].lines[0].points)[0].name}, {list(self.objects[1].lines[0].points)[1].name}))')
-    #         if self.objects[0].__class__.__name__ == 'Polygon':
-    #             draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
-    #             draw_data.append(f'SetColor({self.objects[1].name}, 200, 0, 0)')
-    #
-    #     if len(self.objects) == 1:
-    #         if self.objects[0].__class__.__name__ == 'Segment':
-    #             draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
-    #             draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
-    #         if self.objects[0].__class__.__name__ == 'Angle':
-    #             draw_data.append(f'Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name}))')
-    #         if self.objects[0].__class__.__name__ == 'Polygon':
-    #             draw_data.append(f'SetColor({self.objects[0].name}, 200, 0, 0)')
-    #
-    #     return draw_data
-    #
-    # def hide_fact(self):
-    #     draw_data = list()
-    #
-    #     if len(self.objects) == 2:
-    #         if self.objects[0].__class__.__name__ == 'Segment':
-    #             draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
-    #             draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, false)')
-    #             draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0"')
-    #             draw_data.append(f'SetColor({self.objects[1].name}, "#1565C0"')
-    #         if self.objects[0].__class__.__name__ == 'Angle':
-    #             draw_data.append(f'Delete(Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name})))')
-    #             draw_data.append(f'Delete(Angle(Line({list(self.objects[1].lines[1].points)[0].name}, {list(self.objects[1].lines[1].points)[1].name}), Line({list(self.objects[1].lines[0].points)[0].name}, {list(self.objects[1].lines[0].points)[1].name})))')
-    #         if self.objects[0].__class__.__name__ == 'Polygon':
-    #             draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0")')
-    #             draw_data.append(f'SetColor({self.objects[1].name}, "#1565C0")')
-    #
-    #     if len(self.objects) == 1:
-    #         if self.objects[0].__class__.__name__ == 'Segment':
-    #             draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
-    #             draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0")')
-    #         if self.objects[0].__class__.__name__ == 'Angle':
-    #             draw_data.append(f'Delete(Angle(Line({list(self.objects[0].lines[1].points)[0].name}, {list(self.objects[0].lines[1].points)[1].name}), Line({list(self.objects[0].lines[0].points)[0].name}, {list(self.objects[0].lines[0].points)[1].name})))')
-    #         if self.objects[0].__class__.__name__ == 'Polygon':
-    #             draw_data.append(f'SetColor({self.objects[0].name}, "#1565C0")')
-    #
-    #     return draw_data
+    def show_fact(self):
+        draw_data = list()
+        mark_color = "#FF1919"
+
+        if len(self.objects) == 2:
+            if self.objects[0].__class__.__name__ == 'Segment' and self.objects[1].__class__.__name__ == 'Segment':
+                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
+                draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, true)')
+                draw_data.append(f'SetColor({self.objects[0].name}, {mark_color})')
+                draw_data.append(f'SetColor({self.objects[1].name}, {mark_color})')
+            if self.objects[0].__class__.__name__ == 'Angle' and self.objects[1].__class__.__name__ == 'Angle':
+                draw_data.append(f'{self.objects[0].name}=Angle(Line({self.objects[0].rays[0].main_point.name}, {list(self.objects[0].rays[0].points)[0].name}), Line({self.objects[0].rays[1].main_point.name}, {list(self.objects[0].rays[1].points)[0].name}))')
+                draw_data.append(f'{self.objects[1].name}=Angle(Line({self.objects[1].rays[0].main_point.name}, {list(self.objects[1].rays[0].points)[0].name}), Line({self.objects[1].rays[1].main_point.name}, {list(self.objects[1].rays[1].points)[0].name}))')
+            if self.objects[0].__class__.__name__ == 'Polygon' and self.objects[1].__class__.__name__ == 'Polygon':
+                draw_data.append(f'SetColor({self.objects[0].name}, {mark_color})')
+                draw_data.append(f'SetColor({self.objects[1].name}, {mark_color})')
+
+        if len(self.objects) == 1:
+            if self.objects[0].__class__.__name__ == 'Segment':
+                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
+                draw_data.append(f'SetColor({self.objects[0].name}, {mark_color})')
+            if self.objects[0].__class__.__name__ == 'Angle':
+                draw_data.append(f'{self.objects[0].name}=Angle(Line({self.objects[0].rays[0].main_point.name}, {list(self.objects[0].rays[0].points)[0].name}), Line({self.objects[0].rays[1].main_point.name}, {list(self.objects[0].rays[1].points)[0].name}))')
+            if self.objects[0].__class__.__name__ == 'Polygon':
+                draw_data.append(f'SetColor({self.objects[0].name}, {mark_color})')
+
+        return draw_data
+
+    def hide_fact(self):
+        draw_data = list()
+        standart_color = "#1565C0"
+
+        if len(self.objects) == 2:
+            if self.objects[0].__class__.__name__ == 'Segment' and self.objects[1].__class__.__name__ == 'Segment':
+                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
+                draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, false)')
+                draw_data.append(f'SetColor({self.objects[0].name}, {standart_color})')
+                draw_data.append(f'SetColor({self.objects[1].name}, {standart_color})')
+            if self.objects[0].__class__.__name__ == 'Angle' and self.objects[1].__class__.__name__ == 'Angle':
+                draw_data.append(f'Delete({self.objects[0].name})')
+                draw_data.append(f'Delete({self.objects[1].name})')
+            if self.objects[0].__class__.__name__ == 'Polygon' and self.objects[1].__class__.__name__ == 'Polygon':
+                draw_data.append(f'SetColor({self.objects[0].name}, {standart_color})')
+                draw_data.append(f'SetColor({self.objects[1].name}, {standart_color})')
+
+        if len(self.objects) == 1:
+            if self.objects[0].__class__.__name__ == 'Segment':
+                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
+                draw_data.append(f'SetColor({self.objects[0].name}, {standart_color})')
+            if self.objects[0].__class__.__name__ == 'Angle':
+                draw_data.append(f'Delete({self.objects[0].name})')
+            if self.objects[0].__class__.__name__ == 'Polygon':
+                draw_data.append(f'SetColor({self.objects[0].name}, {standart_color})')
+
+        return draw_data
 
 
 points = list()
@@ -620,16 +622,12 @@ def check_angle_in_polygon(A, B, C):
     return A, B, C
 
 
-def UseRelations(objects):
+def create_new_data_in_parser(objects):
     none_count = 0
 
     for obj in objects:
         if not obj.size:
             none_count += 1
-
-    #if seg_check and none_count == len(objects) != 0:
-        #objects[0].size = 3
-        #none_count -= 1
 
     for n in range(none_count):
 
