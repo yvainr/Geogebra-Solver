@@ -1,6 +1,6 @@
 from math import *
 from random import *
-import task_parser as taskp
+import task_parser as tp
 from itertools import combinations
 
 
@@ -237,12 +237,12 @@ def Shift(new_A, new_B, new_C):
 	phi = uniform(-pi, pi)
 	vec = (cos(phi) * 2, sin(phi) * 2)
 
-	if set(taskp.get_points_names_from_list(taskp.polygons[0].points)) != {new_A.name, new_B.name, new_C.name}:
+	if set(tp.get_points_names_from_list(tp.drawer_data.polygons[0].points)) != {new_A.name, new_B.name, new_C.name}:
 		while True:
 			stop = True
 
-			for polygon in taskp.polygons:
-				if set(taskp.get_points_names_from_list(polygon.points)) != {new_A.name, new_B.name, new_C.name}:
+			for polygon in tp.drawer_data.polygons:
+				if set(tp.get_points_names_from_list(polygon.points)) != {new_A.name, new_B.name, new_C.name}:
 
 					if CheckTrianglesIntersection(polygon.points, (new_A, new_B, new_C)):
 						new_A.x += vec[0]
@@ -272,9 +272,9 @@ def PointSymmetryAboutLine(P, l1):
 
 
 def SaveTriangleData(A, B, C):
-	new_A = taskp.find_point_with_name(A.name)
-	new_B = taskp.find_point_with_name(B.name)
-	new_C = taskp.find_point_with_name(C.name)
+	new_A = tp.find_point_with_name(A.name)
+	new_B = tp.find_point_with_name(B.name)
+	new_C = tp.find_point_with_name(C.name)
 
 	if not new_A.x:
 		new_A.x = A.x
@@ -286,9 +286,9 @@ def SaveTriangleData(A, B, C):
 		new_C.x = C.x
 		new_C.y = C.y
 
-	AB = taskp.find_segment_with_points(A.name, B.name)
-	BC = taskp.find_segment_with_points(C.name, B.name)
-	AC = taskp.find_segment_with_points(A.name, C.name)
+	AB = tp.find_segment_with_points(A.name, B.name)
+	BC = tp.find_segment_with_points(C.name, B.name)
+	AC = tp.find_segment_with_points(A.name, C.name)
 
 	if not AB.size:
 		AB.size = Equal(DistanceBetweenPoints(A, B))
@@ -297,9 +297,9 @@ def SaveTriangleData(A, B, C):
 	if not AC.size:
 		AC.size = Equal(DistanceBetweenPoints(A, C))
 
-	CBA = taskp.find_angle_with_points(new_C.name, new_B.name, new_A.name)
-	ACB = taskp.find_angle_with_points(new_A.name, new_C.name, new_B.name)
-	BAC = taskp.find_angle_with_points(new_B.name, new_A.name, new_C.name)
+	CBA = tp.find_angle_with_points(new_C.name, new_B.name, new_A.name)
+	ACB = tp.find_angle_with_points(new_A.name, new_C.name, new_B.name)
+	BAC = tp.find_angle_with_points(new_B.name, new_A.name, new_C.name)
 
 	c = AB.size
 	a = BC.size
