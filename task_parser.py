@@ -492,9 +492,9 @@ def questions_create(text):
                     polygon_2 = find_polygon_with_points(list(question.split()[1]))
 
                     if question.split()[2] == '?':
-                        drawer_data.questions.append(Fact(len(questions), None, 'relation', [polygon_1, polygon_2], None, True))
+                        drawer_data.questions.append(Fact(len(drawer_data.questions), None, 'relation', [polygon_1, polygon_2], None, True))
                     else:
-                        drawer_data.questions.append(Fact(len(questions), None, 'relation', [polygon_1, polygon_2], Fraction(question.split()[2]), True))
+                        drawer_data.questions.append(Fact(len(drawer_data.questions), None, 'relation', [polygon_1, polygon_2], Fraction(question.split()[2]), True))
 
 
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
