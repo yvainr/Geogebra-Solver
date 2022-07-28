@@ -80,16 +80,16 @@ def check_law_of_cos(sides, angles):
     if sides[0] and sides[1] and sides[2]:
         x = 0.5 * ((sides[0] * sides[0]) + (sides[1] * sides[1]) + (sides[2] * sides[2]))
         if angles[0]:
-            n = round((float((x - (sides[0] * sides[0])) / (sides[1] * sides[2]))), 6)
-            if round((cos(radians(angles[0]))), 6) != n:
+            n = round((float((x - (sides[0] * sides[0])) / (sides[1] * sides[2]))), 3)
+            if round((cos(radians(angles[0]))), 3) != n:
                 answer = False
         if angles[1]:
-            n = round((float((x - (sides[1] * sides[1])) / (sides[0] * sides[2]))), 6)
-            if round((cos(radians(angles[1]))), 6) != n:
+            n = round((float((x - (sides[1] * sides[1])) / (sides[0] * sides[2]))), 3)
+            if round((cos(radians(angles[1]))), 3) != n:
                 answer = False
         if angles[2]:
-            n = round((float((x - (sides[2] * sides[2])) / (sides[1] * sides[0]))), 6)
-            if round((cos(radians(angles[2]))), 6) != n:
+            n = round((float((x - (sides[2] * sides[2])) / (sides[1] * sides[0]))), 3)
+            if round((cos(radians(angles[2]))), 3) != n:
                 answer = False
     return answer
 
@@ -129,8 +129,7 @@ def check_triangle(sides, angles):
                         if check_law_of_cos(sides, angles):
                             return True
                         else:
-                            return True
-                            # return 'Error: Incorrect triangle (The angles do not correspond to the sides of the triangle).'
+                            return 'Error: Incorrect triangle (The angles do not correspond to the sides of the triangle).'
                     else:
                         return 'Error: Incorrect triangle (The greater side must be opposite to the greater angle).'
                 else:
