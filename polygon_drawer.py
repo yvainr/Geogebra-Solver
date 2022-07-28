@@ -1,20 +1,23 @@
 import geogebra_html_generator
 import triangle_drawer as triad
-from task_parser import *
+import task_parser as tp
 from math import *
 from itertools import combinations
+from copy import deepcopy
+from check_triangle import check_triangle
+from objects_types import Objects
 
 
 def get_triangle_parameter(A, B, C):
-    AB = find_segment_with_points(A, B).size
-    BC = find_segment_with_points(B, C).size
-    CA = find_segment_with_points(C, A).size
+    AB = tp.find_segment_with_points(A, B).size
+    BC = tp.find_segment_with_points(B, C).size
+    CA = tp.find_segment_with_points(C, A).size
 
     sides, sides_names = [BC, CA, AB], [f"{B}{C}", f"{C}{A}", f"{A}{B}"]
 
-    CBA = find_angle_with_points(C, B, A).size
-    ACB = find_angle_with_points(A, C, B).size
-    BAC = find_angle_with_points(B, A, C).size
+    CBA = tp.find_angle_with_points(C, B, A).size
+    ACB = tp.find_angle_with_points(A, C, B).size
+    BAC = tp.find_angle_with_points(B, A, C).size
 
     angles, angles_names = [BAC, CBA, ACB], [f"{B}{A}{C}", f"{C}{B}{A}", f"{A}{C}{B}"]
 
@@ -22,25 +25,25 @@ def get_triangle_parameter(A, B, C):
 
 
 def draw_polygon(points, realize_data):
-    ans_polygon = f'{find_polygon_with_points(get_points_names_from_list(points)).name}=Polygon('
+    ans_polygon = f'{tp.find_polygon_with_points(tp.get_points_names_from_list(points)).name}=Polygon('
     for point in points:
         realize_data.append(f"{point.name}({triad.Equal(point.x)}, {triad.Equal(point.y)})")
         ans_polygon += f"{point.name}, "
     ans_polygon = ans_polygon[:-2] + ')'
     realize_data.append(ans_polygon)
     for i in range(len(points)):
-        seg = find_segment_with_points(points[i].name, points[i-1].name)
+        seg = tp.find_segment_with_points(points[i].name, points[i-1].name)
         A, B = seg.points
         realize_data.append(f"{seg.name}=Segment({A.name}, {B.name})")
         realize_data.append(f"SetVisibleInView({seg.name}, 1, false)")
 
 
 def draw_specific_points(realize_data):
-    for point in points:
+    for point in tp.draw_data.points:
         if point.specific_properties_point:
-            A = find_point_with_name(point.specific_properties_triangle[0])
-            B = find_point_with_name(point.specific_properties_triangle[1])
-            C = find_point_with_name(point.specific_properties_triangle[2])
+            A = tp.find_point_with_name(point.specific_properties_triangle[0])
+            B = tp.find_point_with_name(point.specific_properties_triangle[1])
+            C = tp.find_point_with_name(point.specific_properties_triangle[2])
 
             for draw_data in triad.SpecificPointGeneration(point.name, point.specific_properties_point, A, B, C):
                 realize_data.append(draw_data)
@@ -79,7 +82,10 @@ def draw_lines_intersections(intersections, realize_data):
 def create_polygon(vertices):
     if len(vertices) == 3:
         A, B, C = vertices
-
+        
+        if type(check_triangle(get_triangle_parameter(A, B, C)[0], get_triangle_parameter(A, B, C)[1])) == str:
+            return check_triangle(get_triangle_parameter(A, B, C)[0], get_triangle_parameter(A, B, C)[1])
+        
         return triad.CreateTriangle(*get_triangle_parameter(A, B, C))
 
     if len(vertices) == 4:
@@ -96,35 +102,43 @@ def create_polygon(vertices):
 
 
 def text_splitter(text):
+  
     realize_data = list()
 
-    points.clear()
-    lines.clear()
-    angles.clear()
-    segments.clear()
-    polygons.clear()
-    facts.clear()
-    questions.clear()
+    tp.points.clear()
+    tp.lines.clear()
+    tp.angles.clear()
+    tp.angles.clear()
+    tp.segments.clear()
+    tp.polygons.clear()
+    tp.facts.clear()
+    tp.questions.clear()
+    tp.task_data = None
+    tp.drawer_data = Objects()
+    tp.solver_data = None
 
     text = text.replace('\r', '').split('\n')
 
     try:
-        polygons_create(text[0])
-        segments_create(text[1])
-        angles_create(text[2])
-        segments_relations_create(text[3])
-        angles_relations_create(text[4])
-        polygons_relations_create(text[5])
-        line_intersection_create(text[6])
-        questions_create(text[7])
+        tp.polygons_create(text[0])
+        tp.segments_create(text[1])
+        tp.angles_create(text[2])
+        tp.segments_relations_create(text[3])
+        tp.angles_relations_create(text[4])
+        tp.polygons_relations_create(text[5])
+        tp.line_intersection_create(text[6])
+        tp.questions_create(text[7])
     except IndexError:
         pass
+    
+    tp.task_data = deepcopy(tp.drawer_data)
+    tp.solver_data = deepcopy(tp.drawer_data)
 
-    for polygon in taskp.polygons:
+    for polygon in tp.drawer_data.polygons:
         try:
-            create_new_data_in_parser(segments)
-            create_new_data_in_parser(angles)
-            ret = create_polygon(get_points_names_from_list(polygon.points))
+            tp.create_new_data_in_parser(tp.drawer_data.segments)
+            tp.create_new_data_in_parser(tp.drawer_data.angles)
+            ret = create_polygon(tp.get_points_names_from_list(polygon.points))
             if type(ret) == str:
                 return ret
 
@@ -132,7 +146,7 @@ def text_splitter(text):
         except IndexError:
             pass
 
-    draw_specific_points(realize_data)
+    # draw_specific_points(realize_data)
 
     try:
         draw_lines_intersections(text[6], realize_data)
