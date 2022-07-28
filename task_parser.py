@@ -1,4 +1,5 @@
 from fractions import Fraction
+from pprint import pprint
 from random import uniform
 from objects_types import Objects
 
@@ -230,7 +231,7 @@ class Fact:
                 draw_data.append(f'SetColor({self.objects[0].name}, {standart_color})')
 
         return draw_data
-    
+
 
 task_data = None
 drawer_data = Objects()
@@ -498,81 +499,80 @@ def questions_create(text):
 
 
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
-def find_segment_with_points(A, B):
+def find_segment_with_points(A, B, data=drawer_data):
     a = find_point_with_name(A)
     b = find_point_with_name(B)
 
-    for seg in drawer_data.segments:
+    for seg in data.segments:
         if {a, b} == seg.points:
             return seg
 
     new_segment = Segment(a, b)
-
-    drawer_data.segments.append(new_segment)
+    data.segments.append(new_segment)
     return new_segment
 
 
 # вспомогательная функция для поиска прямой по точкам на ней, указываются имена точек
-def find_line_with_points(A, B):
+def find_line_with_points(A, B, data=drawer_data):
     a = find_point_with_name(A)
     b = find_point_with_name(B)
 
-    for line in drawer_data.lines:
+    for line in data.lines:
         if {a, b} <= set(line.points):
             return line
 
     new_line = Line({a, b})
-    drawer_data.lines.append(new_line)
+    data.lines.append(new_line)
     return new_line
 
 
 # вспомогательная функция для поиска прямой по отрезку на ней
-def find_line_with_segment(seg):
+def find_line_with_segment(seg, data=drawer_data):
     A, B = seg.points
-    return find_line_with_points(A.name, B.name)
+    return find_line_with_points(A.name, B.name, data)
 
 
 # вспомогательная функция для поиска угла по прямым, его задающим
-def find_angle_with_rays(r1, r2):
-    for angle in drawer_data.angles:
+def find_angle_with_rays(r1, r2, data=drawer_data):
+    for angle in data.angles:
         if angle.rays == [r1, r2]:
             return angle
 
     new_angle = Angle(r1, r2)
-    drawer_data.angles.append(new_angle)
+    data.angles.append(new_angle)
     return new_angle
 
 
-def find_ray_with_points(A, B):
+def find_ray_with_points(A, B, data=drawer_data):
     a = find_point_with_name(A)
     b = find_point_with_name(B)
 
-    for ray in drawer_data.rays:
+    for ray in data.rays:
         if a == ray.main_point and {b} <= set(ray.points):
             return ray
 
     new_ray = Ray(a, {b})
-    drawer_data.rays.append(new_ray)
+    data.rays.append(new_ray)
     return new_ray
 
 
 # вспомогательная функция для поиска угла по точкам
-def find_angle_with_points(A, B, C):
+def find_angle_with_points(A, B, C, data=drawer_data):
     r1 = find_ray_with_points(B, A)
     r2 = find_ray_with_points(B, C)
 
-    for angle in drawer_data.angles:
+    for angle in data.angles:
         if angle.rays == [r1, r2]:
             return angle
 
     new_angle = Angle(r1, r2)
-    drawer_data.angles.append(new_angle)
+    data.angles.append(new_angle)
     return new_angle
 
 
 # вспомогательная функция для поиска многоугольника по его вершинам
-def find_polygon_with_points(points):
-    for polygon in drawer_data.polygons:
+def find_polygon_with_points(points, data=drawer_data):
+    for polygon in data.polygons:
         if set(get_points_names_from_list(polygon.points)) == set(points):
             return polygon
 
@@ -580,18 +580,18 @@ def find_polygon_with_points(points):
     for point in points:
         new_points.append(find_point_with_name(point))
     new_polygon = Polygon(new_points)
-    drawer_data.polygons.append(new_polygon)
+    data.polygons.append(new_polygon)
     return new_polygon
 
 
 # вспомогательная функция для поиска точки по её имени
-def find_point_with_name(A):
-    for point in drawer_data.points:
+def find_point_with_name(A, data=drawer_data):
+    for point in data.points:
         if A == point.name:
             return point
 
     new_point = Point(A)
-    drawer_data.points.append(new_point)
+    data.points.append(new_point)
     return new_point
 
 
