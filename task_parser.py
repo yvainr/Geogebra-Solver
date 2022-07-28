@@ -1,6 +1,7 @@
 from fractions import Fraction
 from pprint import pprint
 from random import uniform
+from objects_types import Objects
 
 
 class Point:
@@ -50,7 +51,7 @@ class Angle:
         self.relations = dict()
         self.difference = dict()
         self.addition = dict()
-        self.name = f'angle_{len(angles)}'
+        self.name = f'angle_{len(drawer_data.angles)}'
 
     def __str__(self):
         str_rays = ''
@@ -230,16 +231,11 @@ class Fact:
                 draw_data.append(f'SetColor({self.objects[0].name}, {standart_color})')
 
         return draw_data
+    
 
-
-points = list()
-lines = list()
-rays = list()
-angles = list()
-segments = list()
-polygons = list()
-facts = list()
-questions = list()
+task_data = None
+drawer_data = Objects()
+solver_data = None
 
 
 def polygons_create(text):
@@ -259,14 +255,14 @@ def polygons_create(text):
                 try:
                     convex = polygon.split()[1]
                     if convex == '*':
-                        polygons.append(Polygon(vertices_class_list, False))
+                        drawer_data.polygons.append(Polygon(vertices_class_list, False))
                     else:
-                        polygons.append(Polygon(vertices_class_list))
+                        drawer_data.polygons.append(Polygon(vertices_class_list))
                 except IndexError:
-                    polygons.append(Polygon(vertices_class_list))
+                    drawer_data.polygons.append(Polygon(vertices_class_list))
 
             if len(vertices_list) == 3:
-                polygons.append(Polygon(vertices_class_list))
+                drawer_data.polygons.append(Polygon(vertices_class_list))
 
             # if len(vertices_list) == 1:
             #     S = vertices_class_list[0]
@@ -468,10 +464,10 @@ def questions_create(text):
 
                 if len(question.split()[0]) == 2:
                     seg = find_segment_with_points(question.split()[0][0], question.split()[0][1])
-                    questions.append(Fact(len(questions), None, 'size', [seg], val, True))
+                    drawer_data.questions.append(Fact(len(drawer_data.questions), None, 'size', [seg], val, True))
                 if len(question.split()[0]) == 3:
                     ang = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2]))
-                    questions.append(Fact(len(questions), None, 'size', [ang], val, True))
+                    drawer_data.questions.append(Fact(len(drawer_data.questions), None, 'size', [ang], val, True))
 
             if len(question.split()) == 3:
                 if len(question.split()[0]) == 2 and len(question.split()[1]) == 2:
@@ -479,27 +475,27 @@ def questions_create(text):
                     seg_2 = find_segment_with_points(question.split()[1][0], question.split()[1][1])
 
                     if question.split()[2] == '?':
-                        questions.append(Fact(len(questions), None, 'relation', [seg_1, seg_2], None, True))
+                        drawer_data.questions.append(Fact(len(drawer_data.questions), None, 'relation', [seg_1, seg_2], None, True))
                     else:
-                        questions.append(Fact(len(questions), None, 'relation', [seg_1, seg_2], Fraction(question.split()[2]), True))
+                        drawer_data.questions.append(Fact(len(drawer_data.questions), None, 'relation', [seg_1, seg_2], Fraction(question.split()[2]), True))
 
                 elif question.split()[0][0] != '/' and len(question.split()[0]) == 3 and len(question.split()[1]) == 3:
                     ang_1 = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2]))
                     ang_2 = find_angle_with_points(*check_angle_in_polygon(question.split()[1][0], question.split()[1][1], question.split()[1][2]))
 
                     if question.split()[2] == '?':
-                        questions.append(Fact(len(questions), None, 'relation', [ang_1, ang_2], None, True))
+                        drawer_data.questions.append(Fact(len(drawer_data.questions), None, 'relation', [ang_1, ang_2], None, True))
                     else:
-                        questions.append(Fact(len(questions), None, 'relation', [ang_1, ang_2], Fraction(question.split()[2]), True))
+                        drawer_data.questions.append(Fact(len(drawer_data.questions), None, 'relation', [ang_1, ang_2], Fraction(question.split()[2]), True))
 
                 else:
                     polygon_1 = find_polygon_with_points(list(question.split()[0])[1:])
                     polygon_2 = find_polygon_with_points(list(question.split()[1]))
 
                     if question.split()[2] == '?':
-                        questions.append(Fact(len(questions), None, 'relation', [polygon_1, polygon_2], None, True))
+                        drawer_data.questions.append(Fact(len(questions), None, 'relation', [polygon_1, polygon_2], None, True))
                     else:
-                        questions.append(Fact(len(questions), None, 'relation', [polygon_1, polygon_2], Fraction(question.split()[2]), True))
+                        drawer_data.questions.append(Fact(len(questions), None, 'relation', [polygon_1, polygon_2], Fraction(question.split()[2]), True))
 
 
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
@@ -507,12 +503,13 @@ def find_segment_with_points(A, B):
     a = find_point_with_name(A)
     b = find_point_with_name(B)
 
-    for seg in segments:
+    for seg in drawer_data.segments:
         if {a, b} == seg.points:
             return seg
 
     new_segment = Segment(a, b)
-    segments.append(new_segment)
+
+    drawer_data.segments.append(new_segment)
     return new_segment
 
 
@@ -521,12 +518,12 @@ def find_line_with_points(A, B):
     a = find_point_with_name(A)
     b = find_point_with_name(B)
 
-    for line in lines:
+    for line in drawer_data.lines:
         if {a, b} <= set(line.points):
             return line
 
     new_line = Line({a, b})
-    lines.append(new_line)
+    drawer_data.lines.append(new_line)
     return new_line
 
 
@@ -538,12 +535,12 @@ def find_line_with_segment(seg):
 
 # вспомогательная функция для поиска угла по прямым, его задающим
 def find_angle_with_rays(r1, r2):
-    for angle in angles:
+    for angle in drawer_data.angles:
         if angle.rays == [r1, r2]:
             return angle
 
     new_angle = Angle(r1, r2)
-    angles.append(new_angle)
+    drawer_data.angles.append(new_angle)
     return new_angle
 
 
@@ -551,12 +548,12 @@ def find_ray_with_points(A, B):
     a = find_point_with_name(A)
     b = find_point_with_name(B)
 
-    for ray in rays:
+    for ray in drawer_data.rays:
         if a == ray.main_point and {b} <= set(ray.points):
             return ray
 
     new_ray = Ray(a, {b})
-    rays.append(new_ray)
+    drawer_data.rays.append(new_ray)
     return new_ray
 
 
@@ -565,18 +562,18 @@ def find_angle_with_points(A, B, C):
     r1 = find_ray_with_points(B, A)
     r2 = find_ray_with_points(B, C)
 
-    for angle in angles:
+    for angle in drawer_data.angles:
         if angle.rays == [r1, r2]:
             return angle
 
     new_angle = Angle(r1, r2)
-    angles.append(new_angle)
+    drawer_data.angles.append(new_angle)
     return new_angle
 
 
 # вспомогательная функция для поиска многоугольника по его вершинам
 def find_polygon_with_points(points):
-    for polygon in polygons:
+    for polygon in drawer_data.polygons:
         if set(get_points_names_from_list(polygon.points)) == set(points):
             return polygon
 
@@ -584,18 +581,18 @@ def find_polygon_with_points(points):
     for point in points:
         new_points.append(find_point_with_name(point))
     new_polygon = Polygon(new_points)
-    polygons.append(new_polygon)
+    drawer_data.polygons.append(new_polygon)
     return new_polygon
 
 
 # вспомогательная функция для поиска точки по её имени
 def find_point_with_name(A):
-    for point in points:
+    for point in drawer_data.points:
         if A == point.name:
             return point
 
     new_point = Point(A)
-    points.append(new_point)
+    drawer_data.points.append(new_point)
     return new_point
 
 
@@ -609,7 +606,7 @@ def get_points_names_from_list(points_list):
 
 
 def check_angle_in_polygon(A, B, C):
-    for polygon in polygons:
+    for polygon in drawer_data.polygons:
         for i in range(len(polygon.points)):
             uA, uB, uC = polygon.points[i - 2].name, polygon.points[i - 1].name, polygon.points[i].name
 
