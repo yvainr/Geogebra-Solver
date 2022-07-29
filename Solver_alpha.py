@@ -420,7 +420,7 @@ def solving_process():
     global ind, facts_indexes, not_none_angles
 
     first()
-    q_indexes = set([])
+    q_indexes = set()
 
     while len(q_indexes) != len(tp.solver_data.questions):
         for q in tp.solver_data.questions:
@@ -430,7 +430,7 @@ def solving_process():
         fix_all_angles()
         fix_all_triangles()
 
-    return_facts = {}
+    return_facts = dict()
     for q_ind in q_indexes:
         return_facts[tp.solver_data.facts[q_ind]] = return_roots(q_ind)
 
