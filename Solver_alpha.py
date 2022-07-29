@@ -61,10 +61,15 @@ def first():
 
 
 # Находит факт по объектам в нём (если strict - то конкретно с этими объектами, иначе он находит факт где мы находим значение этого объекта)
-def find_in_facts_with_obj(obj, not_strict=False):
+def find_in_facts_with_obj(obj, not_strict=False, extra_type = None):
     if not not_strict:
         for x in tp.solver_data.facts:
             if set(x.objects) == set(obj):
+                return x.id
+            
+    if not_strict == "extra":
+        for x in tp.solver_data.facts:
+            if set(x.objects) == set(obj) and extra_type == x.fact_type:
                 return x.id
     else:
         for x in tp.solver_data.facts:
@@ -80,6 +85,12 @@ def update_facts(ind, fact_obj, value, roofs, reason):
         tp.solver_data.facts[-1].root_facts.add(roof)
     ind += 1
 
+
+# def relations():
+#     for ang1 in not_none_angles:
+#         for ang2 in tp.solver_data.angles:
+#             if not find_in_facts_with_obj(obj, not_strict=False, extra_type = None)
+                
 
 # Обсчитывает вертикальные углы
 def fix_vertical_angles():
@@ -378,14 +389,10 @@ def return_roots(ind):
             roots.append(index)
         current_index = new_indexes
         if len(upd_roots) == 0:
-            roots.reverse()
+            roots.sort()
             n_roots = []
-            root_main = set()
-            for key in roots:
-                if key not in root_main:
-                    root_main.add(key)
-                    n_roots.append(tp.solver_data.facts[key])
-
+            for root in roots:
+                n_roots.append(tp.solver_data.facts[root])
             return n_roots
 
 
@@ -403,10 +410,6 @@ def beautiful_object(object):
                 if p2 != p1:
                     for p3 in tp.solver_data.points:
                         if p3 != p1 and p3 != p2:
-
-                            print(p1.name, p2.name, p3.name)
-                            print(object)
-                            print(tp.find_angle_with_points(p1.name, p2.name, p3.name, tp.solver_data))
                             if tp.find_angle_with_points(p1.name, p2.name, p3.name, tp.solver_data) == object:
                                 return (p1.name + p2.name + p3.name)
 
@@ -450,23 +453,12 @@ def solving_process():
     first()
     q_indexes = set()
 
-    for point in tp.solver_data.points:
-        print(point)
-
-    for ang in tp.solver_data.angles:
-        print(ang)
-
-    for seg in tp.solver_data.segments:
-        print(seg)
-
     while len(q_indexes) != len(tp.solver_data.questions):
         for q in tp.solver_data.questions:
             if find_ans(q):
                 q_indexes.add(find_ans(q))
-
         fix_all_angles()
         fix_all_triangles()
-        break
 
     return_facts = dict()
     for q_ind in q_indexes:
