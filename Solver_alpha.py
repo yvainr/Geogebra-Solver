@@ -1,4 +1,4 @@
-from task_parser import*
+import task_parser as tp
 
 Proportion_theorem = True
 Cos_theorem_allowed = True
@@ -16,84 +16,84 @@ not_none_angles = []
 def first():
     global ind
     #Перебирает тройки и двойки точек, проверяет существует ли прямая (отрезок) с данными двумя точками, существует ли треугольник с этими тремя точками
-    for p1 in solver_data.points:
-        for p2 in solver_data.points:
+    for p1 in tp.solver_data.points:
+        for p2 in tp.solver_data.points:
             if p1 != p2:
                 further_line = True
                 further_segment = True
                 further_ray = True
-                for p3 in solver_data.points:
+                for p3 in tp.solver_data.points:
                     if p3 != p1 and p3 != p2:
                         further = True
-                        for polyg in solver_data.polygons:
+                        for polyg in tp.solver_data.polygons:
                             if len(polyg.points) == 3:
                                 if p1 in polyg.points and p2 in polyg.points and p3 in polyg.points:
                                     further = False
                                     break
                         if further:
-                            solver_data.polygons.append(Polygon([p1, p2, p3]))
-                for line in solver_data.lines:
+                            tp.solver_data.polygons.append(tp.Polygon([p1, p2, p3]))
+                for line in tp.solver_data.lines:
                     if {p1, p2} == line.points:
                         further_line = False
                         break
                 if further_line:
-                    solver_data.lines.append(Line({p1, p2}))
+                    tp.solver_data.lines.append(tp.Line({p1, p2}))
 
-                for segment in solver_data.segments:
+                for segment in tp.solver_data.segments:
                     if {p1, p2} == segment.points:
                         further_segment = False
                         break
                 if further_segment:
-                    solver_data.segments.append(Segment(p1, p2))
+                    tp.solver_data.segments.append(tp.Segment(p1, p2))
 
-                for ray in solver_data.rays:
+                for ray in tp.solver_data.rays:
                     if p1 == ray.main_point and p2 in ray.points:
                         further_ray = False
                         break
                 if further_ray:
-                    solver_data.rays.append(Ray(p1, {p2}))
+                    tp.solver_data.rays.append(tp.Ray(p1, {p2}))
 
     #Перебирает пары прямых, проверяет существеут ли между ними угол, если нет - добавляет.
-    for l1 in solver_data.rays:
-        for l2 in solver_data.rays:
+    for l1 in tp.solver_data.rays:
+        for l2 in tp.solver_data.rays:
             futher_angle = True
             if l1 != l2:
-                for ang in solver_data.angles:
+                for ang in tp.solver_data.angles:
                     if [l1, l2] == ang.rays:
                         futher_angle = False
                 if futher_angle:
-                    solver_data.angles.append(Angle(l1, l2))
-                    solver_data.angles.append(Angle(l2, l1))
+                    tp.solver_data.angles.append(tp.Angle(l1, l2))
+                    tp.solver_data.angles.append(tp.Angle(l2, l1))
     #Добавляет факты с отрезками и углами
-    for ang in solver_data.angles:
+    for ang in tp.solver_data.angles:
         if ang.size:
             not_none_angles.append(ang)
-            solver_data.facts.append(Fact(ind, -1, "size", [ang], ang.size))
+            tp.solver_data.facts.append(tp.Fact(ind, -1, "size", [ang], ang.size))
             ind += 1
 
-    for seg in solver_data.segments:
+    for seg in tp.solver_data.segments:
         if seg.size:
-            solver_data.facts.append(Fact(ind, -1, "size", [seg], seg.size))
+            tp.solver_data.facts.append(tp.Fact(ind, -1, "size", [seg], seg.size))
             ind += 1
 
 
 #Находит факт по объектам в нём (если strict - то конкретно с этими объектами, иначе он находит факт где мы находим значение этого объекта)
 def find_in_facts_with_obj(obj, not_strict = False):
     if not not_strict:
-        for x in solver_data.facts:
+        for x in tp.solver_data.facts:
             if set(x.objects) == set(obj):
                 return x.id
     else:
-        for x in solver_data.facts:
+        for x in tp.solver_data.facts:
             if x.objects[0] == obj[0]:
                 return x.id
 
 #Обновляет факты
 def update_facts(ind, fact_obj, value, roofs, reason):
-    solver_data.facts.append(Fact(ind, -1, reason, fact_obj, value))
+    tp.solver_data.facts.append(tp.Fact(ind, -1, reason, fact_obj, value))
     for roof in roofs:
-        solver_data.facts[roof].following_facts.add(ind)
-        solver_data.facts[-1].root_facts.add(roof)
+        tp.solver_data.facts[roof].following_facts.add(ind)
+        tp.solver_data.facts[-1].root_facts.add(roof)
     ind += 1
 
 
@@ -101,7 +101,7 @@ def update_facts(ind, fact_obj, value, roofs, reason):
 def fix_vertical_angles():
     #Проверяет угол (не None) и если смежный с ним не определен - считает его
     for ang_1 in not_none_angles:
-        for ang_2 in solver_data.angles:
+        for ang_2 in tp.solver_data.angles:
             if ang_1 != ang_2:
                 lines1 = ang_1.rays
                 lines2 = ang_2.rays
@@ -123,7 +123,7 @@ def fix_all_angles():
     for ang1 in not_none_angles:
         for ang2 in not_none_angles:
             if ang1 != ang2:
-                for ang3 in solver_data.angles:
+                for ang3 in tp.solver_data.angles:
                     if ang3 != ang2 and ang3 != ang1 and not ang3:
                         lines1 = ang1.rays
                         lines2 = ang2.rays
@@ -142,16 +142,16 @@ def fix_all_angles():
 
 #Выдает все данные об этом треугольнике
 def search_triangle(triangle):
-    A, B, C = triangle.points[0], triangle.points[1], triangle.points[2]
 
-    AB = find_segment_with_points(A.name, B.name)
+    A, B, C = tp.find_point_with_name(triangle.points[0].name, tp.solver_data), tp.find_point_with_name(triangle.points[1].name, tp.solver_data), tp.find_point_with_name(triangle.points[2].name, tp.solver_data)
 
-    BC = find_segment_with_points(B.name, C.name)
-    CA = find_segment_with_points(C.name, A.name)
+    AB = tp.find_segment_with_points(A.name, B.name, tp.solver_data)
+    BC = tp.find_segment_with_points(B.name, C.name, tp.solver_data)
+    CA = tp.find_segment_with_points(C.name, A.name, tp.solver_data)
 
-    ABC = find_angle_with_points(C.name, B.name, A.name)
-    BCA = find_angle_with_points(B.name, A.name, C.name)
-    CAB = find_angle_with_points(A.name, C.name, B.name)
+    ABC = tp.find_angle_with_points(C.name, B.name, A.name, tp.solver_data)
+    BCA = tp.find_angle_with_points(B.name, A.name, C.name, tp.solver_data)
+    CAB = tp.find_angle_with_points(A.name, C.name, B.name, tp.solver_data)
 
     return [A, B, C, AB, BC, CA, ABC, BCA, CAB]
 
@@ -232,7 +232,7 @@ def simil_them(AB, A1B1, k, fact):
 
 #Находит все стороны и углы, которые может из равнобедренности, во всех р/б треугольниках
 def isosceles_triangles():
-    for triangle in solver_data.polygons:
+    for triangle in tp.solver_data.polygons:
         if len(triangle.points) == 3:
             [A, B, C, AB, BC, CA, ABC, BCA, CAB] = search_triangle(triangle)
             correct_size(ABC, BCA, AB, CA)
@@ -263,12 +263,15 @@ def consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C
 
 #Проверяет все возможные варианты подобия трекугольников, если вершины для подобия указаны в правильном порядке
 def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA, BCA, CAB, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1):
-    for data in solver_data.facts:
+    for data in tp.solver_data.facts:
         if data.objects == [triangle1, triangle2] or data.objects == [triangle2, triangle1]:
             return 0
 
+
     if (similarity_if_not_None(AB, A1B1) == similarity_if_not_None(BC, B1C1) and equal(ABC, A1B1C1) and similarity_if_not_None(AB, A1B1)):
+
         roots = {find_in_facts_with_obj([AB], "not"), find_in_facts_with_obj([ABC], "not"),  find_in_facts_with_obj([BC], "not"),find_in_facts_with_obj([A1B1], "not"), find_in_facts_with_obj([A1B1C1], "not"), find_in_facts_with_obj([B1C1], "not")}
+
 
         update_facts(ind, [triangle1, triangle2], AB.size / A1B1.size , roots, "relation")
 
@@ -313,9 +316,9 @@ def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA,
 #Проверяет все треугольники и ищет среди них подобные и равные перебирая вершины одного из треугольников всеми возможными способами
 def fix_all_triangles():
     isosceles_triangles()
-    for triangle1 in solver_data.polygons:
+    for triangle1 in tp.solver_data.polygons:
         if len(triangle1.points) == 3:
-            for triangle2 in solver_data.polygons:
+            for triangle2 in tp.solver_data.polygons:
                 if len(triangle2.points) == 3 and triangle1 != triangle2:
                     [A, B, C, AB, BC, CA, ABC, BCA, CAB] = search_triangle(triangle1)
                     [A1, B1, C1, A1B1, B1C1, C1A1, A1B1C1, B1C1A1, C1A1B1] = search_triangle(triangle2)
@@ -330,24 +333,21 @@ def fix_all_triangles():
 
 #Поиск решения вопроса среди фактов
 def find_ans(q):
-    for fact in solver_data.facts:
+    for fact in tp.solver_data.facts:
         if fact.objects == q.objects:
             return fact.id
     return None
 
-#Ответ в виде словаря, в котором ключи - сами вопросы, значения - факты доказывающие этот вопрос, лежащие
-ans = {}
-
 #Возвращает корни данного факта
 def return_roots(ind):
     roots = []
-    current_index = solver_data.facts[ind].root_facts
+    current_index = tp.solver_data.facts[ind].root_facts
     upd_roots = [0]
     while len(upd_roots) != 0:
         new_indexes = set()
         upd_roots = []
         for index in current_index:
-            new_indexes &= solver_data.facts[index].root_facts
+            new_indexes &= tp.solver_data.facts[index].root_facts
             upd_roots.append(index)
             roots.append(index)
         current_index = new_indexes
@@ -358,26 +358,26 @@ def return_roots(ind):
             for key in roots:
                 if key not in root_main:
                     root_main.add(key)
-                    n_roots.append(solver_data.facts[key])
+                    n_roots.append(tp.solver_data.facts[key])
 
             return n_roots
 
 
 #Делает имя объекта красивым
 def beautiful_object(object):
-    if type(object) == type(solver_data.segments[0]) or type(object) == type(solver_data.polygons[0]):
+    if type(object) == type(tp.solver_data.segments[0]) or type(object) == type(tp.solver_data.polygons[0]):
         name = ""
         for point in object.points:
             name += point.name
         return name
 
-    elif type(object) == type(solver_data.angles[0]):
-        for p1 in solver_data.points:
-            for p2 in solver_data.points:
+    elif type(object) == type(tp.solver_data.angles[0]):
+        for p1 in tp.solver_data.points:
+            for p2 in tp.solver_data.points:
                 if p2 != p1:
-                    for p3 in solver_data.points:
+                    for p3 in tp.solver_data.points:
                         if p3 != p1 and p3 != p2:
-                            if find_angle_with_points(p1.name, p2.name, p3.name) == object:
+                            if tp.find_angle_with_points(p1.name, p2.name, p3.name, tp.solver_data) == object:
                                 return (p1.name + p2.name + p3.name)
 
 
@@ -386,7 +386,7 @@ def beautiful_object(object):
 def beautiful_fact(fact):
     obj = fact.objects
     if fact.fact_type == "relation":
-        if type(obj[0]) != type(solver_data.polygons[0]):
+        if type(obj[0]) != type(tp.solver_data.polygons[0]):
             return (f"{beautiful_object(obj[0])} / {beautiful_object(obj[1])} = {fact.value}")
         else:
             return (f"{beautiful_object(obj[0])} similars {beautiful_object(obj[1])} with ratio {fact.value}")
@@ -406,7 +406,7 @@ def to_str(fact, roots=True):
         out += beautiful_fact(fact)
         nlist = []
         for root in fact.root_facts:
-            nlist.append(f"{beautiful_fact(solver_data.facts[root])}")
+            nlist.append(f"{beautiful_fact(tp.solver_data.facts[root])}")
         if len(nlist) != 0:
             out += " because of: "
             out += ", ".join(nlist)
@@ -418,21 +418,23 @@ def to_str(fact, roots=True):
 #Сам процесс решения, проверяет все ли вопросы учтены, выводит нужные факты, формирует словарик с нужными фактами
 def solving_process():
     global ind, facts_indexes, not_none_angles
+
     first()
     q_indexes = set([])
 
-    while len(q_indexes) != len(solver_data.questions):
-        for q in solver_data.questions:
+    while len(q_indexes) != len(tp.solver_data.questions):
+        for q in tp.solver_data.questions:
             if find_ans(q):
                 q_indexes.add(find_ans(q))
+
         fix_all_angles()
         fix_all_triangles()
 
     return_facts = {}
     for q_ind in q_indexes:
-        return_facts[solver_data.facts[q_ind]] = return_roots(q_ind)
+        return_facts[tp.solver_data.facts[q_ind]] = return_roots(q_ind)
 
-    for fact in solver_data.facts:
+    for fact in tp.solver_data.facts:
         print(to_str(fact))
 
     return return_facts
