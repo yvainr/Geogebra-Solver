@@ -3,9 +3,8 @@ import triangle_drawer as triad
 import task_parser as tp
 from math import *
 from itertools import combinations
-from copy import deepcopy
 from check_triangle import check_triangle
-from objects_types import Objects
+from objects_types import Objects, create_objects_copy
 
 
 def get_triangle_parameter(A, B, C):
@@ -123,8 +122,8 @@ def text_splitter(text):
     except IndexError:
         pass
     
-    tp.task_data = deepcopy(tp.drawer_data)
-    tp.solver_data = deepcopy(tp.drawer_data)
+    tp.task_data = create_objects_copy(tp.drawer_data)
+    tp.solver_data = create_objects_copy(tp.drawer_data)
 
     for polygon in tp.drawer_data.polygons:
         try:
