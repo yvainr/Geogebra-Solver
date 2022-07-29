@@ -505,9 +505,9 @@ def questions_create(text):
 def find_segment_with_points(A, B, data=None):
     if not data:
         data = drawer_data
-        
-    a = find_point_with_name(A)
-    b = find_point_with_name(B)
+
+    a = find_point_with_name(A, data)
+    b = find_point_with_name(B, data)
 
     for seg in data.segments:
         if {a, b} == seg.points:
@@ -523,8 +523,8 @@ def find_line_with_points(A, B, data=None):
     if not data:
         data = drawer_data
 
-    a = find_point_with_name(A)
-    b = find_point_with_name(B)
+    a = find_point_with_name(A, data)
+    b = find_point_with_name(B, data)
 
     for line in data.lines:
         if {a, b} <= set(line.points):
@@ -562,8 +562,8 @@ def find_ray_with_points(A, B, data=None):
     if not data:
         data = drawer_data
 
-    a = find_point_with_name(A)
-    b = find_point_with_name(B)
+    a = find_point_with_name(A, data)
+    b = find_point_with_name(B, data)
 
     for ray in data.rays:
         if a == ray.main_point and {b} <= set(ray.points):
@@ -579,8 +579,8 @@ def find_angle_with_points(A, B, C, data=None):
     if not data:
         data = drawer_data
 
-    r1 = find_ray_with_points(B, A)
-    r2 = find_ray_with_points(B, C)
+    r1 = find_ray_with_points(B, A, data)
+    r2 = find_ray_with_points(B, C, data)
 
     for angle in data.angles:
         if angle.rays == [r1, r2]:
