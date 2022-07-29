@@ -4,7 +4,7 @@ import task_parser as tp
 from math import *
 from itertools import combinations
 from check_triangle import check_triangle
-from objects_types import Objects, create_objects_copy
+from objects_types import Objects
 
 
 def get_triangle_parameter(A, B, C):
@@ -104,9 +104,9 @@ def text_splitter(text):
   
     realize_data = list()
 
-    tp.task_data = None
+    tp.task_data = Objects()
     tp.drawer_data = Objects()
-    tp.solver_data = None
+    tp.solver_data = Objects()
 
     text = text.replace('\r', '').split('\n')
 
@@ -121,9 +121,6 @@ def text_splitter(text):
         tp.questions_create(text[7])
     except IndexError:
         pass
-    
-    tp.task_data = create_objects_copy(tp.drawer_data)
-    tp.solver_data = create_objects_copy(tp.drawer_data)
 
     for polygon in tp.drawer_data.polygons:
         try:
