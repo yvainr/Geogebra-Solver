@@ -44,13 +44,17 @@ class Angle:
     def __init__(self,
                  ray_one,
                  ray_two,
-                 size=None):
+                 size=None,
+                 name=None):
         self.rays = [ray_one, ray_two]
         self.size = size
         self.relations = dict()
         self.difference = dict()
         self.addition = dict()
-        self.name = f'angle_{len(drawer_data.angles)}'
+        if name:
+            self.name = name
+        if not name:
+            self.name = f'angle_{len(drawer_data.angles)}'
 
     def __str__(self):
         str_rays = ''
@@ -59,7 +63,7 @@ class Angle:
         str_addition = ''
 
         for ray in self.rays:
-            str_rays += f' {get_points_names_from_list(ray.points)}'
+            str_rays += f' {[ray.main_point.name] + get_points_names_from_list(ray.points)}'
 
         for rel in self.relations:
             str_relations += f'{get_points_names_from_list(rel.lines[0].points)} {get_points_names_from_list(rel.lines[1].points)} {self.relations[rel]} '
