@@ -181,7 +181,7 @@ class Fact:
 
     def show_fact(self):
         draw_data = list()
-        mark_color = "#FF1919"
+        mark_color = "#С80000"
 
         if len(self.objects) == 2:
             if self.objects[0].__class__.__name__ == 'Segment' and self.objects[1].__class__.__name__ == 'Segment':
