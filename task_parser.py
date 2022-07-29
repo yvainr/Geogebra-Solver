@@ -181,29 +181,29 @@ class Fact:
 
     def show_fact(self):
         draw_data = list()
-        mark_color = "#С80000"
+        mark_color = "#FF1919"
 
         if len(self.objects) == 2:
             if self.objects[0].__class__.__name__ == 'Segment' and self.objects[1].__class__.__name__ == 'Segment':
                 draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
                 draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, true)')
-                draw_data.append(f'SetColor({self.objects[0].name}, {mark_color})')
-                draw_data.append(f'SetColor({self.objects[1].name}, {mark_color})')
+                draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
+                draw_data.append(f'SetColor({self.objects[1].name}, "{mark_color}")')
             if self.objects[0].__class__.__name__ == 'Angle' and self.objects[1].__class__.__name__ == 'Angle':
                 draw_data.append(f'{self.objects[0].name}=Angle(Line({self.objects[0].rays[0].main_point.name}, {list(self.objects[0].rays[0].points)[0].name}), Line({self.objects[0].rays[1].main_point.name}, {list(self.objects[0].rays[1].points)[0].name}))')
                 draw_data.append(f'{self.objects[1].name}=Angle(Line({self.objects[1].rays[0].main_point.name}, {list(self.objects[1].rays[0].points)[0].name}), Line({self.objects[1].rays[1].main_point.name}, {list(self.objects[1].rays[1].points)[0].name}))')
             if self.objects[0].__class__.__name__ == 'Polygon' and self.objects[1].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, {mark_color})')
-                draw_data.append(f'SetColor({self.objects[1].name}, {mark_color})')
+                draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
+                draw_data.append(f'SetColor({self.objects[1].name}, "{mark_color}")')
 
         if len(self.objects) == 1:
             if self.objects[0].__class__.__name__ == 'Segment':
                 draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
-                draw_data.append(f'SetColor({self.objects[0].name}, {mark_color})')
+                draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
             if self.objects[0].__class__.__name__ == 'Angle':
                 draw_data.append(f'{self.objects[0].name}=Angle(Line({self.objects[0].rays[0].main_point.name}, {list(self.objects[0].rays[0].points)[0].name}), Line({self.objects[0].rays[1].main_point.name}, {list(self.objects[0].rays[1].points)[0].name}))')
             if self.objects[0].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, {mark_color})')
+                draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
 
         return draw_data
 
@@ -215,23 +215,23 @@ class Fact:
             if self.objects[0].__class__.__name__ == 'Segment' and self.objects[1].__class__.__name__ == 'Segment':
                 draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
                 draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, false)')
-                draw_data.append(f'SetColor({self.objects[0].name}, {standart_color})')
-                draw_data.append(f'SetColor({self.objects[1].name}, {standart_color})')
+                draw_data.append(f'SetColor({self.objects[0].name}, "{standart_color}")')
+                draw_data.append(f'SetColor({self.objects[1].name}, "{standart_color}")')
             if self.objects[0].__class__.__name__ == 'Angle' and self.objects[1].__class__.__name__ == 'Angle':
                 draw_data.append(f'Delete({self.objects[0].name})')
                 draw_data.append(f'Delete({self.objects[1].name})')
             if self.objects[0].__class__.__name__ == 'Polygon' and self.objects[1].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, {standart_color})')
-                draw_data.append(f'SetColor({self.objects[1].name}, {standart_color})')
+                draw_data.append(f'SetColor({self.objects[0].name}, "{standart_color}")')
+                draw_data.append(f'SetColor({self.objects[1].name}, "{standart_color}")')
 
         if len(self.objects) == 1:
             if self.objects[0].__class__.__name__ == 'Segment':
                 draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
-                draw_data.append(f'SetColor({self.objects[0].name}, {standart_color})')
+                draw_data.append(f'SetColor({self.objects[0].name}, "{standart_color}")')
             if self.objects[0].__class__.__name__ == 'Angle':
                 draw_data.append(f'Delete({self.objects[0].name})')
             if self.objects[0].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, {standart_color})')
+                draw_data.append(f'SetColor({self.objects[0].name}, "{standart_color}")')
 
         return draw_data
 
