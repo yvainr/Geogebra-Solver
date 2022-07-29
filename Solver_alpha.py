@@ -54,16 +54,16 @@ def first():
                     tp.solver_data.rays.append(tp.Ray(p1, {p2}))
 
     #Перебирает пары прямых, проверяет существеут ли между ними угол, если нет - добавляет.
-    for l1 in tp.solver_data.rays:
-        for l2 in tp.solver_data.rays:
-            futher_angle = True
-            if l1 != l2:
-                for ang in tp.solver_data.angles:
-                    if [l1, l2] == ang.rays:
-                        futher_angle = False
-                if futher_angle:
-                    tp.solver_data.angles.append(tp.Angle(l1, l2))
-                    tp.solver_data.angles.append(tp.Angle(l2, l1))
+    for r1 in tp.solver_data.rays:
+        for r2 in tp.solver_data.rays:
+            if r1 != r2:
+                for angle in tp.solver_data.angles:
+                    if [r1, r2] == angle.rays:
+                        break
+                else:
+                    tp.solver_data.angles.append(tp.Angle(r1, r2, None, f'angle_{len(tp.solver_data.angles)}'))
+                    tp.solver_data.angles.append(tp.Angle(r2, r1, None, f'angle_{len(tp.solver_data.angles)}'))
+                    
     #Добавляет факты с отрезками и углами
     for ang in tp.solver_data.angles:
         if ang.size:
