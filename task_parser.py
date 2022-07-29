@@ -502,7 +502,10 @@ def questions_create(text):
 
 
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
-def find_segment_with_points(A, B, data=drawer_data):
+def find_segment_with_points(A, B, data=None):
+    if not data:
+        data = drawer_data
+        
     a = find_point_with_name(A)
     b = find_point_with_name(B)
 
@@ -516,7 +519,10 @@ def find_segment_with_points(A, B, data=drawer_data):
 
 
 # вспомогательная функция для поиска прямой по точкам на ней, указываются имена точек
-def find_line_with_points(A, B, data=drawer_data):
+def find_line_with_points(A, B, data=None):
+    if not data:
+        data = drawer_data
+
     a = find_point_with_name(A)
     b = find_point_with_name(B)
 
@@ -530,13 +536,19 @@ def find_line_with_points(A, B, data=drawer_data):
 
 
 # вспомогательная функция для поиска прямой по отрезку на ней
-def find_line_with_segment(seg, data=drawer_data):
+def find_line_with_segment(seg, data=None):
+    if not data:
+        data = drawer_data
+
     A, B = seg.points
     return find_line_with_points(A.name, B.name, data)
 
 
 # вспомогательная функция для поиска угла по прямым, его задающим
-def find_angle_with_rays(r1, r2, data=drawer_data):
+def find_angle_with_rays(r1, r2, data=None):
+    if not data:
+        data = drawer_data
+
     for angle in data.angles:
         if angle.rays == [r1, r2]:
             return angle
@@ -546,7 +558,10 @@ def find_angle_with_rays(r1, r2, data=drawer_data):
     return new_angle
 
 
-def find_ray_with_points(A, B, data=drawer_data):
+def find_ray_with_points(A, B, data=None):
+    if not data:
+        data = drawer_data
+
     a = find_point_with_name(A)
     b = find_point_with_name(B)
 
@@ -560,7 +575,10 @@ def find_ray_with_points(A, B, data=drawer_data):
 
 
 # вспомогательная функция для поиска угла по точкам
-def find_angle_with_points(A, B, C, data=drawer_data):
+def find_angle_with_points(A, B, C, data=None):
+    if not data:
+        data = drawer_data
+
     r1 = find_ray_with_points(B, A)
     r2 = find_ray_with_points(B, C)
 
@@ -574,7 +592,10 @@ def find_angle_with_points(A, B, C, data=drawer_data):
 
 
 # вспомогательная функция для поиска многоугольника по его вершинам
-def find_polygon_with_points(points, data=drawer_data):
+def find_polygon_with_points(points, data=None):
+    if not data:
+        data = drawer_data
+
     for polygon in data.polygons:
         if set(get_points_names_from_list(polygon.points)) == set(points):
             return polygon
@@ -588,7 +609,10 @@ def find_polygon_with_points(points, data=drawer_data):
 
 
 # вспомогательная функция для поиска точки по её имени
-def find_point_with_name(A, data=drawer_data):
+def find_point_with_name(A, data=None):
+    if not data:
+        data = drawer_data
+
     for point in data.points:
         if A == point.name:
             return point
