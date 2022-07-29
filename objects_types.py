@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 class Objects:
     def __init__(self):
         self.points = list()
@@ -16,21 +19,13 @@ class Objects:
 def create_objects_copy(objects):
     ret = Objects()
 
-    for point in objects.points:
-        ret.points.append(point)
-    for line in objects.lines:
-        ret.lines.append(line)
-    for ray in objects.rays:
-        ret.rays.append(ray)
-    for angle in objects.angles:
-        ret.angles.append(angle)
-    for segment in objects.segments:
-        ret.segments.append(segment)
-    for polygon in objects.polygons:
-        ret.polygons.append(polygon)
-    for fact in objects.facts:
-        ret.facts.append(fact)
-    for question in objects.questions:
-        ret.questions.append(question)
+    ret.points = deepcopy(objects.points)
+    ret.lines = deepcopy(objects.lines)
+    ret.rays = deepcopy(objects.rays)
+    ret.angles = deepcopy(objects.angles)
+    ret.segments = deepcopy(objects.segments)
+    ret.polygons = deepcopy(objects.polygons)
+    ret.facts = deepcopy(objects.facts)
+    ret.questions = deepcopy(objects.questions)
 
     return ret
