@@ -169,7 +169,7 @@ class Fact:
             list_root_facts.append(following_fact)
 
         for object in self.objects:
-            list_objects.append(object.__str__)
+            list_objects.append(object.__str__())
 
         if not list_root_facts:
             list_root_facts = None
