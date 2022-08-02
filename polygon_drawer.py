@@ -116,6 +116,16 @@ def create_polygon(vertices):
                 perspective_triangle = triangle
 
         A, B, C = triad.CreateTriangle(get_triangle_parameter(perspective_triangle[0], perspective_triangle[1], perspective_triangle[2]))
+        
+        
+def set_screen_size(realize_data):
+    x_cords, y_cords = list(), list()
+
+    for point in tp.drawer_data.points:
+        x_cords.append(point.x)
+        y_cords.append(point.y)
+
+    realize_data.append(f'ZoomIn({min(x_cords)}, {min(y_cords)}, {max(x_cords)}, {max(y_cords)})')
 
 
 def text_splitter(text):
@@ -163,6 +173,8 @@ def text_splitter(text):
         draw_lines_intersections(text[6], realize_data)
     except IndexError:
         pass
+    
+    set_screen_size(realize_data)
 
     geogebra_html_generator.insert_commands(realize_data)
 
