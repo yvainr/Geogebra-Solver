@@ -46,7 +46,8 @@ def spaces_normalize(part):
 
 def output_formatting(part):
     """putting segment relation in correct order"""
-    part = sub(r"(^[A-Z]\s)([A-Z][A-Z])", r'\2 \1', part)
+    part = distillation(part)
+    part = sub(r"(^[A-Z]\s)([A-Z][A-Z]$)", r'\2 \1', part)
     return part
 
 
@@ -66,8 +67,9 @@ def distillation(part):
                 new_part = new_part[:] + str(part[i])
         except:
             pass
+
     new_part = spaces_normalize(new_part)
-    new_part = output_formatting(new_part)
+    # new_part = output_formatting(new_part)
     return new_part.strip()
 
 
@@ -92,6 +94,15 @@ def algebraic_sum(part):
         part = distillation(part)
         part = sub(r"(^[A-Z][A-Z])(\s)([A-Z][A-Z])", r"+\1 \3 ", part)
         part = sub(r"(^[A-Z][A-Z][A-Z])(\s)([A-Z][A-Z][A-Z])", r"+\1 \3 ", part)
+    return part
+
+
+def within_polygon(part):
+    """formatting points within polygon"""
+    if "леж" in part or "внутр" in part or "наход" in part:
+        part = distillation(part)
+        part = sub(r"(^[A-Z])(\s)([A-Z]+)$", r"\1 /// \3", part)
+        # part = sub(r"([A-Z]+)(\s)([A-Z])(\s)", r"\3 * \1", part)
     return part
 
 
@@ -190,13 +201,17 @@ def new_assign_to_classes(inp_str):
             polygons.append(distillation(part))
         elif cla == "segment_rel":
             part = summ_formatting(part)
+            part = output_formatting(part)
             segments_relations.append(distillation(part))
         elif cla == "angle_rel":
             part = summ_formatting(part)
             angles_relations.append(distillation(part))
         elif cla == "rem_point":
+            part = within_polygon(part)
             part = remarkable_point_processing(part)
-            polygons.append(distillation(part))
+            part = distillation(part)
+            part = sub("///", "in", part)
+            polygons.append(part)
         elif cla == "segment":
             segments.append(distillation(part))
         elif cla == "lines_intersection":
@@ -219,10 +234,9 @@ def question_processing(question):
     if poly:
         question = distillation(question)
         question = sub(r"(^\w+)(\s)(\w*)(\s)(\d)", r'/\1 \3 \5', question)
-        question = sub(r"(^\w+)(\s)(\w*$)", r'/\1 \3 ?', question)
+        question = sub(r"(^\w+)(\s*)(\w*$)", r'/\1 \3 ?', question)
     elif "больш" in question or "меньш" in question or "сумм" in question:
         question = algebraic_sum(question)
-        print(question)
         question = sub(r"([A-Z])(\s*)$", r"\1 ?", question)
         question = summ_formatting(question)
     else:
@@ -230,6 +244,7 @@ def question_processing(question):
         question = sub(r"(^\w+)(\s)(\w*)(\s)(\d+)", r'\1 \3 \5', question)
         question = sub(r"(^\w+)(\s*)(\w*$)", r'\1 \3 ?', question)
     return question
+
 
 # inputt = "Треугольник ABC, AB = 10, угол BAC равен 40, AC относится к AB как 3/5, I - точка пересечения биссектрис ABC \n Найти угол ABC"
 # inpu = 'ABC, DEF, ABC подобен DEF с коэффициентом 1/2, relation of sides AB and DE is 1/2 \n prove that BC relate EF like 1/2'
