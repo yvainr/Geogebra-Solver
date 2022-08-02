@@ -125,7 +125,7 @@ def set_screen_size(realize_data):
         x_cords.append(point.x)
         y_cords.append(point.y)
 
-    realize_data.append(f'ZoomIn({min(x_cords)}, {min(y_cords)}, {max(x_cords)}, {max(y_cords)})')
+    realize_data.append(f'ZoomIn({min(x_cords) - 0.1 * abs(min(x_cords))}, {min(y_cords) - 0.1 * abs(min(y_cords))}, {max(x_cords) + 0.1 * abs(max(x_cords))}, {max(y_cords) + 0.1 * abs(max(y_cords))})')
 
 
 def text_splitter(text):
