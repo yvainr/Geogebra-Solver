@@ -1,10 +1,28 @@
 import geogebra_html_generator
+import shapely.geometry
 import triangle_drawer as triad
 import task_parser as tp
 from math import *
 from itertools import combinations
 from check_triangle import check_triangle
 from objects_types import Objects
+
+
+def get_random_point_in_polygon(point_name, polygon):
+    new_polygon = list()
+
+    for point in polygon.points:
+        new_polygon.append((point.x, point.y))
+    poly = shapely.geometry.Polygon(new_polygon)
+    minx, miny, maxx, maxy = poly.bounds
+
+    while True:
+        generated_point = shapely.geometry.Point(uniform(minx, maxx), uniform(miny, maxy))
+        if poly.contains(generated_point):
+            find_point = tp.find_point_with_name(point_name)
+            find_point.x, find_point.y = generated_point.x, generated_point.y
+
+            return find_point
 
 
 def get_triangle_parameter(A, B, C):
@@ -37,15 +55,15 @@ def draw_polygon(points, realize_data):
         realize_data.append(f"SetVisibleInView({seg.name}, 1, false)")
 
 
-def draw_specific_points(realize_data):
-    for point in tp.draw_data.points:
-        if point.specific_properties_point:
-            A = tp.find_point_with_name(point.specific_properties_triangle[0])
-            B = tp.find_point_with_name(point.specific_properties_triangle[1])
-            C = tp.find_point_with_name(point.specific_properties_triangle[2])
-
-            for draw_data in triad.SpecificPointGeneration(point.name, point.specific_properties_point, A, B, C):
-                realize_data.append(draw_data)
+# def draw_specific_points(realize_data):
+#     for point in tp.draw_data.points:
+#         if point.specific_properties_point:
+#             A = tp.find_point_with_name(point.specific_properties_triangle[0])
+#             B = tp.find_point_with_name(point.specific_properties_triangle[1])
+#             C = tp.find_point_with_name(point.specific_properties_triangle[2])
+#
+#             for draw_data in triad.SpecificPointGeneration(point.name, point.specific_properties_point, A, B, C):
+#                 realize_data.append(draw_data)
 
 
 def triangle_with_segment_synchronization(A, B, C, P1, P2):
@@ -133,6 +151,11 @@ def text_splitter(text):
             draw_polygon(ret, realize_data)
         except IndexError:
             pass
+        
+    for point in tp.drawer_data.points:
+        if point.in_polygon:
+            get_random_point_in_polygon(point.name, point.in_polygon)
+            realize_data.append(f'{point.name}({point.x}, {point.y})')
 
     # draw_specific_points(realize_data)
 
