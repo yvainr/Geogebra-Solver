@@ -190,9 +190,9 @@ class Fact:
                 draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
                 draw_data.append(f'SetColor({self.objects[1].name}, "{mark_color}")')
                 if self.value:
-                    A, B = objects[0].points
-                    C, D = objects[1].points
-                    rel1, rel2 = str(self.value).split('/')
+                    A, B = self.objects[0].points
+                    C, D = self.objects[1].points
+                    rel1, rel2 = str(Fraction(self.value)).split('/')
                     draw_data.append(
                         f'text1=Text({rel1}x, ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), true, true)')
                     draw_data.append(
@@ -205,28 +205,28 @@ class Fact:
                 draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
                 draw_data.append(f'SetColor({self.objects[1].name}, "{mark_color}")')
                 if self.value:
-                    rel1, rel2 = str(self.value).split('/')
+                    rel1, rel2 = str(Fraction(self.value)).split('/')
                     x_points_1, y_points_1, x_points_2, y_points_2 = str(), str(), str(), str()
 
-                    for point in objects[0].points:
+                    for point in self.objects[0].points:
                         x_points_1 += f'x({point.name})+'
                         y_points_1 += f'y({point.name})+'
 
-                    for point in objects[1].points:
+                    for point in self.objects[1].points:
                         x_points_2 += f'x({point.name})+'
                         y_points_2 += f'y({point.name})+'
 
                     draw_data.append(
-                        f'text1=Text({rel1}x, (({x_points_1})/{len(objects[0].points)}, ({y_points_1})/{len(objects[0].points)})), true, true)')
+                        f'text1=Text({rel1}x, (({x_points_1})/{len(self.objects[0].points)}, ({y_points_1})/{len(self.objects[0].points)})), true, true)')
                     draw_data.append(
-                        f'text2=Text({rel2}x, (({x_points_2})/{len(objects[1].points)}, ({y_points_2})/{len(objects[1].points)})), true, true)')
+                        f'text2=Text({rel2}x, (({x_points_2})/{len(self.objects[1].points)}, ({y_points_2})/{len(self.objects[1].points)})), true, true)')
 
         if len(self.objects) == 1:
             if self.objects[0].__class__.__name__ == 'Segment':
                 draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
                 draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
                 if self.value:
-                    A, B = objects[0].points
+                    A, B = self.objects[0].points
                     draw_data.append(f'text=Text(Distance({A.name}, {B.name}), ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), true, true)')
             if self.objects[0].__class__.__name__ == 'Angle':
                 draw_data.append(f'{self.objects[0].name}=Angle(Line({self.objects[0].rays[0].main_point.name}, {list(self.objects[0].rays[0].points)[0].name}), Line({self.objects[0].rays[1].main_point.name}, {list(self.objects[0].rays[1].points)[0].name}))')
