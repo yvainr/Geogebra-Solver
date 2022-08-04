@@ -6,6 +6,7 @@ from math import *
 from itertools import combinations
 from check_triangle import check_triangle
 from objects_types import Objects
+from random import uniform
 
 
 def get_random_point_in_polygon(point_name, polygon):
@@ -99,10 +100,10 @@ def draw_lines_intersections(intersections, realize_data):
 def create_polygon(vertices):
     if len(vertices) == 3:
         A, B, C = vertices
-        
+
         if type(check_triangle(get_triangle_parameter(A, B, C)[0], get_triangle_parameter(A, B, C)[1])) == str:
             return check_triangle(get_triangle_parameter(A, B, C)[0], get_triangle_parameter(A, B, C)[1])
-        
+
         return triad.CreateTriangle(*get_triangle_parameter(A, B, C))
 
     if len(vertices) == 4:
@@ -116,8 +117,8 @@ def create_polygon(vertices):
                 perspective_triangle = triangle
 
         A, B, C = triad.CreateTriangle(get_triangle_parameter(perspective_triangle[0], perspective_triangle[1], perspective_triangle[2]))
-        
-        
+
+
 def set_screen_size(realize_data):
     x_cords, y_cords = list(), list()
 
@@ -125,11 +126,18 @@ def set_screen_size(realize_data):
         x_cords.append(point.x)
         y_cords.append(point.y)
 
-    realize_data.append(f'ZoomIn({min(x_cords) - 0.25 * abs(min(x_cords))}, {min(y_cords) - 0.25 * abs(min(y_cords))}, {max(x_cords) + 0.25 * abs(max(x_cords))}, {max(y_cords) + 0.25 * abs(max(y_cords))})')
+    new_cord_center_x = (max(x_cords) - min(x_cords)) / 2
+    new_cord_center_y = (max(y_cords) - min(y_cords)) / 2
+
+    for point in tp.drawer_data.points:
+        point.x -= new_cord_center_x
+        point.y -= new_cord_center_y
+
+    # realize_data.append(f'ZoomIn({xmin - 0.25 * abs(xmin - xmax)}, {ymin - 0.25 * abs(ymin - ymax)}, {xmax + 0.25 * abs(xmin - xmax)}, {ymax + 0.25 * abs(ymin - ymax)})')
 
 
-def text_splitter(text):
-  
+def text_splitter(text, input_file_name):
+
     realize_data = list()
 
     tp.task_data = Objects()
@@ -161,7 +169,7 @@ def text_splitter(text):
             draw_polygon(ret, realize_data)
         except IndexError:
             pass
-        
+
     for point in tp.drawer_data.points:
         if point.in_polygon:
             get_random_point_in_polygon(point.name, point.in_polygon)
@@ -173,9 +181,9 @@ def text_splitter(text):
         draw_lines_intersections(text[6], realize_data)
     except IndexError:
         pass
-    
+
     set_screen_size(realize_data)
 
-    geogebra_html_generator.insert_commands(realize_data)
+    geogebra_html_generator.insert_commands(realize_data, input_file_name=input_file_name)
 
     return 200
