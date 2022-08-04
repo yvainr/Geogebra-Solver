@@ -534,8 +534,8 @@ def questions_create(text):
                             data.questions.append(Fact(len(data.questions), None, 'relation', [seg_1, seg_2], Fraction(question.split()[2]), True))
 
                     elif question.split()[0][0] != '/' and len(question.split()[0]) == 3 and len(question.split()[1]) == 3:
-                        ang_1 = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2], data))
-                        ang_2 = find_angle_with_points(*check_angle_in_polygon(question.split()[1][0], question.split()[1][1], question.split()[1][2], data))
+                        ang_1 = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2], data), data)
+                        ang_2 = find_angle_with_points(*check_angle_in_polygon(question.split()[1][0], question.split()[1][1], question.split()[1][2], data), data)
 
                         if question.split()[2] == '?':
                             data.questions.append(Fact(len(data.questions), None, 'relation', [ang_1, ang_2], None, True))
