@@ -182,7 +182,7 @@ def text_splitter(text, input_file_name):
     except IndexError:
         pass
 
-    set_screen_size(realize_data)
+    # set_screen_size(realize_data)
 
     geogebra_html_generator.insert_commands(realize_data, input_file_name=input_file_name)
 
