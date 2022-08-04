@@ -551,7 +551,6 @@ def solving_process():
 
             if find_ans(q):
                 q_indexes.add(find_ans(q))
-            print(0)
             fix_all_triangles()
             add_size_fact()
 
