@@ -52,10 +52,7 @@ class Angle:
         self.relations = dict()
         self.difference = dict()
         self.addition = dict()
-        if name:
-            self.name = name
-        if not name:
-            self.name = f'angle_{len(drawer_data.angles)}'
+        self.name = name
 
     def __str__(self):
         str_rays = ''
@@ -195,7 +192,7 @@ class Fact:
                     try:
                         rel1, rel2 = str(self.value).split('/')
                     except ValueError:
-                        rel1, rel2 = 1, 1
+                        rel1, rel2 = self.value, 1
                     draw_data.append(
                         f'text1=Text("{rel1}X", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), false, true)')
                     draw_data.append(
@@ -211,7 +208,7 @@ class Fact:
                     try:
                         rel1, rel2 = str(self.value).split('/')
                     except ValueError:
-                        rel1, rel2 = 1, 1
+                        rel1, rel2 = self.value, 1
                     x_points_1, y_points_1, x_points_2, y_points_2 = str(), str(), str(), str()
 
                     for point in self.objects[0].points:
@@ -607,7 +604,7 @@ def find_angle_with_rays(r1, r2, data=None):
         if angle.rays == [r1, r2]:
             return angle
 
-    new_angle = Angle(r1, r2)
+    new_angle = Angle(r1, r2, None, f'angle_{len(data.angles)}')
     data.angles.append(new_angle)
     return new_angle
 
@@ -640,7 +637,7 @@ def find_angle_with_points(A, B, C, data=None):
         if angle.rays == [r1, r2]:
             return angle
 
-    new_angle = Angle(r1, r2)
+    new_angle = Angle(r1, r2, None, f'angle_{len(data.angles)}')
     data.angles.append(new_angle)
     return new_angle
 
