@@ -192,11 +192,14 @@ class Fact:
                 if self.value:
                     A, B = self.objects[0].points
                     C, D = self.objects[1].points
-                    rel1, rel2 = str(Fraction(self.value)).split('/')
+                    try:
+                        rel1, rel2 = str(self.value).split('/')
+                    except ValueError:
+                        rel1, rel2 = 1, 1
                     draw_data.append(
-                        f'text1=Text({rel1}x, ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), true, true)')
+                        f'text1=Text("{rel1}X", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), false, true)')
                     draw_data.append(
-                        f'text2=Text({rel2}x, ((x({C.name}) + x({D.name})) / 2, ((y({C.name}) + y({D.name})) / 2) + 0.75), true, true)')
+                        f'text2=Text("{rel2}X", ((x({C.name}) + x({D.name})) / 2, ((y({C.name}) + y({D.name})) / 2) + 0.75), false, true)')
 
             if self.objects[0].__class__.__name__ == 'Angle' and self.objects[1].__class__.__name__ == 'Angle':
                 draw_data.append(f'{self.objects[0].name}=Angle(Line({self.objects[0].rays[0].main_point.name}, {list(self.objects[0].rays[0].points)[0].name}), Line({self.objects[0].rays[1].main_point.name}, {list(self.objects[0].rays[1].points)[0].name}))')
@@ -205,7 +208,10 @@ class Fact:
                 draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
                 draw_data.append(f'SetColor({self.objects[1].name}, "{mark_color}")')
                 if self.value:
-                    rel1, rel2 = str(Fraction(self.value)).split('/')
+                    try:
+                        rel1, rel2 = str(self.value).split('/')
+                    except ValueError:
+                        rel1, rel2 = 1, 1
                     x_points_1, y_points_1, x_points_2, y_points_2 = str(), str(), str(), str()
 
                     for point in self.objects[0].points:
@@ -217,9 +223,9 @@ class Fact:
                         y_points_2 += f'y({point.name})+'
 
                     draw_data.append(
-                        f'text1=Text({rel1}x, (({x_points_1})/{len(self.objects[0].points)}, ({y_points_1})/{len(self.objects[0].points)})), true, true)')
+                        f'text1=Text("{rel1}X", (({x_points_1[:-1]})/{len(self.objects[0].points)}, ({y_points_1[:-1]})/{len(self.objects[0].points)}), false, true)')
                     draw_data.append(
-                        f'text2=Text({rel2}x, (({x_points_2})/{len(self.objects[1].points)}, ({y_points_2})/{len(self.objects[1].points)})), true, true)')
+                        f'text2=Text("{rel2}X", (({x_points_2[:-1]})/{len(self.objects[1].points)}, ({y_points_2[:-1]})/{len(self.objects[1].points)}), false, true)')
 
         if len(self.objects) == 1:
             if self.objects[0].__class__.__name__ == 'Segment':
