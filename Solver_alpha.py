@@ -7,7 +7,6 @@ Sin_theorem_allowed = True
 
 # Индекс последнего добавленного факта
 ind = 0
-ir = 0
 facts_indexes = []
 
 
