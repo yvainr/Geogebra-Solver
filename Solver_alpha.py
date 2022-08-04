@@ -342,6 +342,17 @@ def similaritys_triangles(triangle1, triangle2,AB, CA, BC, BCA, ABC, CAB, A1B1, 
                 update_facts([triangle2, triangle1], 1 / k, roots, "relation")
 
                 consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k)
+            
+            elif equal(CAB, C1A1B1) and equal(BCA, B1C1A1) and similarity_if_not_None(CA, C1A1):
+
+                roots = {find_in_facts_with_obj([CAB, C1A1B1], "extra", "relation", None),
+                         find_in_facts_with_obj([BCA, B1C1A1], "extra", "relation", None),
+                         find_in_facts_with_obj([CA, C1A1], "extra", "relation", None)}
+
+                update_facts([triangle1, triangle2], k, roots, "relation")
+                update_facts([triangle2, triangle1], 1 / k, roots, "relation")
+
+                consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k)
 
             elif (similarity_if_not_None(CA, C1A1) == similarity_if_not_None(AB, A1B1) and similarity_if_not_None(BC,
                                                                                                                   B1C1) == similarity_if_not_None(
