@@ -1,3 +1,4 @@
+from fractions import Fraction
 import task_parser as tp
 
 Proportion_theorem = True
@@ -6,16 +7,16 @@ Sin_theorem_allowed = True
 
 # Индекс последнего добавленного факта
 ind = 0
+ir = 0
 facts_indexes = []
 
-# Это нужно чтобы не перебирать None углы, если угол в результате вычислений становится не None - он сюда добавляется
-not_none_angles = []
 
 def rays_on_same_line(ray1, ray2):
     if tp.find_line_with_points(ray1.main_point.name, list(ray1.points)[0].name, tp.solver_data) == tp.find_line_with_points(ray2.main_point.name, list(ray2.points)[0].name, tp.solver_data):
         return True
     else:
         return False
+
 
 def angle_between_rays(ray1, ray2):
     if (set([ray1.main_point]) | ray1.points) & (set([ray2.main_point]) | ray2.points) == set():
@@ -27,19 +28,26 @@ def angle_between_rays(ray1, ray2):
     else:
         return 0
 
-def find_segment_and_give_size(segm, size):
-    for i in range (len(tp.solver_data.segments)):
-        if tp.solver_data.segments[i] == segm:
-            tp.solver_data.segments[i].size = size
+def pre_work():
+    global ind, segments2, angles2
+    # Добавляет факты с отрезками и углами
+    for i, ang in enumerate(tp.solver_data.angles):
+        if ang.size:
+            update_facts([ang], ang.size, {}, "size")
+            angles2[i] = ind
+        else:
+            angles2[i] = -1
 
-def find_angle_and_give_size(angl, size):
-    for ang in tp.solver_data.angles:
-        if ang == angl:
-            ang.size = size
+    for i, seg in enumerate(tp.solver_data.segments):
+        if seg.size:
+            update_facts([seg], seg.size, {}, "size")
+            segments2[i] = ind
+        else:
+            segments2[i] = -1
 
 # Неприятная функция, добавляющая все возможные прямые, отрезки, треугольники и углы
 def first():
-    global ind
+    global ind, segments2, angles2
     # Перебирает тройки и двойки точек, проверяет существует ли прямая (отрезок) с данными двумя точками, существует ли треугольник с этими тремя точками
     for p1 in tp.solver_data.points:
         for p2 in tp.solver_data.points:
@@ -51,64 +59,67 @@ def first():
 
                 tp.find_line_with_points(p1.name, p2.name, tp.solver_data)
 
-                tp.find_segment_with_points(p1.name, p2.name, tp.solver_data)
+                now_len_seg = len(tp.solver_data.segments)
+
+                seg = tp.find_segment_with_points(p1.name, p2.name, tp.solver_data)
+
+                if now_len_seg != len(tp.solver_data.segments):
+                    segments2 = segments2 + [-1]
 
                 tp.find_ray_with_points(p1.name, p2.name, tp.solver_data)
 
 
-    for ray1 in tp.solver_data.rays:
-        for ray2 in tp.solver_data.rays:
-            if ray1 != ray2:
-                tp.find_angle_with_rays(ray1, ray2, tp.solver_data)
-                if rays_on_same_line(ray1, ray2):
-                    tp.find_angle_with_rays(ray1, ray2, tp.solver_data).size = angle_between_rays(ray1, ray2)
+    for i1, ray1 in enumerate(tp.solver_data.rays):
+        for i2, ray2 in enumerate(tp.solver_data.rays):
+            if i1 > i2:
+                now_len_ang = len(tp.solver_data.angles)
 
-    # Добавляет факты с отрезками и углами
-    for ang in tp.solver_data.angles:
-        if ang.size:
-            not_none_angles.append(ang)
-            tp.solver_data.facts.append(tp.Fact(ind, -1, "size", [ang], ang.size))
-            ind += 1
-
-    for seg in tp.solver_data.segments:
-        if seg.size:
-            tp.solver_data.facts.append(tp.Fact(ind, -1, "size", [seg], seg.size))
-            ind += 1
-
-    for ray1 in tp.solver_data.rays:
-        for ray2 in tp.solver_data.rays:
-            if ray1 != ray2:
                 ang1 = tp.find_angle_with_rays(ray1, ray2, tp.solver_data)
                 ang2 = tp.find_angle_with_rays(ray2, ray1, tp.solver_data)
-                if not find_in_facts_with_obj([ang1, ang2], "half_hard", "addition", "val"):
-                    update_facts([ang1, ang2], 360, {}, "addition")
-                if not ang1.size and ang2.size:
-                    find_angle_and_give_size(ang1, (360 - ang2.size) % 360)
-                    not_none_angles.append(ang1)
 
-#Добавляет отношения между известными величинами
-def add_realtions():
-    global ind
-    for ang1 in tp.solver_data.angles:
-        for ang2 in tp.solver_data.angles:
-            if ang1.size and ang2.size and ang1 != ang2:
-                i1 = find_in_facts_with_obj([ang1], "extra", "size", None)
-                i2 = find_in_facts_with_obj([ang2], "extra", "size", None)
-                if (i1 or i1 == 0) and (i2 or i2 == 0):
-                    update_facts([ang1, ang2] , ang1.size / ang2.size, {i1, i2}, "relation")
-                    update_facts([ang2, ang1], ang2.size / ang1.size, {i1, i2}, "relation")
+                if rays_on_same_line(ray1, ray2):
+                    ang1.size = angle_between_rays(ray1, ray2)
+                    update_facts([ang1], ang1.size, {}, "size")
+                    angles2 = angles2 + [ind]
 
-    for seg1 in tp.solver_data.segments:
-        for seg2 in tp.solver_data.segments:
+                    ang2.size = angle_between_rays(ray1, ray2)
+                    update_facts([ang2], ang2.size, {}, "size")
+                    angles2 = angles2 + [ind]
+                else:
+                    if len(tp.solver_data.angles) - now_len_ang == 1:
+                        angles2 = angles2 + [-1]
+                    elif len(tp.solver_data.angles) - now_len_ang == 2:
+                        angles2 = angles2 + [-1, -1]
+
+                update_facts([ang1, ang2], 360, {}, "addition")
+
+
+def add_relations_later():
+    global segments2, angles2
+    if isinstance(tp.solver_data.facts[-1].objects[0], tp.Segment):
+        for i1, seg1 in enumerate(tp.solver_data.segments):
+            seg2 = tp.solver_data.facts[-1].objects[0]
             if seg1.size and seg2.size and seg1 != seg2:
-                i1 = find_in_facts_with_obj([seg1], "extra", "size", None)
-                i2 = find_in_facts_with_obj([seg2], "extra", "size", None)
-                update_facts([seg1, seg2], seg1.size / seg2.size, {i1, i2}, "relation")
-                update_facts([seg2, seg1], seg2.size / seg1.size, {i1, i2}, "relation")
+                in1 = segments2[i1]
+                in2 = tp.solver_data.facts[-1].id
+                if in1 != -1:
+                    update_facts([seg1, seg2], seg1.size / seg2.size, {in1, in2}, "relation")
+                    update_facts([seg2, seg1], seg2.size / seg1.size, {in1, in2}, "relation")
+
+    if isinstance(tp.solver_data.facts[-1].objects[0], tp.Angle):
+        for i1, ang1 in enumerate(tp.solver_data.angles):
+            ang2 = tp.solver_data.facts[-1].objects[0]
+            if ang1.size and ang2.size and ang1 != ang2:
+                in1 = angles2[i1]
+                in2 = tp.solver_data.facts[-1].id
+                if in1 != -1:
+                    update_facts([ang1, ang2], ang1.size / ang2.size, {in1, in2}, "relation")
+                    update_facts([ang2, ang1], ang2.size / ang1.size, {in1, in2}, "relation")
+
+
 
 # Находит факт по объектам в нём (если strict - то конкретно с этими объектами, иначе он находит факт где мы находим значение этого объекта)
 def find_in_facts_with_obj(obj, not_strict, extra_type, extra_value):
-    global ind
     if not not_strict:
         for x in tp.solver_data.facts:
             if set(x.objects) == set(obj):
@@ -133,12 +144,14 @@ def find_in_facts_with_obj(obj, not_strict, extra_type, extra_value):
 # Обновляет факты
 def update_facts(fact_obj, value, roofs, reason):
     global ind
-    if not find_in_facts_with_obj(fact_obj, "extra", reason, None) and find_in_facts_with_obj(fact_obj, "extra", reason, None) != 0:
-        tp.solver_data.facts.append(tp.Fact(ind, -1, reason, fact_obj, value))
-        for roof in roofs:
-            tp.solver_data.facts[roof].following_facts.add(ind)
-            tp.solver_data.facts[-1].root_facts.add(roof)
-        ind += 1
+    tp.solver_data.facts.append(tp.Fact(ind, -1, reason, fact_obj, value))
+    for roof in roofs:
+        tp.solver_data.facts[roof].following_facts.add(ind)
+        tp.solver_data.facts[-1].root_facts.add(roof)
+    ind += 1
+    if reason == "size":
+        add_relations_later()
+        add_size_fact()
 
 
 # Обсчитывает вертикальные углы
@@ -149,17 +162,12 @@ def fix_all_angles():
             if ray1 != ray2:
                 for ray3 in tp.solver_data.rays:
                     if ray3 != ray1 and ray3 != ray2:
+
                         ang1 = tp.find_angle_with_rays(ray1, ray2, tp.solver_data)
                         ang2 = tp.find_angle_with_rays(ray2, ray3, tp.solver_data)
                         ang = tp.find_angle_with_rays(ray1, ray3, tp.solver_data)
 
-                        if not find_in_facts_with_obj([ang, ang1, ang2], "half_hard", "addition", None):
-                            update_facts([ang, ang1, ang2], None, {}, "addition")
-
-                        if ang1.size and ang2.size and not ang.size:
-                            if find_in_facts_with_obj([ang1], "extra", "size", None) and find_in_facts_with_obj([ang2], "extra", "size", None):
-                                find_angle_and_give_size(ang, (ang1.size + ang2.size) % 360)
-                                update_facts([ang], ang.size, {find_in_facts_with_obj([ang1], "extra", "size", None), find_in_facts_with_obj([ang2], "extra", "size", None)}, "size")
+                        update_facts([ang, ang1, ang2], [], {}, "addition")
 
 
 # Выдает все данные об этом треугольнике
@@ -175,33 +183,35 @@ def search_triangle(triangle):
     CAB = tp.find_angle_with_points(B.name, A.name, C.name, tp.solver_data)
     BCA = tp.find_angle_with_points(A.name, C.name, B.name, tp.solver_data)
 
-    return [A, B, C, AB, BC, CA, BCA, CAB, ABC]
+    return [C, B, A, AB, CA, BC, BCA, ABC, CAB]
 
 
 # Корректирует равенства сторон и углов в равнобедренном треугольнике
 def correct_size(ABC, BCA, CA, AB):
     global ind
+
     if find_in_facts_with_obj([ABC, BCA], "extra", "relation", None):
         if tp.solver_data.facts[find_in_facts_with_obj([ABC, BCA], "extra", "relation", None)].value == 1:
-            update_facts([AB, CA], 1, {find_in_facts_with_obj([ABC, BCA], "extra", "relation", None)}, "relation")
-            update_facts([CA, AB], 1, {find_in_facts_with_obj([ABC, BCA], "extra", "relation", None)}, "relation")
+            if not find_in_facts_with_obj([AB, CA], "extra", "relation", None):
+                update_facts([AB, CA], 1, {find_in_facts_with_obj([ABC, BCA], "extra", "relation", None)}, "relation")
+                update_facts([CA, AB], 1, {find_in_facts_with_obj([ABC, BCA], "extra", "relation", None)}, "relation")
 
-            if CA.size and not AB.size:
-                find_segment_and_give_size(AB, CA.size)
+                if CA.size and not AB.size:
+                    AB.size = CA.size
 
-            elif AB.size and not CA.size:
-                find_segment_and_give_size(CA, AB.size)
+                elif AB.size and not CA.size:
+                    CA.size = AB.size
 
     if find_in_facts_with_obj([AB, CA], "extra", "relation", None):
         if tp.solver_data.facts[find_in_facts_with_obj([AB, CA], "extra", "relation", None)].value == 1:
-            update_facts([ABC, BCA], 1, {find_in_facts_with_obj([AB, CA], "extra", "relation", None)}, "relation")
-            update_facts([BCA, ABC], 1, {find_in_facts_with_obj([AB, CA], "extra", "relation", None)}, "relation")
+            if not find_in_facts_with_obj([ABC, BCA], "extra", "relation", None):
+                update_facts([ABC, BCA], 1, {find_in_facts_with_obj([AB, CA], "extra", "relation", None)}, "relation")
+                update_facts([BCA, ABC], 1, {find_in_facts_with_obj([AB, CA], "extra", "relation", None)}, "relation")
 
-            if BCA.size and not ABC.size:
-                find_angle_and_give_size(BCA, ABC.size)
-                not_none_angles.append(ABC)
-            elif ABC.size and not BCA.size:
-                find_angle_and_give_size(ABC, BCA.size)
+                if BCA.size and not ABC.size:
+                    BCA.size = ABC.size
+                elif ABC.size and not BCA.size:
+                    ABC.size = BCA.size
 
 
 # Проверяет равенство величин объектов, при их не None_овости
@@ -214,34 +224,26 @@ def equal(AB, BC):
 
 # Делает углы, где один из них None, а другой - нет, равными (из подобия треугольников)
 def equal_them(A, B, fact):
-    global ind
     update_facts([B, A], 1, {fact}, "relation")
     update_facts([A, B], 1, {fact}, "relation")
 
     if A.size and not B.size:
-        B.size = A.size
-        find_angle_and_give_size(B, A.size)
-        not_none_angles.append(B)
+        B.size = Fraction(A.size)
 
     if B.size and not A.size:
-        A.size = B.size
-        find_angle_and_give_size(A, B.size)
-        not_none_angles.append(A)
+        A.size = Fraction(B.size)
 
 
-# Делает стороны, где один из них None, а другой - нет, подобными (из подобия треугольников)
+# It makes Делает стороны, где один из них None, а другой - нет, подобными (из подобия треугольников)
 def simil_them(AB, A1B1, k, fact):
-    global ind
     update_facts([A1B1, AB], 1 / k, {fact}, "relation")
     update_facts([AB, A1B1], k, {fact}, "relation")
 
     if AB.size and not A1B1.size:
-        A1B1.size = AB.size / k
-        find_segment_and_give_size(A1B1, AB.size / k)
+        A1B1.size = Fraction(AB.size / k)
 
     if A1B1.size and not AB.size:
-        AB.size = A1B1.size * k
-        find_segment_and_give_size(AB, A1B1.size * k)
+        AB.size = Fraction(A1B1.size * k)
 
 
 # Находит все стороны и углы, которые может из равнобедренности, во всех р/б треугольниках
@@ -274,16 +276,21 @@ def consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C
 
 
 # Проверяет все возможные варианты подобия трекугольников, если вершины для подобия указаны в правильном порядке
-def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA, BCA, CAB, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1):
-    global ind
+def similaritys_triangles(triangle1, triangle2,AB, CA, BC, BCA, ABC, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1):
     if not find_in_facts_with_obj([triangle1, triangle2], "extra", "relation", None):
+
+        # print(AB.size, BC.size, CA.size, BCA.size, CAB.size, ABC.size, A1B1.size, B1C1.size, C1A1.size, B1C1A1.size, C1A1B1.size, A1B1C1.size)
+        # print(beautiful_object(AB), beautiful_object(BC), beautiful_object(CA), beautiful_object(BCA), beautiful_object(CAB), beautiful_object(ABC), beautiful_object(A1B1), beautiful_object(B1C1), beautiful_object(C1A1), beautiful_object(B1C1A1), beautiful_object(C1A1B1), beautiful_object(A1B1C1))
+
         k = similarity_if_not_None(AB, A1B1)
         if not k:
             k = similarity_if_not_None(BC, B1C1)
             if not k:
                 k = similarity_if_not_None(CA, C1A1)
+
         if k:
             if (similarity_if_not_None(AB, A1B1) == similarity_if_not_None(BC, B1C1) and equal(ABC, A1B1C1) and similarity_if_not_None(AB, A1B1)):
+
 
                 roots = {find_in_facts_with_obj([AB, A1B1], "extra", "relation", None), find_in_facts_with_obj([ABC, A1B1C1], "extra", "relation", None),
                          find_in_facts_with_obj([BC, B1C1], "extra", "relation", None)}
@@ -296,6 +303,7 @@ def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA,
             elif (similarity_if_not_None(AB, A1B1) == similarity_if_not_None(CA, C1A1) and equal(CAB,
                                                                                              C1A1B1) and similarity_if_not_None(
                 AB, A1B1)):
+
                 roots = {find_in_facts_with_obj([CAB, C1A1B1], "extra", "relation", None), find_in_facts_with_obj([AB, A1B1], "extra", "relation", None),
                          find_in_facts_with_obj([CA, C1A1], "extra", "relation", None)}
 
@@ -307,6 +315,7 @@ def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA,
             elif (similarity_if_not_None(BC, B1C1) == similarity_if_not_None(CA, C1A1) and equal(BCA,
                                                                                              B1C1A1) and similarity_if_not_None(
                 BC, B1C1)):
+
                 roots = {find_in_facts_with_obj([BC, B1C1], "extra", "relation", None), find_in_facts_with_obj([BCA, B1C1A1], "extra", "relation", None),
                          find_in_facts_with_obj([CA, C1A1], "extra", "relation", None)}
 
@@ -316,6 +325,7 @@ def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA,
                 consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k)
 
             elif (equal(ABC, A1B1C1) and equal(CAB, C1A1B1) and similarity_if_not_None(AB, A1B1)):
+
                 roots = {find_in_facts_with_obj([ABC, A1B1C1], "extra", "relation", None), find_in_facts_with_obj([CAB, C1A1B1], "extra", "relation", None),
                          find_in_facts_with_obj([AB, A1B1], "extra", "relation", None)}
 
@@ -325,6 +335,7 @@ def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA,
                 consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k)
 
             elif (equal(ABC, A1B1C1) and equal(BCA, B1C1A1) and similarity_if_not_None(BC, B1C1)):
+
                 roots = {find_in_facts_with_obj([ABC, A1B1C1], "extra", "relation", None), find_in_facts_with_obj([BCA, B1C1A1], "extra", "relation", None),
                          find_in_facts_with_obj([BC, B1C1], "extra", "relation", None)}
 
@@ -336,6 +347,7 @@ def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA,
             elif (similarity_if_not_None(CA, C1A1) == similarity_if_not_None(AB, A1B1) and similarity_if_not_None(BC,
                                                                                                                   B1C1) == similarity_if_not_None(
                     AB, A1B1) and similarity_if_not_None(AB, A1B1)):
+
                 roots = {find_in_facts_with_obj([AB, A1B1], "extra", "relation", None), find_in_facts_with_obj([CA, C1A1], "extra", "relation", None),
                          find_in_facts_with_obj([BC, B1C1], "extra", "relation", None)}
 
@@ -347,96 +359,83 @@ def similaritys_triangles(triangle1, triangle2, A, B, C, A1, B1, C1, AB, BC, CA,
 
 # Проверяет все треугольники и ищет среди них подобные и равные перебирая вершины одного из треугольников всеми возможными способами
 def fix_all_triangles():
-    global ind
     isosceles_triangles()
     for triangle1 in tp.solver_data.polygons:
         if len(triangle1.points) == 3:
             for triangle2 in tp.solver_data.polygons:
                 if len(triangle2.points) == 3 and triangle1 != triangle2:
-                    [A, B, C, AB, BC, CA, ABC, BCA, CAB] = search_triangle(triangle1)
-                    [A1, B1, C1, A1B1, B1C1, C1A1, A1B1C1, B1C1A1, C1A1B1] = search_triangle(triangle2)
+                    [C, A, B, AB, BC, CA, BCA, CAB, ABC] = search_triangle(triangle1)
+                    [C1, A1, B1, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1] = search_triangle(triangle2)
 
-                    similaritys_triangles(triangle1, triangle2, C, B, A, C1, B1, A1, AB, CA, BC, BCA, ABC, CAB, A1B1,
-                                          C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
-                    similaritys_triangles(triangle1, triangle2, C, A, B, C1, B1, A1, AB, BC, CA, BCA, CAB, ABC, A1B1,
-                                          C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
-                    similaritys_triangles(triangle1, triangle2, A, C, B, C1, B1, A1, BC, AB, CA, CAB, BCA, ABC, A1B1,
-                                          C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
-                    similaritys_triangles(triangle1, triangle2, A, B, C, C1, B1, A1, BC, CA, AB, CAB, ABC, BCA, A1B1,
-                                          C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
-                    similaritys_triangles(triangle1, triangle2, B, C, A, C1, B1, A1, CA, AB, BC, ABC, BCA, CAB, A1B1,
-                                          C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
-                    similaritys_triangles(triangle1, triangle2, B, A, C, C1, B1, A1, CA, BC, AB, ABC, CAB, BCA, A1B1,
-                                          C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1)
+                    similaritys_triangles(triangle1, triangle2, AB, CA, BC, BCA, ABC, CAB, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
+                    similaritys_triangles(triangle1, triangle2, AB, BC, CA, BCA, CAB, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
+                    similaritys_triangles(triangle1, triangle2, BC, AB, CA, CAB, BCA, ABC, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
+                    similaritys_triangles(triangle1, triangle2, BC, CA, AB, CAB, ABC, BCA, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
+                    similaritys_triangles(triangle1, triangle2, CA, AB, BC, ABC, BCA, CAB, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
+                    similaritys_triangles(triangle1, triangle2, CA, BC, AB, ABC, CAB, BCA, A1B1, B1C1, C1A1, B1C1A1, C1A1B1, A1B1C1)
                     break
 
 
 # Поиск решения вопроса среди фактов
 def find_ans(q):
     for fact in tp.solver_data.facts:
-        if fact.objects == q.objects and fact.fact_type == q.fact_type:
-            return fact.id
+        if len(fact.objects) == len(q.objects):
+            for i in range (len(fact.objects)):
+                if fact.objects[i].__str__() == q.objects[i].__str__():
+                    if fact.fact_type == q.fact_type:
+                        return fact.id
     return None
 
 
 #Добавялет факты типа size
 def add_size_fact():
-    global ind
     for fact in tp.solver_data.facts:
-        indexes = set()
-        indexes.add(fact.id)
-        value = 0
-        if fact.fact_type == "relation":
-            if not find_in_facts_with_obj([fact.objects[0]], "extra", "size", None) and find_in_facts_with_obj([fact.objects[1]], "extra", "size", None):
-                value = tp.solver_data.facts[find_in_facts_with_obj([fact.objects[1]], "extra", "size", None)].value * fact.value
-                indexes.add(find_in_facts_with_obj([fact.objects[1]], "extra", "size", None))
+        if tp.solver_data.facts[-1].objects[0] in fact.objects and len(fact.objects) != 1:
+            indexes = set()
+            indexes.add(fact.id)
+            indexes.add(tp.solver_data.facts[-1].id)
+            value = 0
+            obj1, obj2 = fact.objects[0], fact.objects[1]
 
-                if type(fact.objects[0]) == type(tp.solver_data.segments[0]):
-                    find_segment_and_give_size(fact.objects[0], value % 360)
-                elif type(fact.objects[0]) == type(tp.solver_data.angles[0]):
-                    find_angle_and_give_size(fact.objects[0], value % 360)
+            if fact.fact_type == "relation":
+                if fact.objects[1].size and not fact.objects[0].size:
+                    fact.objects[0].size = fact.objects[1].size  * fact.value
+                    if isinstance(fact.objects[0], tp.Angle):
+                        fact.objects[0].size = fact.objects[0].size % 360
+                    update_facts([fact.objects[0]], fact.objects[0].size, indexes, "size")
 
-                update_facts([fact.objects[0]], value % 360, indexes, "size")
-            elif not find_in_facts_with_obj([fact.objects[1]], "extra", "size", None) and find_in_facts_with_obj([fact.objects[0]], "extra", "size", None):
-                value = tp.solver_data.facts[find_in_facts_with_obj([fact.objects[0]], "extra", "size", None)].value / fact.value
-                indexes.add(find_in_facts_with_obj([fact.objects[0]], "extra", "size", None))
+                elif fact.objects[0].size and not fact.objects[1].size:
+                    fact.objects[1].size = fact.objects[0].size * fact.value
+                    if isinstance(fact.objects[1], tp.Angle):
+                        fact.objects[1].size = fact.objects[1].size % 360
+                    update_facts([fact.objects[1]], fact.objects[1].size, indexes, "size")
 
-                if type(fact.objects[1]) == type(tp.solver_data.segments[1]):
-                    find_segment_and_give_size(fact.objects[1], value % 360)
-                elif type(fact.objects[1]) == type(tp.solver_data.angles[1]):
-                    find_angle_and_give_size(fact.objects[1], value % 360)
+            if fact.fact_type == "addition" or fact.fact_type == "difference":
+                if not fact.value:
+                    if tp.solver_data.facts[-1].objects[0] != fact.objects[0]:
+                        fact.value.append(tp.solver_data.facts[-1].objects[0].size)
+                        indexes.add(tp.solver_data.facts[-1].id)
 
-                update_facts([fact.objects[1]], value % 360, indexes, "size")
+                        if len(fact.value) == len(fact.objects) + 1:
+                            value = sum(fact.value)
+                            if isinstance(fact.objects[0], tp.Angle):
+                                value = value % 360
+                            fact.objects[0].size = value
+                            update_facts([fact.objects[0]], value, indexes, "size")
 
-        if fact.fact_type == "addition" or fact.fact_type == "difference":
-            further = True
-            if not fact.value:
-                for i in range(len(fact.objects)):
-                    actual = find_in_facts_with_obj([fact.objects[i]], "extra", "size", None)
-                    if i == 0 and actual:
-                        further = False
-                    elif i != 0 and not actual:
-                        further = False
-                    elif i != 0 and actual:
-                        indexes.add(actual)
-                        value += tp.solver_data.facts[actual].value
-                if further:
-                    value = value % 360
-                    update_facts([fact.objects[0]], value, indexes, "size")
-                    find_segment_and_give_size(fact.objects[0], value % 360)
-            else:
-                empty = []
-                for i in range(len(fact.objects)):
-                    if find_in_facts_with_obj([fact.objects[i]], "extra", "size", None):
-                        value += tp.solver_data.facts[find_in_facts_with_obj([fact.objects[i]], "extra", "size", None)].value
-                        indexes.add(find_in_facts_with_obj([fact.objects[i]], "extra", "size", None))
-                    else:
-                        empty.append(fact.objects[i])
-                if len(empty) == 1:
-                    find_segment_and_give_size(empty[0], (fact.value - value) % 360)
-                    empty[0].size = (fact.value - value) % 360
-                    update_facts([empty[0]], (fact.value - value) % 360, indexes, "size")
+                else:
+                    fact.value = [fact.value]
+                    fact.value.append(tp.solver_data.facts[-1].objects[0].size)
+                    indexes.add(tp.solver_data.facts[-1].id)
 
+                    if len(fact.value) == len(fact.objects) + 1:
+                        value = 2 * fact.value[0] - sum(fact.value)
+                        if isinstance(fact.objects[0], tp.Angle):
+                            value = value % 360
+                        for object in fact.objects:
+                            if not object.size:
+                                object.size = value
+                                update_facts([object], value, indexes, "size")
 
 
 # Возвращает корни данного факта
@@ -462,13 +461,13 @@ def return_roots(ind):
 
 # Делает имя объекта красивым
 def beautiful_object(object):
-    if type(object) == type(tp.solver_data.segments[0]) or type(object) == type(tp.solver_data.polygons[0]):
+    if isinstance(object, tp.Segment) or isinstance(object, tp.Polygon):
         name = ""
         for point in object.points:
             name += point.name
         return name
 
-    elif type(object) == type(tp.solver_data.angles[0]):
+    elif isinstance(object, tp.Angle):
         for p1 in tp.solver_data.points:
             for p2 in tp.solver_data.points:
                 if p2 != p1:
@@ -483,7 +482,7 @@ def beautiful_object(object):
 def beautiful_fact(fact):
     obj = fact.objects
     if fact.fact_type == "relation":
-        if type(obj[0]) != type(tp.solver_data.polygons[0]):
+        if isinstance(obj[0], tp.Polygon):
             return (f"{beautiful_object(obj[0])} / {beautiful_object(obj[1])} = {fact.value}")
         else:
             return (f"{beautiful_object(obj[0])} similars {beautiful_object(obj[1])} with ratio {fact.value}")
@@ -499,18 +498,18 @@ def beautiful_fact(fact):
                 if i != 0:
                     sums.append(beautiful_object(obj[i]))
             out = ", ".join(sums)
-            if type(fact.objects[0]) == type(tp.solver_data.angles[0]):
+            if isinstance(fact.objects[0], tp.Angle):
                 return f"{beautiful_object(obj[0])} equals sum of:{out} as sum of angles"
-            elif type(fact.objects[0]) == type(tp.solver_data.segments[0]):
+            elif isinstance(fact.objects[0], tp.Segment):
                 return f"{beautiful_object(obj[0])} equals sum of:{out} as sum of segments"
         else:
             sums = []
             for i in range(len(fact.objects)):
                 sums.append(beautiful_object(obj[i]))
             out = ", ".join(sums)
-            if type(fact.objects[0]) == type(tp.solver_data.angles[0]):
+            if isinstance(fact.objects[0], tp.Angle):
                 return f"Sum of angles {out} equals {fact.value}"
-            elif type(fact.objects[0]) == type(tp.solver_data.segments[0]):
+            elif isinstance(fact.objects[0], tp.Segment):
                 return f"Sum of segments {out} equals {fact.value}"
 
 
@@ -534,19 +533,28 @@ def to_str(fact, roots=True):
 
 # Сам процесс решения, проверяет все ли вопросы учтены, выводит нужные факты, формирует словарик с нужными фактами
 def solving_process():
-    global ind, facts_indexes, not_none_angles
+    global angles2, segments2
+
+    angles2 = [-1] * len(tp.solver_data.angles)
+    segments2 = [-1] * len(tp.solver_data.segments)
+
+    pre_work()
 
     first()
+
+    fix_all_angles()
+
     q_indexes = set()
 
     while len(q_indexes) != len(tp.solver_data.questions):
         for q in tp.solver_data.questions:
+
             if find_ans(q):
                 q_indexes.add(find_ans(q))
-            fix_all_angles()
+            print(0)
             fix_all_triangles()
             add_size_fact()
-            add_realtions()
+
 
     return_facts = dict()
 
