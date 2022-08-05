@@ -1,5 +1,6 @@
 import Solver_alpha
 import task_parser as taskp
+from re import *
 
 
 def fact_objects_name(fact):
@@ -49,7 +50,7 @@ def fact_output(fact):
         add = False
         value = fact.value
         if fact.fact_type == "relation":
-            if value == "1/1":
+            if value == "1/1" or value == 1.0:
                 equality = True
             else:
                 relation = True
@@ -57,7 +58,7 @@ def fact_output(fact):
             size = True
         elif fact.fact_type == "difference":
             diff = True
-        elif fact.fact_type == "additions":
+        elif fact.fact_type == "addition":
             add = True
 
         names = fact_objects_name(fact)
@@ -70,9 +71,15 @@ def fact_output(fact):
             elif size:
                 return "{S}{N1} = {V}{D}".format(N1=names[0], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
             elif diff:
-                return "{S}{N1} - {S}{N2} = {V}{D}".format(N1=names[0], N2=names[1], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
+                if len(fact.objects) == 3:
+                    return "{S}{N1} - {S}{N2} - {N3} = {V}{D}".format(N1=names[0], N2=names[1],  N3=names[2], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
+                else:
+                    return "{S}{N1} - {S}{N2} = {V}{D}".format(N1=names[0], N2=names[1], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
             elif add:
-                return "{S}{N1} + {S}{N2} = {V}{D}".format(N1=names[0], N2=names[1], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
+                if len(fact.objects) == 3:
+                    return "{S}{N1} + {S}{N2} + {S}{N3} = {V}{D}".format(N1=names[0], N2=names[1], N3=names[2], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
+                else:
+                    return "{S}{N1} + {S}{N2} = {V}{D}".format(N1=names[0], N2=names[1], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
             else:
                 return ""
         else:
@@ -83,9 +90,15 @@ def fact_output(fact):
             elif size:
                 return "{N1} = {V}".format(N1=names[0], V=value)
             elif diff:
-                return "{N1} - {N2} = {V}".format(N1=names[0], N2=names[1], V=value)
+                if len(fact.objects) == 3:
+                    return "{N1} - {N2} - {N3} = {V}".format(N1=names[0], N2=names[1], N3=names[2], V=value)
+                else:
+                    return "{N1} - {N2} = {V}".format(N1=names[0], N2=names[1], V=value)
             elif add:
-                return "{N1} + {N2} = {V}".format(N1=names[0], N2=names[1], V=value)
+                if len(fact.objects) == 3:
+                    return "{N1} + {N2} + {N3} = {V}".format(N1=names[0], N2=names[1], N3=names[2], V=value)
+                else:
+                    return "{N1} + {N2} = {V}".format(N1=names[0], N2=names[1], V=value)
             else:
                 return ""
     except:
