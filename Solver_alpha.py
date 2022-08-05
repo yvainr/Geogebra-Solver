@@ -156,25 +156,44 @@ def find_in_facts_with_obj(obj, not_strict, extra_type, extra_value):
 # Обновляет факты
 def update_facts(fact_obj, value, roofs, reason):
     global ind, segments2, angles2
-    tp.solver_data.facts.append(tp.Fact(ind, -1, reason, fact_obj, value))
-    for roof in roofs:
-        tp.solver_data.facts[roof].following_facts.add(ind)
-        tp.solver_data.facts[-1].root_facts.add(roof)
-    ind += 1
-    if reason == "size":
-        fact_obj[0].size = value
-        if isinstance(fact_obj[0], tp.Segment):
-            for i, segm in enumerate(tp.solver_data.segments):
-                if segm == fact_obj[0]:
-                    segments2[i] = ind - 1
 
-        if isinstance(fact_obj[0], tp.Angle):
-            for i, angl in enumerate(tp.solver_data.angles):
-                if angl == fact_obj[0]:
-                    angles2[i] = ind - 1
-        income_fact = tp.solver_data.facts[-1]
-        add_size_fact(income_fact)
-        add_relations_later(income_fact)
+    if reason == "relation":
+        if fact_obj[1] not in fact_obj[0].relations:
+            fact_obj[0].relations[fact_obj[1]] = [value, ind]
+            tp.solver_data.facts.append(tp.Fact(ind, -1, reason, fact_obj, value))
+            for roof in roofs:
+                tp.solver_data.facts[roof].following_facts.add(ind)
+                tp.solver_data.facts[-1].root_facts.add(roof)
+            ind += 1
+        elif fact_obj[1] in fact_obj[0].relations and isinstance(fact_obj[0].relations[fact_obj[1]], float):
+            fact_obj[0].relations[fact_obj[1]] = [value, ind]
+            tp.solver_data.facts.append(tp.Fact(ind, -1, reason, fact_obj, value))
+            for roof in roofs:
+                tp.solver_data.facts[roof].following_facts.add(ind)
+                tp.solver_data.facts[-1].root_facts.add(roof)
+            ind += 1
+    else:
+
+        tp.solver_data.facts.append(tp.Fact(ind, -1, reason, fact_obj, value))
+        for roof in roofs:
+            tp.solver_data.facts[roof].following_facts.add(ind)
+            tp.solver_data.facts[-1].root_facts.add(roof)
+        ind += 1
+
+        if reason == "size":
+            fact_obj[0].size = value
+            if isinstance(fact_obj[0], tp.Segment):
+                for i, segm in enumerate(tp.solver_data.segments):
+                    if segm == fact_obj[0]:
+                        segments2[i] = ind - 1
+
+            if isinstance(fact_obj[0], tp.Angle):
+                for i, angl in enumerate(tp.solver_data.angles):
+                    if angl == fact_obj[0]:
+                        angles2[i] = ind - 1
+            income_fact = tp.solver_data.facts[-1]
+            add_size_fact(income_fact)
+            add_relations_later(income_fact)
 
 
 
@@ -289,7 +308,7 @@ def similarity_if_not_None(AB, BC):
 
 # Добавляет новые факты следующие из подобия треугольников
 def consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k):
-    fact = ind
+    fact = ind - 1
     simil_them(AB, A1B1, k, fact)
     simil_them(BC, B1C1, k, fact)
     simil_them(CA, C1A1, k, fact)
@@ -300,8 +319,7 @@ def consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C
 
 # Проверяет все возможные варианты подобия трекугольников, если вершины для подобия указаны в правильном порядке
 def similaritys_triangles(triangle1, triangle2, AB, CA, BC, BCA, ABC, CAB, A1B1, C1A1, B1C1, B1C1A1, A1B1C1, C1A1B1):
-    if not find_in_facts_with_obj([triangle1, triangle2], "extra", "relation", None):
-
+    if triangle1 not in triangle2.relations:
         # print(AB.size, BC.size, CA.size, BCA.size, CAB.size, ABC.size, A1B1.size, B1C1.size, C1A1.size, B1C1A1.size, C1A1B1.size, A1B1C1.size)
         # print(beautiful_object(AB), beautiful_object(BC), beautiful_object(CA), beautiful_object(BCA), beautiful_object(CAB), beautiful_object(ABC), beautiful_object(A1B1), beautiful_object(B1C1), beautiful_object(C1A1), beautiful_object(B1C1A1), beautiful_object(C1A1B1), beautiful_object(A1B1C1))
 
@@ -316,12 +334,11 @@ def similaritys_triangles(triangle1, triangle2, AB, CA, BC, BCA, ABC, CAB, A1B1,
                                                                                                A1B1C1) and similarity_if_not_None(
                     AB, A1B1)):
 
-                roots = {find_in_facts_with_obj([AB, A1B1], "extra", "relation", None),
-                         find_in_facts_with_obj([ABC, A1B1C1], "extra", "relation", None),
-                         find_in_facts_with_obj([BC, B1C1], "extra", "relation", None)}
+                roots = {AB.relations[A1B1][1],
+                         ABC.relations[A1B1C1][1],
+                         BC.relations[B1C1][1]}
 
                 update_facts([triangle1, triangle2], k, roots, "relation")
-                update_facts([triangle2, triangle1], 1 / k, roots, "relation")
 
                 consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k)
 
@@ -329,58 +346,59 @@ def similaritys_triangles(triangle1, triangle2, AB, CA, BC, BCA, ABC, CAB, A1B1,
                                                                                                  C1A1B1) and similarity_if_not_None(
                 AB, A1B1)):
 
-                roots = {find_in_facts_with_obj([CAB, C1A1B1], "extra", "relation", None),
-                         find_in_facts_with_obj([AB, A1B1], "extra", "relation", None),
-                         find_in_facts_with_obj([CA, C1A1], "extra", "relation", None)}
+                roots = {CAB.relations[C1A1B1][1],
+                         AB.relations[A1B1][1],
+                         CA.relations[C1A1][1]}
 
                 update_facts([triangle1, triangle2], k, roots, "relation")
-                update_facts([triangle2, triangle1], 1 / k, roots, "relation")
 
                 consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k)
+
 
             elif (similarity_if_not_None(BC, B1C1) == similarity_if_not_None(CA, C1A1) and equal(BCA,
                                                                                                  B1C1A1) and similarity_if_not_None(
                 BC, B1C1)):
 
-                roots = {find_in_facts_with_obj([BC, B1C1], "extra", "relation", None),
-                         find_in_facts_with_obj([BCA, B1C1A1], "extra", "relation", None),
-                         find_in_facts_with_obj([CA, C1A1], "extra", "relation", None)}
+                roots = {BC.relations[B1C1][1],
+                         BCA.relations[B1C1A1][1],
+                         CA.relations[C1A1][1]}
+
 
                 update_facts([triangle1, triangle2], k, roots, "relation")
-                update_facts([triangle2, triangle1], 1 / k, roots, "relation")
 
                 consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k)
 
+
             elif (equal(ABC, A1B1C1) and equal(CAB, C1A1B1) and similarity_if_not_None(AB, A1B1)):
 
-                roots = {find_in_facts_with_obj([ABC, A1B1C1], "extra", "relation", None),
-                         find_in_facts_with_obj([CAB, C1A1B1], "extra", "relation", None),
-                         find_in_facts_with_obj([AB, A1B1], "extra", "relation", None)}
+                roots = {ABC.realtions[A1B1C1][1],
+                         CAB.relations[C1A1B1][1],
+                         AB.relations[A1B1][1]}
+
 
                 update_facts([triangle1, triangle2], k, roots, "relation")
-                update_facts([triangle2, triangle1], 1 / k, roots, "relation")
 
                 consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k)
 
             elif (equal(ABC, A1B1C1) and equal(BCA, B1C1A1) and similarity_if_not_None(BC, B1C1)):
 
-                roots = {find_in_facts_with_obj([ABC, A1B1C1], "extra", "relation", None),
-                         find_in_facts_with_obj([BCA, B1C1A1], "extra", "relation", None),
-                         find_in_facts_with_obj([BC, B1C1], "extra", "relation", None)}
+                roots = {ABC.realtions[A1B1C1][1],
+                         BCA.relations[B1C1A1][1],
+                         BC.relations[B1C1][1]}
+
 
                 update_facts([triangle1, triangle2], k, roots, "relation")
-                update_facts([triangle2, triangle1], 1 / k, roots, "relation")
 
                 consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k)
 
             elif equal(CAB, C1A1B1) and equal(BCA, B1C1A1) and similarity_if_not_None(CA, C1A1):
 
-                roots = {find_in_facts_with_obj([CAB, C1A1B1], "extra", "relation", None),
-                         find_in_facts_with_obj([BCA, B1C1A1], "extra", "relation", None),
-                         find_in_facts_with_obj([CA, C1A1], "extra", "relation", None)}
+                roots = {CAB.relations[C1A1B1][1],
+                         BCA.relations[B1C1A1][1],
+                         CA.relations[C1A1][1]}
+
 
                 update_facts([triangle1, triangle2], k, roots, "relation")
-                update_facts([triangle2, triangle1], 1 / k, roots, "relation")
 
                 consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k)
 
@@ -388,12 +406,10 @@ def similaritys_triangles(triangle1, triangle2, AB, CA, BC, BCA, ABC, CAB, A1B1,
                                                                                                                   B1C1) == similarity_if_not_None(
                 AB, A1B1) and similarity_if_not_None(AB, A1B1)):
 
-                roots = {find_in_facts_with_obj([AB, A1B1], "extra", "relation", None),
-                         find_in_facts_with_obj([CA, C1A1], "extra", "relation", None),
-                         find_in_facts_with_obj([BC, B1C1], "extra", "relation", None)}
+                roots = {AB.relations[A1B1][1], (CA.relations[C1A1][1]), BC.relations[B1C1][1]}
+
 
                 update_facts([triangle1, triangle2], k, roots, "relation")
-                update_facts([triangle2, triangle1], 1 / k, roots, "relation")
 
                 consequences_of_similarity(AB, A1B1, BC, B1C1, CA, C1A1, BCA, B1C1A1, CAB, C1A1B1, ABC, A1B1C1, k)
 
@@ -501,12 +517,14 @@ def return_roots(ind):
     while len(upd_roots) != 0:
         new_indexes = set()
         upd_roots = []
+
         for index in current_index:
             if tp.solver_data.facts[index].fact_type != "addition":
                 new_indexes |= tp.solver_data.facts[index].root_facts
             upd_roots.append(index)
             roots.append(index)
         current_index = new_indexes
+
         if len(upd_roots) == 0:
             roots.sort()
             n_roots = []
@@ -568,7 +586,7 @@ def beautiful_fact(fact):
             elif isinstance(fact.objects[0], tp.Segment):
                 return f"Sum of segments {out} equals {fact.value[0]}"
 
-            
+
 # Печать факта для юзера
 def to_str(fact, roots=True):
     if fact.fact_type == "addition":
@@ -603,6 +621,7 @@ def solving_process():
 
     while len(q_indexes) != len(tp.solver_data.questions):
         for q in tp.solver_data.questions:
+            
             fix_all_triangles()
 
             if find_ans(q):
