@@ -387,6 +387,8 @@ def angles_create(text):
                 angle_name, angle_size = angle
                 A, B, C = list(angle_name)
                 if A != B != C != A:
+                    A, B, C = check_angle_in_polygon(A, B, C, data)
+
                     find_angle_with_points(A, B, C, data).size = float(Fraction(angle_size))
                     find_angle_with_points(C, B, A, data).size = 360 - float(Fraction(angle_size))
 
@@ -446,8 +448,8 @@ def angles_relations_create(text):
             for relation in text.split(','):
                 ang_1, ang_2, val = relation.split()
 
-                ang_1 = find_angle_with_points(ang_1[0], ang_1[1], ang_1[2], data)
-                ang_2 = find_angle_with_points(ang_2[0], ang_2[1], ang_2[2], data)
+                ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[0], ang_1[1], ang_1[2], data))
+                ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2], data))
 
                 if len(relation.split()[0]) == len(relation.split()[1]) == 3:
                     ang_1.relations[ang_2] = Fraction(val)
@@ -518,7 +520,7 @@ def questions_create(text):
                         seg = find_segment_with_points(question.split()[0][0], question.split()[0][1], data)
                         data.questions.append(Fact(len(data.questions), None, 'size', [seg], val, True))
                     if len(question.split()[0]) == 3:
-                        ang = find_angle_with_points(question.split()[0][0], question.split()[0][1], question.split()[0][2], data)
+                        ang = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2], data))
                         data.questions.append(Fact(len(data.questions), None, 'size', [ang], val, True))
 
                 if len(question.split()) == 3:
@@ -532,8 +534,8 @@ def questions_create(text):
                             data.questions.append(Fact(len(data.questions), None, 'relation', [seg_1, seg_2], Fraction(question.split()[2]), True))
 
                     elif question.split()[0][0] != '/' and len(question.split()[0]) == 3 and len(question.split()[1]) == 3:
-                        ang_1 = find_angle_with_points(question.split()[0][0], question.split()[0][1], question.split()[0][2], data)
-                        ang_2 = find_angle_with_points(question.split()[1][0], question.split()[1][1], question.split()[1][2], data)
+                        ang_1 = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2], data), data)
+                        ang_2 = find_angle_with_points(*check_angle_in_polygon(question.split()[1][0], question.split()[1][1], question.split()[1][2], data), data)
 
                         if question.split()[2] == '?':
                             data.questions.append(Fact(len(data.questions), None, 'relation', [ang_1, ang_2], None, True))
@@ -627,8 +629,6 @@ def find_ray_with_points(A, B, data=None):
 def find_angle_with_points(A, B, C, data=None):
     if not data:
         data = drawer_data
-
-    A, B, C = check_angle_in_polygon(A, B, C, data)
 
     r1 = find_ray_with_points(B, A, data)
     r2 = find_ray_with_points(B, C, data)
