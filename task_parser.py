@@ -64,13 +64,13 @@ class Angle:
             str_rays += f' {[ray.main_point.name] + get_points_names_from_list(ray.points)}'
 
         for rel in self.relations:
-            str_relations += f'{get_points_names_from_list(rel.lines[0].points)} {get_points_names_from_list(rel.lines[1].points)} {self.relations[rel]} '
+            str_relations += f'{get_points_names_from_list(rel.rays[0].points)} {get_points_names_from_list(rel.rays[1].points)} {self.relations[rel]} '
 
         for dif in self.difference:
-            str_difference += f'{get_points_names_from_list(dif.lines[0].points)} {get_points_names_from_list(dif.lines[1].points)} {self.difference[dif]} '
+            str_difference += f'{get_points_names_from_list(dif.rays[0].points)} {get_points_names_from_list(dif.rays[1].points)} {self.difference[dif]} '
 
         for add in self.addition:
-            str_addition += f'{get_points_names_from_list(add.lines[0].points)} {get_points_names_from_list(add.lines[1].points)} {self.addition[add]} '
+            str_addition += f'{get_points_names_from_list(add.rays[0].points)} {get_points_names_from_list(add.rays[1].points)} {self.addition[add]} '
 
         if not str_relations:
             str_relations = 'None '
