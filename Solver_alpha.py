@@ -568,7 +568,7 @@ def beautiful_fact(fact):
             elif isinstance(fact.objects[0], tp.Segment):
                 return f"Sum of segments {out} equals {fact.value[0]}"
 
-
+            
 # Печать факта для юзера
 def to_str(fact, roots=True):
     if fact.fact_type == "addition":
@@ -609,7 +609,6 @@ def solving_process():
                 q_indexes.add(find_ans(q))
 
     return_facts = dict()
-
 
     for q_ind in q_indexes:
         return_facts[tp.solver_data.facts[q_ind]] = return_roots(q_ind)
