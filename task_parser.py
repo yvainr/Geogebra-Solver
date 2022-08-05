@@ -513,7 +513,7 @@ def questions_create(text):
                 if len(question.split()) == 2:
                     try:
                         val = Fraction(question.split()[1])
-                    except TypeError:
+                    except ValueError:
                         val = None
 
                     if len(question.split()[0]) == 2:
