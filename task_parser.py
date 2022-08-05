@@ -448,8 +448,8 @@ def angles_relations_create(text):
             for relation in text.split(','):
                 ang_1, ang_2, val = relation.split()
 
-                ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[0], ang_1[1], ang_1[2], data))
-                ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2], data))
+                ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[0], ang_1[1], ang_1[2], data), data)
+                ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2], data), data)
 
                 if len(relation.split()[0]) == len(relation.split()[1]) == 3:
                     ang_1.relations[ang_2] = Fraction(val)
@@ -520,7 +520,7 @@ def questions_create(text):
                         seg = find_segment_with_points(question.split()[0][0], question.split()[0][1], data)
                         data.questions.append(Fact(len(data.questions), None, 'size', [seg], val, True))
                     if len(question.split()[0]) == 3:
-                        ang = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2], data))
+                        ang = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2], data), data)
                         data.questions.append(Fact(len(data.questions), None, 'size', [ang], val, True))
 
                 if len(question.split()) == 3:
