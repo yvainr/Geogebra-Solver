@@ -455,11 +455,11 @@ def angles_relations_create(text):
                     ang_1.relations[ang_2] = Fraction(val)
                     ang_2.relations[ang_1] = 1 / Fraction(val)
 
-                if relation.split()[0][3] == '-' and len(relation.split()[0]) == 4 and len(relation.split()[1]) == 3:
+                elif relation.split()[0][3] == '-' and len(relation.split()[0]) == 4 and len(relation.split()[1]) == 3:
                     ang_1.difference[ang_2] = Fraction(val)
                     ang_2.difference[ang_1] = - Fraction(val)
 
-                if relation.split()[0][3] == '+' and len(relation.split()[0]) == 4 and len(relation.split()[1]) == 3:
+                elif relation.split()[0][3] == '+' and len(relation.split()[0]) == 4 and len(relation.split()[1]) == 3:
                     ang_1.addition[ang_2] = Fraction(val)
                     ang_2.addition[ang_1] = Fraction(val)
 
