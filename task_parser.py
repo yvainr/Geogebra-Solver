@@ -64,7 +64,7 @@ class Angle:
             str_rays += f' {[ray.main_point.name] + get_points_names_from_list(ray.points)}'
 
         for rel in self.relations:
-            str_relations += f'{get_points_names_from_list(rel.rays[0].points)} {get_points_names_from_list(rel.rays[1].points)} {self.relations[rel]} '
+            str_relations += f'{[rel.rays[0].main_point.name] + get_points_names_from_list(rel.rays[0].points)} {[rel.rays[1].main_point.name] + get_points_names_from_list(rel.rays[1].points)} {self.relations[rel]} '
 
         for dif in self.difference:
             str_difference += f'{get_points_names_from_list(dif.rays[0].points)} {get_points_names_from_list(dif.rays[1].points)} {self.difference[dif]} '
@@ -81,7 +81,7 @@ class Angle:
         if not str_addition:
             str_addition = 'None '
 
-        return f'name: {self.name}, rays:{str_rays}, size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
+        return f'name: {self.name}, rays:{str_rays}' # , size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
 
 
 class Segment:
@@ -119,7 +119,7 @@ class Segment:
         if not str_addition:
             str_addition = 'None '
 
-        return f'points: {get_points_names_from_list(self.points)}, size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
+        return f'name: {self.name}'  # , size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
 
 
 class Polygon:
@@ -132,7 +132,7 @@ class Polygon:
         self.name = f"polygon_{''.join(get_points_names_from_list(vertices))}"
 
     def __str__(self):
-        return f'points: {get_points_names_from_list(self.points)}, convex: {self.convex}'
+        return f'name: {self.name}, convex: {self.convex}'
 
 
 class Fact:
@@ -371,7 +371,7 @@ def segments_create(text):
             for segment in text.split(','):
                 segment = segment.split()
                 try:
-                    size = float(Fraction(segment[1]))
+                    size = Fraction(segment[1])
                 except IndexError:
                     size = None
 
@@ -389,8 +389,8 @@ def angles_create(text):
                 if A != B != C != A:
                     A, B, C = check_angle_in_polygon(A, B, C, data)
 
-                    find_angle_with_points(A, B, C, data).size = float(Fraction(angle_size))
-                    find_angle_with_points(C, B, A, data).size = 360 - float(Fraction(angle_size))
+                    find_angle_with_points(A, B, C, data).size = Fraction(angle_size)
+                    find_angle_with_points(C, B, A, data).size = Fraction(360) - Fraction(angle_size)
 
 
 def segments_relations_create(text):
