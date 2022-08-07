@@ -21,13 +21,13 @@ def rays_on_same_line(ray1, ray2):
 
 def angle_between_rays(ray1, ray2):
     if (set([ray1.main_point]) | ray1.points) & (set([ray2.main_point]) | ray2.points) == set():
-        return 180
+        return 180.0
     elif ray1.main_point in ray2.points and ray2.main_point in ray1.points:
-        return 180
+        return 180.0
     elif ray1.main_point == ray2.main_point and (set([ray1.main_point])) & (set([ray2.main_point])):
-        return 180
+        return 180.0
     else:
-        return 0
+        return 0.0
 
 
 def pre_work():
@@ -80,7 +80,7 @@ def first():
             if i1 > i2:
                 ang1 = tp.find_angle_with_rays(ray1, ray2, tp.solver_data)
                 ang2 = tp.find_angle_with_rays(ray2, ray1, tp.solver_data)
-                update_facts([ang1, ang2], [360], {}, "addition")
+                update_facts([ang1, ang2], 360.0, {}, "addition")
 
     pre_work()
 
@@ -209,7 +209,7 @@ def fix_all_angles():
                         ang2 = tp.find_angle_with_rays(ray2, ray3, tp.solver_data)
                         ang = tp.find_angle_with_rays(ray1, ray3, tp.solver_data)
 
-                        update_facts([ang, ang1, ang2], [], {}, "addition")
+                        update_facts([ang, ang1, ang2], None, {}, "addition")
 
 
 # Выдает все данные об этом треугольнике
@@ -468,7 +468,7 @@ def add_size_fact(income_fact):
 
             if fact.fact_type == "addition" or fact.fact_type == "difference":
                 fact.root_facts.add(income_fact.id)
-                if len(fact.objects) == 3 and len(fact.objects) == len(fact.root_facts) + 1:
+                if not fact.value and len(fact.objects) == len(fact.root_facts) + 1:
                     if income_fact.objects[0] != fact.objects[0]:
                             for ind1 in fact.root_facts:
                                 if isinstance(tp.solver_data.facts[ind1].value, float):
@@ -482,16 +482,16 @@ def add_size_fact(income_fact):
                                 update_facts([fact.objects[0]], value, fact.root_facts, "size")
 
 
-                else:
+                elif fact.value:
                     if len(fact.objects) == len(fact.root_facts):
 
-                        if len(fact.objects) == len(fact.value):
+                        # if len(fact.objects) == len(fact.value):
 
                             for ind1 in fact.root_facts:
                                 if isinstance(value, float):
                                     value += tp.solver_data.facts[ind1].size
 
-                            value = 2 * fact.value[0] - value
+                            value = fact.value - value
 
                             if isinstance(fact.objects[0], tp.Angle):
                                 value = value % 360
@@ -508,7 +508,7 @@ def add_size_fact(income_fact):
 
 # Возвращает корни данного факта
 def return_roots(ind):
-    roots = []
+    roots = [ind]
     if tp.solver_data.facts[ind].fact_type == "addition":
         current_indexes = set()
     else:
@@ -582,9 +582,9 @@ def beautiful_fact(fact):
                 sums.append(beautiful_object(obj[i]))
             out = ", ".join(sums)
             if isinstance(fact.objects[0], tp.Angle):
-                return f"Sum of angles {out} equals {fact.value[0]}"
+                return f"Sum of angles {out} equals {fact.value}"
             elif isinstance(fact.objects[0], tp.Segment):
-                return f"Sum of segments {out} equals {fact.value[0]}"
+                return f"Sum of segments {out} equals {fact.value}"
 
 
 # Печать факта для юзера
@@ -621,7 +621,7 @@ def solving_process():
 
     while len(q_indexes) != len(tp.solver_data.questions):
         for q in tp.solver_data.questions:
-            
+
             fix_all_triangles()
 
             if find_ans(q):
