@@ -392,7 +392,7 @@ def similaritys_triangles(triangle1, triangle2, AB, CA, BC, BCA, ABC, CAB, A1B1,
 
             elif (equal(ABC, A1B1C1) and equal(CAB, C1A1B1) and similarity_if_not_None(AB, A1B1)):
 
-                roots = {ABC.realtions[A1B1C1][1],
+                roots = {ABC.relations[A1B1C1][1],
                          CAB.relations[C1A1B1][1],
                          AB.relations[A1B1][1]}
 
@@ -403,7 +403,7 @@ def similaritys_triangles(triangle1, triangle2, AB, CA, BC, BCA, ABC, CAB, A1B1,
 
             elif (equal(ABC, A1B1C1) and equal(BCA, B1C1A1) and similarity_if_not_None(BC, B1C1)):
 
-                roots = {ABC.realtions[A1B1C1][1],
+                roots = {ABC.relations[A1B1C1][1],
                          BCA.relations[B1C1A1][1],
                          BC.relations[B1C1][1]}
 
