@@ -106,6 +106,28 @@ def first():
                     elif len(tp.solver_data.angles) - now_len_ang == 2:
                         angles2 = angles2 + [-1, -1]
 
+    for seg1 in tp.solver_data.segments:
+        for seg2 in seg1.relations:
+            update_facts([seg1, seg2], seg1.relations[seg2], {}, "relation")
+
+    for i1, seg1 in enumerate(tp.solver_data.segments):
+        for i2, seg2 in enumerate(tp.solver_data.segments):
+            if i1 > i2 and seg2 in seg1.addition:
+                update_facts([seg1, seg2], seg1.addition[seg2], {}, "addition")
+        
+    
+    for ang1 in tp.solver_data.angles:
+        for ang2 in ang1.relations:
+            update_facts([ang1, ang2], ang1.relations[ang2], {}, "relation")
+    
+    for i1, ang1 in enumerate(tp.solver_data.angles):
+        for i2, ang2 in enumerate(tp.solver_data.angles):
+            if i1 > i2 and ang2 in ang1.addition:
+                update_facts([ang1, ang2], ang1.addition[ang2], {}, "addition")
+    
+    
+
+
 
 def add_relations_later(income_fact):
     global segments2, angles2
@@ -173,7 +195,6 @@ def update_facts(fact_obj, value, roofs, reason):
                 tp.solver_data.facts[-1].root_facts.add(roof)
             ind += 1
     else:
-
         tp.solver_data.facts.append(tp.Fact(ind, -1, reason, fact_obj, value))
         for roof in roofs:
             tp.solver_data.facts[roof].following_facts.add(ind)
