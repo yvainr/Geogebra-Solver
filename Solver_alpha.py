@@ -70,6 +70,7 @@ def first():
 
                 tp.find_ray_with_points(p1.name, p2.name, tp.solver_data)
 
+
     fix_all_angles()
 
     angles2 = [-1] * len(tp.solver_data.angles)
@@ -109,23 +110,27 @@ def first():
     for seg1 in tp.solver_data.segments:
         for seg2 in seg1.relations:
             update_facts([seg1, seg2], seg1.relations[seg2], {}, "relation")
+        #
+        # for seg2 in seg2.difference:
+        #     update_facts([seg1, seg2], seg1.difference[seg2], {}, "")
+
 
     for i1, seg1 in enumerate(tp.solver_data.segments):
         for i2, seg2 in enumerate(tp.solver_data.segments):
             if i1 > i2 and seg2 in seg1.addition:
                 update_facts([seg1, seg2], seg1.addition[seg2], {}, "addition")
-        
-    
+
+
     for ang1 in tp.solver_data.angles:
         for ang2 in ang1.relations:
             update_facts([ang1, ang2], ang1.relations[ang2], {}, "relation")
-    
+
     for i1, ang1 in enumerate(tp.solver_data.angles):
         for i2, ang2 in enumerate(tp.solver_data.angles):
             if i1 > i2 and ang2 in ang1.addition:
                 update_facts([ang1, ang2], ang1.addition[ang2], {}, "addition")
-    
-    
+
+
 
 
 
@@ -181,12 +186,35 @@ def update_facts(fact_obj, value, roofs, reason):
 
     if reason == "relation":
         if fact_obj[1] not in fact_obj[0].relations:
+            ind1 = ind
             fact_obj[0].relations[fact_obj[1]] = [value, ind]
             tp.solver_data.facts.append(tp.Fact(ind, -1, reason, fact_obj, value))
             for roof in roofs:
                 tp.solver_data.facts[roof].following_facts.add(ind)
                 tp.solver_data.facts[-1].root_facts.add(roof)
             ind += 1
+
+            if fact_obj[0].size and not fact_obj[1].size:
+                if isinstance(fact_obj[0], tp.Segment):
+                    for i, segm in enumerate(tp.solver_data.segments):
+                        if segm == fact_obj[0]:
+                            index = segments2[i]
+
+                    fact_obj[1].size = fact_obj[0].size / value
+
+                    update_facts([fact_obj[1]], fact_obj[1].size, {index, ind1}, "size")
+
+
+                if isinstance(fact_obj[0], tp.Angle):
+                    for i, angl in enumerate(tp.solver_data.angles):
+                        if angl == fact_obj[0]:
+                            index = segments2[i]
+
+                    update_facts([fact_obj[1]], fact_obj[1].size, {index, ind1}, "size")
+
+                    fact_obj[1].size = fact_obj[0].size / value
+
+
         elif fact_obj[1] in fact_obj[0].relations and isinstance(fact_obj[0].relations[fact_obj[1]], float):
             fact_obj[0].relations[fact_obj[1]] = [value, ind]
             tp.solver_data.facts.append(tp.Fact(ind, -1, reason, fact_obj, value))
@@ -258,23 +286,23 @@ def correct_size(ABC, BCA, CA, AB):
             if not find_in_facts_with_obj([AB, CA], "extra", "relation", None):
                 update_facts([AB, CA], 1, {find_in_facts_with_obj([ABC, BCA], "extra", "relation", None)}, "relation")
                 update_facts([CA, AB], 1, {find_in_facts_with_obj([ABC, BCA], "extra", "relation", None)}, "relation")
-
-                if CA.size and not AB.size:
-                    AB.size = CA.size
-
-                elif AB.size and not CA.size:
-                    CA.size = AB.size
+                #
+                # if CA.size and not AB.size:
+                #     AB.size = CA.size
+                #
+                # elif AB.size and not CA.size:
+                #     CA.size = AB.size
 
     if find_in_facts_with_obj([AB, CA], "extra", "relation", None):
         if tp.solver_data.facts[find_in_facts_with_obj([AB, CA], "extra", "relation", None)].value == 1:
             if not find_in_facts_with_obj([ABC, BCA], "extra", "relation", None):
                 update_facts([ABC, BCA], 1, {find_in_facts_with_obj([AB, CA], "extra", "relation", None)}, "relation")
                 update_facts([BCA, ABC], 1, {find_in_facts_with_obj([AB, CA], "extra", "relation", None)}, "relation")
-
-                if BCA.size and not ABC.size:
-                    BCA.size = ABC.size
-                elif ABC.size and not BCA.size:
-                    ABC.size = BCA.size
+                #
+                # if BCA.size and not ABC.size:
+                #     BCA.size = ABC.size
+                # elif ABC.size and not BCA.size:
+                #     ABC.size = BCA.size
 
 
 # Проверяет равенство величин объектов, при их не None_овости
@@ -289,24 +317,26 @@ def equal(AB, BC):
 def equal_them(A, B, fact):
     update_facts([B, A], 1, {fact}, "relation")
     update_facts([A, B], 1, {fact}, "relation")
-
-    if A.size and not B.size:
-        B.size = Fraction(A.size)
-
-    if B.size and not A.size:
-        A.size = Fraction(B.size)
+    #
+    # if A.size and not B.size:
+    #     B.size = Fraction(A.size)
+    #
+    # if B.size and not A.size:
+    #     A.size = Fraction(B.size)
 
 
 # It makes Делает стороны, где один из них None, а другой - нет, подобными (из подобия треугольников)
 def simil_them(AB, A1B1, k, fact):
+
+    ind1 = ind
     update_facts([A1B1, AB], 1 / k, {fact}, "relation")
     update_facts([AB, A1B1], k, {fact}, "relation")
-
-    if AB.size and not A1B1.size:
-        A1B1.size = Fraction(AB.size / k)
-
-    if A1B1.size and not AB.size:
-        AB.size = Fraction(A1B1.size * k)
+    #
+    # if AB.size and not A1B1.size:
+    #     A1B1.size = Fraction(AB.size / k)
+    #
+    # if A1B1.size and not AB.size:
+    #     AB.size = Fraction(A1B1.size * k)
 
 
 # Находит все стороны и углы, которые может из равнобедренности, во всех р/б треугольниках
@@ -403,7 +433,7 @@ def similaritys_triangles(triangle1, triangle2, AB, CA, BC, BCA, ABC, CAB, A1B1,
 
             elif (equal(ABC, A1B1C1) and equal(BCA, B1C1A1) and similarity_if_not_None(BC, B1C1)):
 
-                roots = {ABC.relations[A1B1C1][1],
+                roots = {ABC.realtions[A1B1C1][1],
                          BCA.relations[B1C1A1][1],
                          BC.relations[B1C1][1]}
 
@@ -476,6 +506,7 @@ def add_size_fact(income_fact):
 
             if fact.fact_type == "relation":
                 if fact.objects[1].size and not fact.objects[0].size:
+                    print(9)
                     fact.objects[0].size = fact.objects[1].size * fact.value
                     if isinstance(fact.objects[0], tp.Angle):
                         fact.objects[0].size = fact.objects[0].size % 360
@@ -487,7 +518,7 @@ def add_size_fact(income_fact):
                         fact.objects[1].size = fact.objects[1].size % 360
                     update_facts([fact.objects[1]], fact.objects[1].size, {income_fact.id}, "size")
 
-            if fact.fact_type == "addition" or fact.fact_type == "difference":
+            if fact.fact_type == "addition":
                 fact.root_facts.add(income_fact.id)
                 if not fact.value and len(fact.objects) == len(fact.root_facts) + 1:
                     if income_fact.objects[0] != fact.objects[0]:
@@ -510,7 +541,7 @@ def add_size_fact(income_fact):
 
                             for ind1 in fact.root_facts:
                                 if isinstance(value, float):
-                                    value += tp.solver_data.facts[ind1].size
+                                    value += tp.solver_data.facts[ind1].value
 
                             value = fact.value - value
 
@@ -522,6 +553,36 @@ def add_size_fact(income_fact):
                                     object.size = value
                                     fact.root_facts.add(fact.id)
                                     update_facts([object], value, fact.root_facts, "size")
+
+            if fact.fact_type == "difference":
+                if len(fact.objects) == len(fact.root_facts):
+
+                    # if len(fact.objects) == len(fact.value):
+
+                    for ind1 in fact.root_facts:
+                        if isinstance(value, float):
+                            if tp.solver_data.facts[ind1].objects[0] == fact.objects[0]:
+                                value += tp.solver_data.facts[ind1].value
+                            else:
+                                value -= tp.solver_data.facts[ind1].value
+
+                    value = fact.value - value
+
+                    if isinstance(fact.objects[0], tp.Angle):
+                        value = value % 360
+
+                    for i, object in enumerate(fact.objects):
+                        if not object.size:
+                            if i == 0:
+
+                                value = -1 * value
+
+                                if isinstance(fact.objects[0], tp.Angle):
+                                    value = value % 360
+
+                            object.size = value
+                            fact.root_facts.add(fact.id)
+                            update_facts([object], value, fact.root_facts, "size")
 
 
 
