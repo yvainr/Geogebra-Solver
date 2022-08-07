@@ -194,25 +194,27 @@ def update_facts(fact_obj, value, roofs, reason):
                 tp.solver_data.facts[-1].root_facts.add(roof)
             ind += 1
 
-            if fact_obj[0].size and not fact_obj[1].size:
-                if isinstance(fact_obj[0], tp.Segment):
-                    for i, segm in enumerate(tp.solver_data.segments):
-                        if segm == fact_obj[0]:
-                            index = segments2[i]
+            if not isinstance(fact_obj[0], tp.Polygon):
 
-                    fact_obj[1].size = fact_obj[0].size / value
+                if fact_obj[0].size and not fact_obj[1].size:
+                    if isinstance(fact_obj[0], tp.Segment):
+                        for i, segm in enumerate(tp.solver_data.segments):
+                            if segm == fact_obj[0]:
+                                index = segments2[i]
 
-                    update_facts([fact_obj[1]], fact_obj[1].size, {index, ind1}, "size")
+                        fact_obj[1].size = fact_obj[0].size / value
+
+                        update_facts([fact_obj[1]], fact_obj[1].size, {index, ind1}, "size")
 
 
-                if isinstance(fact_obj[0], tp.Angle):
-                    for i, angl in enumerate(tp.solver_data.angles):
-                        if angl == fact_obj[0]:
-                            index = segments2[i]
+                    if isinstance(fact_obj[0], tp.Angle):
+                        for i, angl in enumerate(tp.solver_data.angles):
+                            if angl == fact_obj[0]:
+                                index = segments2[i]
 
-                    update_facts([fact_obj[1]], fact_obj[1].size, {index, ind1}, "size")
+                        update_facts([fact_obj[1]], fact_obj[1].size, {index, ind1}, "size")
 
-                    fact_obj[1].size = fact_obj[0].size / value
+                        fact_obj[1].size = fact_obj[0].size / value
 
 
         elif fact_obj[1] in fact_obj[0].relations and isinstance(fact_obj[0].relations[fact_obj[1]], float):
