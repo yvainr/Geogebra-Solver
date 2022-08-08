@@ -30,6 +30,7 @@ def text_analyze(inp_str, output_num=7):
 
 def string_split(inp_str):
     """creating list with diff objects"""
+    inp_str = sub(" и ",  ",", inp_str)
     inp_str = inp_str.split(",")
     return inp_str
 
@@ -246,7 +247,7 @@ def question_processing(question):
     return question
 
 
-# inputt = "Треугольник ABC, AB = 10, угол BAC равен 40, AC относится к AB как 3/5, I - точка пересечения биссектрис ABC \n Найти угол ABC"
+# inputt = "Треугольник ABC и  AB = 10, угол BAC равен 40, AC относится к AB как 3/5, I - точка пересечения биссектрис ABC \n Найти угол ABC"
 # inpu = 'ABC, DEF, ABC подобен DEF с коэффициентом 1/2, relation of sides AB and DE is 1/2 \n prove that BC relate EF like 1/2'
 # inp = 'треугольники ABC = HFG, ABCD невыпуклый, AB = 5, сторона BC равна 4, AB = AC, angle RUS меньше и UTS стороны на 5, ACB равен 90, I -- инцентр в ABC, точкой M сторона AB делится в отношении 1/2 \n найти сумму ABC DEF'
 # print(text_analyze(inputt))
