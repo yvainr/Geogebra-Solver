@@ -81,7 +81,7 @@ class Angle:
         if not str_addition:
             str_addition = 'None '
 
-        return f'name: {self.name}, rays:{str_rays}' # , size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
+        return f'name: {self.name}, rays:{str_rays}, size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
 
 
 class Segment:
@@ -119,7 +119,7 @@ class Segment:
         if not str_addition:
             str_addition = 'None '
 
-        return f'name: {self.name}'  # , size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
+        return f'name: {self.name}, size: {self.size}, relations: {str_relations[:-1]}, difference: {str_difference[:-1]}, addition: {str_addition[:-1]}'
 
 
 class Polygon:
