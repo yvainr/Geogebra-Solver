@@ -21,13 +21,13 @@ def rays_on_same_line(ray1, ray2):
 
 def angle_between_rays(ray1, ray2):
     if (set([ray1.main_point]) | ray1.points) & (set([ray2.main_point]) | ray2.points) == set():
-        return 180.0
+        return Fraction(180.0)
     elif ray1.main_point in ray2.points and ray2.main_point in ray1.points:
-        return 180.0
+        return Fraction(180.0)
     elif ray1.main_point == ray2.main_point and (set([ray1.main_point])) & (set([ray2.main_point])):
-        return 180.0
+        return Fraction(180.0)
     else:
-        return 0.0
+        return Fraction(0.0)
 
 
 def pre_work():
@@ -81,7 +81,7 @@ def first():
             if i1 > i2:
                 ang1 = tp.find_angle_with_rays(ray1, ray2, tp.solver_data)
                 ang2 = tp.find_angle_with_rays(ray2, ray1, tp.solver_data)
-                update_facts([ang1, ang2], 360.0, {}, "addition")
+                update_facts([ang1, ang2], Fraction(360), {}, "addition")
 
     pre_work()
 
@@ -217,7 +217,7 @@ def update_facts(fact_obj, value, roofs, reason):
                         fact_obj[1].size = fact_obj[0].size / value
 
 
-        elif fact_obj[1] in fact_obj[0].relations and isinstance(fact_obj[0].relations[fact_obj[1]], float):
+        elif fact_obj[1] in fact_obj[0].relations and str(fact_obj[0].relations[fact_obj[1]]).isnumeric():
             fact_obj[0].relations[fact_obj[1]] = [value, ind]
             tp.solver_data.facts.append(tp.Fact(ind, -1, reason, fact_obj, value))
             for roof in roofs:
@@ -508,7 +508,6 @@ def add_size_fact(income_fact):
 
             if fact.fact_type == "relation":
                 if fact.objects[1].size and not fact.objects[0].size:
-                    print(9)
                     fact.objects[0].size = fact.objects[1].size * fact.value
                     if isinstance(fact.objects[0], tp.Angle):
                         fact.objects[0].size = fact.objects[0].size % 360
@@ -525,7 +524,7 @@ def add_size_fact(income_fact):
                 if not fact.value and len(fact.objects) == len(fact.root_facts) + 1:
                     if income_fact.objects[0] != fact.objects[0]:
                             for ind1 in fact.root_facts:
-                                if isinstance(tp.solver_data.facts[ind1].value, float):
+                                if str(tp.solver_data.facts[ind1].value).isnumeric():
                                     value += tp.solver_data.facts[ind1].value
                             if isinstance(fact.objects[0], tp.Angle):
                                 value = value % 360
@@ -542,7 +541,7 @@ def add_size_fact(income_fact):
                         # if len(fact.objects) == len(fact.value):
 
                             for ind1 in fact.root_facts:
-                                if isinstance(value, float):
+                                if str(value).isnumeric():
                                     value += tp.solver_data.facts[ind1].value
 
                             value = fact.value - value
@@ -562,7 +561,7 @@ def add_size_fact(income_fact):
                     # if len(fact.objects) == len(fact.value):
 
                     for ind1 in fact.root_facts:
-                        if isinstance(value, float):
+                        if str(value).isnumeric():
                             if tp.solver_data.facts[ind1].objects[0] == fact.objects[0]:
                                 value += tp.solver_data.facts[ind1].value
                             else:
@@ -717,3 +716,4 @@ def solving_process():
         return_facts[tp.solver_data.facts[q_ind]] = return_roots(q_ind)
 
     return return_facts
+
