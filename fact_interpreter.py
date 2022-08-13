@@ -1,5 +1,6 @@
 import Solver_alpha
 import task_parser as taskp
+import normal_solver
 from re import *
 
 
@@ -62,6 +63,9 @@ def fact_output(fact):
             add = True
 
         names = fact_objects_name(fact)
+
+        if value == None:
+            value = "?"
 
         if angle_formalization(fact):
             if equality:
