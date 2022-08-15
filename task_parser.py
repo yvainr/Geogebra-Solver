@@ -180,61 +180,51 @@ class Fact:
         draw_data = list()
         mark_color = "#FF1919"
 
-        if len(self.objects) == 2:
-            if self.objects[0].__class__.__name__ == 'Segment' and self.objects[1].__class__.__name__ == 'Segment':
-                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
-                draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, true)')
-                draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
-                draw_data.append(f'SetColor({self.objects[1].name}, "{mark_color}")')
-                if self.value:
-                    A, B = self.objects[0].points
-                    C, D = self.objects[1].points
-                    try:
-                        rel1, rel2 = str(self.value).split('/')
-                    except ValueError:
-                        rel1, rel2 = self.value, 1
-                    draw_data.append(
-                        f'text1=Text("{rel1}X", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), false, true)')
-                    draw_data.append(
-                        f'text2=Text("{rel2}X", ((x({C.name}) + x({D.name})) / 2, ((y({C.name}) + y({D.name})) / 2) + 0.75), false, true)')
+        for obj in self.objects:
+            if obj.__class__.__name__ == 'Segment':
+                draw_data.append(f'SetVisibleInView({obj.name}, 1, true)')
+                draw_data.append(f'SetColor({obj.name}, "{mark_color}")')
+            if obj.__class__.__name__ == 'Angle':
+                draw_data.append(f'{obj.name}=Angle(Line({obj.rays[0].main_point.name}, {list(obj.rays[0].points)[0].name}), Line({obj.rays[1].main_point.name}, {list(obj.rays[1].points)[0].name}))')
+            if obj.__class__.__name__ == 'Polygon':
+                draw_data.append(f'SetColor({obj.name}, "{mark_color}")')
 
-            if self.objects[0].__class__.__name__ == 'Angle' and self.objects[1].__class__.__name__ == 'Angle':
-                draw_data.append(f'{self.objects[0].name}=Angle(Line({self.objects[0].rays[0].main_point.name}, {list(self.objects[0].rays[0].points)[0].name}), Line({self.objects[0].rays[1].main_point.name}, {list(self.objects[0].rays[1].points)[0].name}))')
-                draw_data.append(f'{self.objects[1].name}=Angle(Line({self.objects[1].rays[0].main_point.name}, {list(self.objects[1].rays[0].points)[0].name}), Line({self.objects[1].rays[1].main_point.name}, {list(self.objects[1].rays[1].points)[0].name}))')
-            if self.objects[0].__class__.__name__ == 'Polygon' and self.objects[1].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
-                draw_data.append(f'SetColor({self.objects[1].name}, "{mark_color}")')
-                if self.value:
-                    try:
-                        rel1, rel2 = str(self.value).split('/')
-                    except ValueError:
-                        rel1, rel2 = self.value, 1
-                    x_points_1, y_points_1, x_points_2, y_points_2 = str(), str(), str(), str()
+        if self.fact_type == 'relation' and self.objects[0].__class__.__name__ == 'Polygon' and self.value:
+            try:
+                rel1, rel2 = str(self.value).split('/')
+            except ValueError:
+                rel1, rel2 = self.value, 1
+            x_points_1, y_points_1, x_points_2, y_points_2 = str(), str(), str(), str()
 
-                    for point in self.objects[0].points:
-                        x_points_1 += f'x({point.name})+'
-                        y_points_1 += f'y({point.name})+'
+            for point in self.objects[0].points:
+                x_points_1 += f'x({point.name})+'
+                y_points_1 += f'y({point.name})+'
 
-                    for point in self.objects[1].points:
-                        x_points_2 += f'x({point.name})+'
-                        y_points_2 += f'y({point.name})+'
+            for point in self.objects[1].points:
+                x_points_2 += f'x({point.name})+'
+                y_points_2 += f'y({point.name})+'
 
-                    draw_data.append(
-                        f'text1=Text("{rel1}X", (({x_points_1[:-1]})/{len(self.objects[0].points)}, ({y_points_1[:-1]})/{len(self.objects[0].points)}), false, true)')
-                    draw_data.append(
-                        f'text2=Text("{rel2}X", (({x_points_2[:-1]})/{len(self.objects[1].points)}, ({y_points_2[:-1]})/{len(self.objects[1].points)}), false, true)')
+            draw_data.append(
+                f'text1=Text("{rel1}X", (({x_points_1[:-1]})/{len(self.objects[0].points)}, ({y_points_1[:-1]})/{len(self.objects[0].points)}), false, true)')
+            draw_data.append(
+                f'text2=Text("{rel2}X", (({x_points_2[:-1]})/{len(self.objects[1].points)}, ({y_points_2[:-1]})/{len(self.objects[1].points)}), false, true)')
 
-        if len(self.objects) == 1:
-            if self.objects[0].__class__.__name__ == 'Segment':
-                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, true)')
-                draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
-                if self.value:
-                    A, B = self.objects[0].points
-                    draw_data.append(f'text=Text(Distance({A.name}, {B.name}), ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), true, true)')
-            if self.objects[0].__class__.__name__ == 'Angle':
-                draw_data.append(f'{self.objects[0].name}=Angle(Line({self.objects[0].rays[0].main_point.name}, {list(self.objects[0].rays[0].points)[0].name}), Line({self.objects[0].rays[1].main_point.name}, {list(self.objects[0].rays[1].points)[0].name}))')
-            if self.objects[0].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, "{mark_color}")')
+        elif self.fact_type == 'relation' and self.objects[0].__class__.__name__ == 'Segment' and self.value:
+            A, B = self.objects[0].points
+            C, D = self.objects[1].points
+            try:
+                rel1, rel2 = str(self.value).split('/')
+            except ValueError:
+                rel1, rel2 = self.value, 1
+            draw_data.append(
+                f'text1=Text("{rel1}X", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), false, true)')
+            draw_data.append(
+                f'text2=Text("{rel2}X", ((x({C.name}) + x({D.name})) / 2, ((y({C.name}) + y({D.name})) / 2) + 0.75), false, true)')
+
+        elif self.fact_type == 'size' and self.objects[0].__class__.__name__ == 'Segment' and self.value:
+            A, B = self.objects[0].points
+            draw_data.append(
+                f'text=Text(Distance({A.name}, {B.name}), ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), true, true)')
 
         return draw_data
 
@@ -242,35 +232,21 @@ class Fact:
         draw_data = list()
         standart_color = "#1565C0"
 
-        if len(self.objects) == 2:
-            if self.objects[0].__class__.__name__ == 'Segment' and self.objects[1].__class__.__name__ == 'Segment':
-                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
-                draw_data.append(f'SetVisibleInView({self.objects[1].name}, 1, false)')
-                draw_data.append(f'SetColor({self.objects[0].name}, "{standart_color}")')
-                draw_data.append(f'SetColor({self.objects[1].name}, "{standart_color}")')
-                if self.value:
-                    draw_data.append(f'Delete(text1)')
-                    draw_data.append(f'Delete(text2)')
-            if self.objects[0].__class__.__name__ == 'Angle' and self.objects[1].__class__.__name__ == 'Angle':
-                draw_data.append(f'Delete({self.objects[0].name})')
-                draw_data.append(f'Delete({self.objects[1].name})')
-            if self.objects[0].__class__.__name__ == 'Polygon' and self.objects[1].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, "{standart_color}")')
-                draw_data.append(f'SetColor({self.objects[1].name}, "{standart_color}")')
-                if self.value:
-                    draw_data.append(f'Delete(text1)')
-                    draw_data.append(f'Delete(text2)')
+        for obj in self.objects:
+            if obj.__class__.__name__ == 'Segment':
+                draw_data.append(f'SetVisibleInView({obj.name}, 1, false)')
+                draw_data.append(f'SetColor({obj.name}, "{standart_color}")')
+            if obj.__class__.__name__ == 'Angle':
+                draw_data.append(f'Delete({obj.name})')
+            if obj.__class__.__name__ == 'Polygon':
+                draw_data.append(f'SetColor({obj.name}, "{standart_color}")')
 
-        if len(self.objects) == 1:
-            if self.objects[0].__class__.__name__ == 'Segment':
-                draw_data.append(f'SetVisibleInView({self.objects[0].name}, 1, false)')
-                draw_data.append(f'SetColor({self.objects[0].name}, "{standart_color}")')
-                if self.value:
-                    draw_data.append(f'Delete(text)')
-            if self.objects[0].__class__.__name__ == 'Angle':
-                draw_data.append(f'Delete({self.objects[0].name})')
-            if self.objects[0].__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({self.objects[0].name}, "{standart_color}")')
+        if self.fact_type == 'relation' and self.value and (self.objects[0].__class__.__name__ == 'Segment' or self.objects[0].__class__.__name__ == 'Polygon'):
+            draw_data.append(f'Delete(text1)')
+            draw_data.append(f'Delete(text2)')
+
+        if self.fact_type == 'size' and self.objects[0].__class__.__name__ == 'Segment' and self.value:
+            draw_data.append(f'Delete(text)')
 
         return draw_data
 
@@ -648,8 +624,15 @@ def find_polygon_with_points(points, data=None):
         data = drawer_data
 
     for polygon in data.polygons:
-        if set(get_points_names_from_list(polygon.points)) == set(points):
-            return polygon
+        polygon_points_names = get_points_names_from_list(polygon.points)
+        if len(polygon_points_names) == len(points):
+            if len(points) == 3:
+                if set(polygon_points_names) == set(points):
+                    return polygon
+            else:
+                for i in range(len(points)):
+                    if (points[i:] + points[:i]) == polygon_points_names:
+                        return polygon
 
     new_points = list()
     for point in points:
