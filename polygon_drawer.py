@@ -3,10 +3,10 @@ import shapely.geometry
 import triangle_drawer as triad
 import task_parser as tp
 from math import *
-from itertools import combinations
-from check_triangle import check_triangle
+from itertools import combinations, permutations
 from objects_types import Objects
 from random import uniform
+from check_triangle import check_triangle
 
 
 def get_random_point_in_polygon(point_name, polygon):
@@ -26,16 +26,19 @@ def get_random_point_in_polygon(point_name, polygon):
             return find_point
 
 
-def get_triangle_parameter(A, B, C):
-    AB = tp.find_segment_with_points(A, B).size
-    BC = tp.find_segment_with_points(B, C).size
-    CA = tp.find_segment_with_points(C, A).size
+def get_triangle_parameter(A, B, C, data=None):
+    if not data:
+        data = tp.drawer_data
+
+    AB = tp.find_segment_with_points(A, B, data).size
+    BC = tp.find_segment_with_points(B, C, data).size
+    CA = tp.find_segment_with_points(C, A, data).size
 
     sides, sides_names = [BC, CA, AB], [f"{B}{C}", f"{C}{A}", f"{A}{B}"]
 
-    CBA = tp.find_angle_with_points(C, B, A).size
-    ACB = tp.find_angle_with_points(A, C, B).size
-    BAC = tp.find_angle_with_points(B, A, C).size
+    CBA = tp.find_angle_with_points(C, B, A, data).size
+    ACB = tp.find_angle_with_points(A, C, B, data).size
+    BAC = tp.find_angle_with_points(B, A, C, data).size
 
     angles, angles_names = [BAC, CBA, ACB], [f"{B}{A}{C}", f"{C}{B}{A}", f"{A}{C}{B}"]
 
@@ -45,7 +48,7 @@ def get_triangle_parameter(A, B, C):
 def draw_polygon(points, realize_data):
     ans_polygon = f'{tp.find_polygon_with_points(tp.get_points_names_from_list(points)).name}=Polygon('
     for point in points:
-        realize_data.append(f"{point.name}({triad.Equal(point.x)}, {triad.Equal(point.y)})")
+        realize_data.append(f"{point.name}({float(point.x.value)}, {float(point.y.value)})")
         ans_polygon += f"{point.name}, "
     ans_polygon = ans_polygon[:-2] + ')'
     realize_data.append(ans_polygon)
@@ -101,10 +104,13 @@ def create_polygon(vertices):
     if len(vertices) == 3:
         A, B, C = vertices
 
-        if type(check_triangle(get_triangle_parameter(A, B, C)[0], get_triangle_parameter(A, B, C)[1])) == str:
-            return check_triangle(get_triangle_parameter(A, B, C)[0], get_triangle_parameter(A, B, C)[1])
+        # проверка треугольников
+        if type(check_triangle(*get_triangle_parameter(A, B, C)[:2])) == str:
+            return check_triangle(*get_triangle_parameter(A, B, C)[:2])
 
-        return triad.CreateTriangle(*get_triangle_parameter(A, B, C))
+        for points_with_cords in permutations(triad.CreateTriangle(*get_triangle_parameter(A, B, C)), 3):
+            if (A, B, C) == (points_with_cords[0].name, points_with_cords[1].name, points_with_cords[2].name):
+                return points_with_cords
 
     if len(vertices) == 4:
         perspective_triangle = None
@@ -126,18 +132,15 @@ def set_screen_size(realize_data):
         x_cords.append(point.x)
         y_cords.append(point.y)
 
-    new_cord_center_x = (max(x_cords) - min(x_cords)) / 2
-    new_cord_center_y = (max(y_cords) - min(y_cords)) / 2
+    xmin = min(x_cords)
+    ymin = min(y_cords)
+    xmax = max(x_cords)
+    ymax = max(y_cords)
 
-    for point in tp.drawer_data.points:
-        point.x -= new_cord_center_x
-        point.y -= new_cord_center_y
-
-    # realize_data.append(f'ZoomIn({xmin - 0.25 * abs(xmin - xmax)}, {ymin - 0.25 * abs(ymin - ymax)}, {xmax + 0.25 * abs(xmin - xmax)}, {ymax + 0.25 * abs(ymin - ymax)})')
+    realize_data.append(f'ZoomIn({xmin - 0.25 * abs(xmin - xmax)}, {ymin - 0.25 * abs(ymin - ymax)}, {xmax + 0.25 * abs(xmin - xmax)}, {ymax + 0.25 * abs(ymin - ymax)})')
 
 
-def text_splitter(text, input_file_name):
-
+def text_splitter(text):
     realize_data = list()
 
     tp.task_data = Objects()
@@ -159,16 +162,12 @@ def text_splitter(text, input_file_name):
         pass
 
     for polygon in tp.drawer_data.polygons:
-        try:
-            tp.create_new_data_in_parser(tp.drawer_data.segments)
-            tp.create_new_data_in_parser(tp.drawer_data.angles)
-            ret = create_polygon(tp.get_points_names_from_list(polygon.points))
-            if type(ret) == str:
-                return ret
-
-            draw_polygon(ret, realize_data)
-        except IndexError:
-            pass
+        tp.create_new_data_in_parser(tp.drawer_data.segments)
+        tp.create_new_data_in_parser(tp.drawer_data.angles)
+        ret = create_polygon(tp.get_points_names_from_list(polygon.points))
+        if type(ret) == str:
+            return ret
+        draw_polygon(ret, realize_data)
 
     for point in tp.drawer_data.points:
         if point.in_polygon:
@@ -184,6 +183,6 @@ def text_splitter(text, input_file_name):
 
     # set_screen_size(realize_data)
 
-    geogebra_html_generator.insert_commands(realize_data, input_file_name=input_file_name)
+    geogebra_html_generator.insert_commands(realize_data)
 
     return 200
