@@ -1,6 +1,6 @@
-from fractions import Fraction
+# from fractions import Fraction
 from random import uniform
-from objects_types import Objects
+from objects_types import Objects, Size
 
 
 class Point:
@@ -314,12 +314,12 @@ def polygons_create(text):
                 #         BS = find_segment_with_points(B, S.name)
                 #         CS = find_segment_with_points(C, S.name)
                 #
-                #         AS.relations[BS] = Fraction(1)
-                #         BS.relations[AS] = Fraction(1)
-                #         AS.relations[CS] = Fraction(1)
-                #         CS.relations[AS] = Fraction(1)
-                #         CS.relations[BS] = Fraction(1)
-                #         BS.relations[CS] = Fraction(1)
+                #         AS.relations[BS] = Size(1)
+                #         BS.relations[AS] = Size(1)
+                #         AS.relations[CS] = Size(1)
+                #         CS.relations[AS] = Size(1)
+                #         CS.relations[BS] = Size(1)
+                #         BS.relations[CS] = Size(1)
                 #
                 #     if polygon.split()[1] == 'I':
                 #         AS = find_line_with_points(A, S.name)
@@ -333,12 +333,12 @@ def polygons_create(text):
                 #         SCB = find_angle_with_lines(CS, BC)
                 #         ACS = find_angle_with_lines(CA, CS)
                 #
-                #         SAC.relations[BAS] = Fraction(1)
-                #         BAS.relations[SAC] = Fraction(1)
-                #         SBA.relations[CBS] = Fraction(1)
-                #         CBS.relations[SBA] = Fraction(1)
-                #         SCB.relations[ACS] = Fraction(1)
-                #         ACS.relations[SCB] = Fraction(1)
+                #         SAC.relations[BAS] = Size(1)
+                #         BAS.relations[SAC] = Size(1)
+                #         SBA.relations[CBS] = Size(1)
+                #         CBS.relations[SBA] = Size(1)
+                #         SCB.relations[ACS] = Size(1)
+                #         ACS.relations[SCB] = Size(1)
 
 
 def segments_create(text):
@@ -347,7 +347,7 @@ def segments_create(text):
             for segment in text.split(','):
                 segment = segment.split()
                 try:
-                    size = Fraction(segment[1])
+                    size = Size(segment[1])
                 except IndexError:
                     size = None
 
@@ -365,8 +365,8 @@ def angles_create(text):
                 if A != B != C != A:
                     A, B, C = check_angle_in_polygon(A, B, C, data)
 
-                    find_angle_with_points(A, B, C, data).size = Fraction(angle_size)
-                    find_angle_with_points(C, B, A, data).size = Fraction(360) - Fraction(angle_size)
+                    find_angle_with_points(A, B, C, data).size = Size(angle_size)
+                    find_angle_with_points(C, B, A, data).size = Size(360) - Size(angle_size)
 
 
 def segments_relations_create(text):
@@ -378,8 +378,8 @@ def segments_relations_create(text):
                     seg_2 = find_segment_with_points(relation.split()[1][0], relation.split()[1][1], data)
 
                     rel = relation.split()[2]
-                    seg_1.relations[seg_2] = Fraction(rel)
-                    seg_2.relations[seg_1] = 1 / Fraction(rel)
+                    seg_1.relations[seg_2] = Size(rel)
+                    seg_2.relations[seg_1] = 1 / Size(rel)
 
                 if len(relation.split()[0]) == 1:
                     seg_1 = find_segment_with_points(relation.split()[0], relation.split()[1][0], data)
@@ -389,8 +389,8 @@ def segments_relations_create(text):
                     line.points.add(find_point_with_name(relation.split()[0], data))
 
                     rel = relation.split()[2]
-                    seg_1.relations[seg_2] = Fraction(rel)
-                    seg_2.relations[seg_1] = 1 / Fraction(rel)
+                    seg_1.relations[seg_2] = Size(rel)
+                    seg_2.relations[seg_1] = 1 / Size(rel)
 
                 if len(relation.split()[1]) == 1:
                     seg_1 = find_segment_with_points(relation.split()[1], relation.split()[0][0], data)
@@ -400,8 +400,8 @@ def segments_relations_create(text):
                     line.points.add(find_point_with_name(relation.split()[1], data))
 
                     rel = relation.split()[2]
-                    seg_1.relations[seg_2] = Fraction(rel)
-                    seg_2.relations[seg_1] = 1 / Fraction(rel)
+                    seg_1.relations[seg_2] = Size(rel)
+                    seg_2.relations[seg_1] = 1 / Size(rel)
 
                 if len(relation.split()[0]) == 3 and len(relation.split()[1]) == 2:
                     seg_1 = find_segment_with_points(relation.split()[0][0], relation.split()[0][1], data)
@@ -409,13 +409,13 @@ def segments_relations_create(text):
 
                     if relation.split()[0][2] == '-':
                         dif = relation.split()[2]
-                        seg_1.difference[seg_2] = Fraction(dif)
-                        seg_2.difference[seg_1] = - Fraction(dif)
+                        seg_1.difference[seg_2] = Size(dif)
+                        seg_2.difference[seg_1] = - Size(dif)
 
                     if relation.split()[0][2] == '+':
                         add = relation.split()[2]
-                        seg_1.addition[seg_2] = Fraction(add)
-                        seg_2.addition[seg_1] = Fraction(add)
+                        seg_1.addition[seg_2] = Size(add)
+                        seg_2.addition[seg_1] = Size(add)
 
 
 def angles_relations_create(text):
@@ -428,16 +428,16 @@ def angles_relations_create(text):
                 ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2], data), data)
 
                 if len(relation.split()[0]) == len(relation.split()[1]) == 3:
-                    ang_1.relations[ang_2] = Fraction(val)
-                    ang_2.relations[ang_1] = 1 / Fraction(val)
+                    ang_1.relations[ang_2] = Size(val)
+                    ang_2.relations[ang_1] = 1 / Size(val)
 
                 elif relation.split()[0][3] == '-' and len(relation.split()[0]) == 4 and len(relation.split()[1]) == 3:
-                    ang_1.difference[ang_2] = Fraction(val)
-                    ang_2.difference[ang_1] = - Fraction(val)
+                    ang_1.difference[ang_2] = Size(val)
+                    ang_2.difference[ang_1] = - Size(val)
 
                 elif relation.split()[0][3] == '+' and len(relation.split()[0]) == 4 and len(relation.split()[1]) == 3:
-                    ang_1.addition[ang_2] = Fraction(val)
-                    ang_2.addition[ang_1] = Fraction(val)
+                    ang_1.addition[ang_2] = Size(val)
+                    ang_2.addition[ang_1] = Size(val)
 
 
 def polygons_relations_create(text):
@@ -450,21 +450,21 @@ def polygons_relations_create(text):
                     side_1 = find_segment_with_points(polygon_1[i - 1], polygon_1[i], data)
                     side_2 = find_segment_with_points(polygon_2[i - 1], polygon_2[i], data)
 
-                    side_1.relations[side_2] = Fraction(rel)
-                    side_2.relations[side_1] = 1 / Fraction(rel)
+                    side_1.relations[side_2] = Size(rel)
+                    side_2.relations[side_1] = 1 / Size(rel)
 
                 for i in range(len(polygon_1)):
                     ang_1 = find_angle_with_points(polygon_1[i], polygon_1[i - 1], polygon_1[i - 2], data)
                     ang_2 = find_angle_with_points(polygon_2[i], polygon_2[i - 1], polygon_2[i - 2], data)
 
-                    ang_1.relations[ang_2] = Fraction(1)
-                    ang_2.relations[ang_1] = Fraction(1)
+                    ang_1.relations[ang_2] = Size(1)
+                    ang_2.relations[ang_1] = Size(1)
 
                 polygon_1 = find_polygon_with_points(list(polygon_1), data)
                 polygon_2 = find_polygon_with_points(list(polygon_2), data)
 
-                polygon_1.relations[polygon_2] = Fraction(rel)
-                polygon_2.relations[polygon_1] = 1 / Fraction(rel)
+                polygon_1.relations[polygon_2] = Size(rel)
+                polygon_2.relations[polygon_1] = 1 / Size(rel)
 
 
 def line_intersection_create(text):
@@ -488,7 +488,7 @@ def questions_create(text):
             for question in text.split(','):
                 if len(question.split()) == 2:
                     try:
-                        val = Fraction(question.split()[1])
+                        val = Size(question.split()[1])
                     except ValueError:
                         val = None
 
@@ -507,7 +507,7 @@ def questions_create(text):
                         if question.split()[2] == '?':
                             data.questions.append(Fact(len(data.questions), None, 'relation', [seg_1, seg_2], None, True))
                         else:
-                            data.questions.append(Fact(len(data.questions), None, 'relation', [seg_1, seg_2], Fraction(question.split()[2]), True))
+                            data.questions.append(Fact(len(data.questions), None, 'relation', [seg_1, seg_2], Size(question.split()[2]), True))
 
                     elif question.split()[0][0] != '/' and len(question.split()[0]) == 3 and len(question.split()[1]) == 3:
                         ang_1 = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2], data), data)
@@ -516,7 +516,7 @@ def questions_create(text):
                         if question.split()[2] == '?':
                             data.questions.append(Fact(len(data.questions), None, 'relation', [ang_1, ang_2], None, True))
                         else:
-                            data.questions.append(Fact(len(data.questions), None, 'relation', [ang_1, ang_2], Fraction(question.split()[2]), True))
+                            data.questions.append(Fact(len(data.questions), None, 'relation', [ang_1, ang_2], Size(question.split()[2]), True))
 
                     else:
                         polygon_1 = find_polygon_with_points(list(question.split()[0])[1:], data)
@@ -525,7 +525,7 @@ def questions_create(text):
                         if question.split()[2] == '?':
                             data.questions.append(Fact(len(data.questions), None, 'relation', [polygon_1, polygon_2], None, True))
                         else:
-                            data.questions.append(Fact(len(data.questions), None, 'relation', [polygon_1, polygon_2], Fraction(question.split()[2]), True))
+                            data.questions.append(Fact(len(data.questions), None, 'relation', [polygon_1, polygon_2], Size(question.split()[2]), True))
 
 
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
