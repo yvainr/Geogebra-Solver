@@ -9,10 +9,12 @@
     <title>Test geogebra</title>
 </head>
 <body>
+<!--<div id="ggb-element" style="pointer-events: none"></div>-->
 <div id="ggb-element"></div>
 <!--<input value="Press this button to show construction" onclick="ggbOnInit()" type="button">-->
 <!--<h4>{{ text }}</h4>-->
 <form method="post" action="{{ url_for('index', commands_text=commands_text) if type == 'commands' else url_for('text_input', text=text, commands_text=commands_text)}}">
+    <br>
     <div class="form-group col">
         <button type="submit" class="btn btn-primary">Press this button to go back</button>
     </div>
@@ -24,14 +26,18 @@
 
 //////
     }
+    let width = 1400
+    let height = 700
+    var flag = 0;
 
     var params = {
         "appName": "geometry",
-        "width": 1400,
-        "height": 700,
+        "width": document.documentElement.clientWidth,
+        "height": document.documentElement.clientHeight - 100,
         "showToolBar": false,
         "showAlgebraInput": false,
-        "showMenuBar": false
+        "showMenuBar": false,
+        "enableUndoRedo": true
     };
 
     var applet = new GGBApplet('5.0', params);
@@ -45,15 +51,26 @@
             if (!mutation.addedNodes) return
 
             // console.log(mutation.addedNodes);
+
+            if (mutation.addedNodes.length === 0 && flag === 1){
+
+                    ggbOnInit();
+
+                    flag = 2;
+                }
+
             for (let i = 0; i < mutation.addedNodes.length; i++) {
                 // do things to your newly added nodes here
                 let node = mutation.addedNodes[i];
-                // console.log(node.classList);
-                if ('classList' in node && node.classList.contains('DockGlassPane')){
-                    // console.log(node);
-                    // console.log(ggbApplet)
-                    ggbOnInit()
+                // console.log(node)
+
+                if (node.textContent === '  GeoGebra Geometry ' || node.textContent === 'GeoGebra Geometry' && flag === 0){
+
+                    flag = 1;
+                    // console.log(flag);
+
                 }
+
             }
         })
     })

@@ -1,73 +1,119 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <title>Geogebra text input</title>
-  </head>
-  <body>
+        <title>Geogebra text input</title>
+    </head>
+    <body>
+        <div class="container">
+            {% for message in get_flashed_messages() %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endfor %}
 
-<nav class="navbar navbar-expand-md navbar-light bg-light">
-    <a class="navbar-brand">Geogebra</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-        <li class="nav-item active">
-            <a class="nav-link" href="https://wiki.geogebra.org/en/Point_Command" target="_blank">Список команд</a>
-        </li>
-
-        <li class="nav-item active">
-            <a class="nav-link" href="/">Ввод команд geogebra</a>
-        </li>
-
-        </ul>
-    </div>
-</nav>
-
-<form method="post" action="/parse_text">
-    <div class="form-group" >
-        <div class="container-fluid">
-            <div class="row">
-
-                <h3 class="col-10">
-                    <label for="commands">Text input</label>
-                </h3>
-                <div class="form-group col">
-                    <button type="submit" class="btn btn-primary">Parse</button>
-                </div>
-            </div>
         </div>
-        <textarea name="text" placeholder="Дорогой пользователь, вводи команды правильно" class="form-control" rows="7">{{ text if text != None else '' }}</textarea>
-    </div>
-</form>
 
-<form method="post" action="/analysis_commands">
-    <div class="form-group">
-        <div class="container-fluid">
-            <div class="row">
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+            <a class="navbar-brand">Geogebra</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="https://wiki.geogebra.org/en/Point_Command" target="_blank">Список команд</a>
+                </li>
 
-                <h3 class="col-10">
-                    <label for="commands">Parse result</label>
-                </h3>
-                <div class="form-group col">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/instruction" target="_blank">Инструкция для ввода</a>
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="/commands_input">Ввод команд geogebra</a>
+                </li>
+
+                </ul>
             </div>
-        </div>
-        <input type="hidden" name="text" value="{{ text }}">
-        <textarea name="text_commands" placeholder="Дорогой пользователь, вводи команды правильно" class="form-control" rows="7">{{ commands_text if commands_text != None else '' }}</textarea>
-    </div>
-</form>
+        </nav>
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-  </body>
+        <form method="post" action="/parse_text" id="text-input-block">
+            <div class="form-group" >
+                <div class="container-fluid">
+                    <div class="row">
+
+                        <h3 class="col-8">
+                            <label>Условие задачи</label>
+                        </h3>
+                        <div class="form-group">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary col-sm-17">Анализ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <textarea name="text" placeholder="Дорогой пользователь, вводи команды правильно, для этого прочитай инструкцию!" class="form-control" rows="8">{{ text if text != None else '' }}</textarea>
+            </div>
+        </form>
+
+        <form method="post" action="/analysis_commands" id="parse-result-block">
+            <div class="form-group">
+                <div class="container-fluid">
+                    <div class="row">
+
+                        <h3 class="col-8">
+                            <label>Результат анализа</label>
+                        </h3>
+
+                        <div class="form-group">
+                            <button id="solve-button" type="submit" class="btn btn-primary col-sm-17">Решить</button>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="text" value="{{ text }}">
+                <input type="hidden" name="type" value="text">
+                <input type="hidden" name="screen-width" id="screen-width-container">
+                <input type="hidden" name="screen-height" id="screen-height-container">
+                <textarea name="text_commands" placeholder="Дорогой тестировщик, вводи команды правильно" class="form-control" rows="8">{{ commands_text if commands_text != None else '' }}</textarea>
+            </div>
+        </form>
+        <div id="loading">
+            <h2 class="col-2">Решаем...</h2>
+            <h6 class="col-4"><i>{{ quote }}</i></h6>
+<!--            <img alt="loading" src="{{url_for('static', filename='gifs/loading.gif')}}" class="center" width="100%" height="500px">-->
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script type="text/javascript">
+            document.getElementById("loading").hidden = true;
+
+            document.getElementById("solve-button").onclick = function () {
+                document.getElementById("text-input-block").hidden = true;
+                document.getElementById("parse-result-block").hidden = true;
+                document.getElementById("loading").hidden = false;
+
+            }
+
+            function Get_screen_size() {
+                document.getElementById("screen-width-container").value = document.documentElement.clientWidth;
+                document.getElementById("screen-height-container").value = document.documentElement.clientHeight;
+            }
+
+            window.addEventListener('orientationchange', Get_screen_size);
+            window.addEventListener('resize', Get_screen_size);
+
+            Get_screen_size();
+
+        </script>
+<!--    <img src="loading.gif" alt="this slowpoke moves"/>-->
+<!--        <h1 align="center">Как поймать льва?</h1>-->
+
+    </body>
 </html>

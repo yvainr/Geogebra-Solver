@@ -8,7 +8,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <title>Geogebra commands input</title>
+    <title>Geogebra instruction input</title>
   </head>
   <body>
   <div class="container">
@@ -17,7 +17,7 @@
         {% endfor %}
   </div>
 
-  <form method="post" action="/render_geogebra">
+  <form method="post" action="/instruction_edit2508">
     <nav class="navbar navbar-expand-md navbar-light bg-light">
         <a class="navbar-brand">Geogebra</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,44 +25,38 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
+
             <li class="nav-item active">
-                <a class="nav-link" href="https://wiki.geogebra.org/en/Point_Command" target="_blank">Список команд</a>
+                <a class="nav-link" href="/instruction">Страница с инструкцией</a>
             </li>
 
             <li class="nav-item active">
-                <a class="nav-link" href="/">Ввод условия текстом</a>
+                <a class="nav-link" href="/">Домой</a>
+            </li>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="https://ru.wikipedia.org/wiki/Манул" target="_blank">Манул</a>
             </li>
             </ul>
         </div>
+
     </nav>
     <div class="form-group">
         <div class="container-fluid">
             <div class="row">
 
                 <h3 class="col-10">
-                    <label for="commands">Commands input</label>
+                    <label for="commands">Instruction input</label>
                 </h3>
                 <div class="form-group col">
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </div>
         </div>
-        <input type="hidden" name="type" value="commands">
-        <textarea name="commands" placeholder="Дорогой пользователь, вводи команды правильно" class="form-control" rows="20">{{ commands_text if commands_text != None else '' }}</textarea>
+        <textarea name="instruction" placeholder="Дорогая Катя, пиши html правильно" class="form-control" rows="20">{{ text if text != None else '' }}</textarea>
     </div>
   </form>
-<!--  <h3> {{ commands_text }} </h3>-->
 
-
-<!--    <div class="container">-->
-<!--        {% for message in get_flashed_messages() %}-->
-<!--            <div class="alert alert-danger">{{ message }}</div>-->
-<!--        {% endfor %}-->
-<!--        {% block content %} {% endblock %}-->
-<!--    </div>-->
-
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>

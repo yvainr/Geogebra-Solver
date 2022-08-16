@@ -1,7 +1,7 @@
 import logging
 
 
-def insert_commands(list_of_commands: list, input_file_name='web/templates/template.html', output_file_name='web/templates/geogebra_page.html'):
+def insert_commands(list_of_commands: list, input_file_name='templates/solving_template.html', output_file_name='templates/geogebra_page.html'):
     """Принимает на вход список строк-команд geogebra, возвращает код html страницы, 
     отображающей чертёж, постороенный по этим командам и создаёт такой файл в той же дирректории, что и запущена"""
 
