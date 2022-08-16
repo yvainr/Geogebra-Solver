@@ -1,6 +1,6 @@
 import Solver_alpha
 import task_parser as taskp
-import normal_solver
+import updated_solver
 from re import *
 
 

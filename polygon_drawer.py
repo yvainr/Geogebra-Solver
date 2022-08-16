@@ -1,4 +1,4 @@
-import geogebra_html_generator
+from drawer_ggb import geogebra_html_generator as geogebra_html_generator
 import shapely.geometry
 import triangle_drawer as triad
 import task_parser as tp
@@ -140,7 +140,7 @@ def set_screen_size(realize_data):
     realize_data.append(f'ZoomIn({xmin - 0.25 * abs(xmin - xmax)}, {ymin - 0.25 * abs(ymin - ymax)}, {xmax + 0.25 * abs(xmin - xmax)}, {ymax + 0.25 * abs(ymin - ymax)})')
 
 
-def text_splitter(text):
+def text_splitter(text, input_file_name):
     realize_data = list()
 
     tp.task_data = Objects()
@@ -183,6 +183,6 @@ def text_splitter(text):
 
     # set_screen_size(realize_data)
 
-    geogebra_html_generator.insert_commands(realize_data)
+    geogebra_html_generator.insert_commands(realize_data, input_file_name=input_file_name)
 
     return 200

@@ -19,7 +19,7 @@ from fact_interpreter import fact_output
 from copy import deepcopy
 from datetime import datetime
 from random import choice
-from normal_solver import tree_levels_proccesing
+from updated_solver import tree_levels_proccesing
 from pretty_answer import pretty_detailed_description
 # from normal_solver import solving_process
 
