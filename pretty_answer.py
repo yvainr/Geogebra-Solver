@@ -2,9 +2,9 @@ import task_parser as tp
 from random import choice
 
 
-def Equal(x, digits=2):
-    x = float(x)
-    return float(f"{x:.{digits}f}")
+# def Equal(x, digits=2):
+#     x = float(x)
+#     return float(f"{x:.{digits}f}")
 
 
 def pretty_name(obj, dative=False, genitive=False):
@@ -20,11 +20,12 @@ def pretty_name(obj, dative=False, genitive=False):
         A = list(obj.rays[0].points)[0]
         B = obj.rays[0].main_point
         C = list(obj.rays[1].points)[0]
-        if dative:
-            return f'углу {A.name}{B.name}{C.name}'
-        if genitive:
-            return f'угла {A.name}{B.name}{C.name}'
-        return f'угол {A.name}{B.name}{C.name}'
+        # if dative:
+        #     return f'углу {A.name}{B.name}{C.name}'
+        # if genitive:
+        #     return f'угла {A.name}{B.name}{C.name}'
+        # return f'угол {A.name}{B.name}{C.name}'
+        return f'∠{A.name}{B.name}{C.name}'
 
     if obj.__class__.__name__ == 'Polygon':
         if dative:
@@ -36,26 +37,26 @@ def pretty_name(obj, dative=False, genitive=False):
 
 def pretty_description(fact, called=False):
     if fact.fact_type == 'size':
-        answer = f'{pretty_name(fact.objects[0])} равен {Equal(fact.value)}'
+        answer = f'{pretty_name(fact.objects[0])} равен {fact.value.outward}'
     if fact.fact_type == 'relation':
         if fact.value != 1:
-            answer = f'{pretty_name(fact.objects[0])} подобен {pretty_name(fact.objects[1], True)} с коэффициентом {Equal(fact.value)}'
+            answer = f'{pretty_name(fact.objects[0])} подобен {pretty_name(fact.objects[1], True)} с коэффициентом {fact.value.outward}'
         else:
             answer = f'{pretty_name(fact.objects[0])} равен {pretty_name(fact.objects[1], True)}'
     if fact.fact_type == 'difference':
-        answer = f'разность {pretty_name(fact.objects[0], False, True)} и {pretty_name(fact.objects[1], False, True)} равна {Equal(fact.value)}'
+        answer = f'разность {pretty_name(fact.objects[0], False, True)} и {pretty_name(fact.objects[1], False, True)} равна {fact.value.outward}'
     if fact.fact_type == 'addition':
         answer = 'сумма '
         for obj in fact.objects:
             answer += f'{pretty_name(obj, False, True)}, '
-        answer = answer[:-2] + f' равна {Equal(fact.value)}'
+        answer = answer[:-2] + f' равна {fact.value.outward}'
         answer = answer[:answer.rfind(',')] + ' и' + answer[answer.rfind(',') + 1:]
-
-    if fact.description:
-        return f'{fact.description} {answer}'
 
     if called:
         return answer
+
+    if fact.description:
+        answer = f'{fact.description} {answer}'
     return answer[0].upper() + answer[1:] + '.'
 
 
@@ -73,6 +74,9 @@ def pretty_detailed_description(fact):
             answer = pretty_description(fact, True)
     else:
         answer = f'{pretty_description(fact, True)} из условия'
+
+    if fact.description:
+        answer = f'{fact.description} {answer}'
 
     return answer[0].upper() + answer[1:] + '.'
 
