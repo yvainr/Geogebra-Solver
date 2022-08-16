@@ -1,7 +1,8 @@
-from math import *
-from random import *
 import task_parser as tp
+from math import tan, pi, cos, sin, acos
+from random import *
 from itertools import combinations
+from objects_types import Size, sqrt
 
 
 class MyPoint:
@@ -50,9 +51,9 @@ def IsLineParallel(L1, L2):
 	return 1
 
 
-#округление
-def Equal(x, digits=6):
-	return float(f"{x:.{digits}f}")
+# #округление
+# def Equal(x, digits=6):
+# 	return float(f"{float(x.value):.{digits}f}")
 
 
 #перпендикулярная прямая через точку
@@ -143,8 +144,8 @@ def CirclesIntersectionPoint(r1, r2, O1, O2):
 
 
 def LineWithTiltAngle(P, alpha):
-	k = tan(alpha * pi / 180)
-	b = P.y - k * P.x
+	k = tan((alpha * pi / 180).value)
+	b = P.y - P.x * k
 	
 	return MyLine(-k, 1, -b)
 
@@ -291,11 +292,11 @@ def SaveTriangleData(A, B, C):
 	AC = tp.find_segment_with_points(A.name, C.name)
 
 	if not AB.size:
-		AB.size = Equal(DistanceBetweenPoints(A, B))
+		AB.size = DistanceBetweenPoints(A, B)
 	if not BC.size:
-		BC.size = Equal(DistanceBetweenPoints(C, B))
+		BC.size = DistanceBetweenPoints(C, B)
 	if not AC.size:
-		AC.size = Equal(DistanceBetweenPoints(A, C))
+		AC.size = DistanceBetweenPoints(A, C)
 
 	CBA = tp.find_angle_with_points(new_C.name, new_B.name, new_A.name)
 	ACB = tp.find_angle_with_points(new_A.name, new_C.name, new_B.name)
@@ -306,11 +307,11 @@ def SaveTriangleData(A, B, C):
 	b = AC.size
 
 	if not CBA.size:
-		CBA.size = Equal(acos((a ** 2 + c ** 2 - b ** 2) / (2 * a * c)) * 180 / pi, 3)
+		CBA.size = Size(acos(((a ** 2 + c ** 2 - b ** 2) / (2 * a * c)).value) * 180 / pi)
 	if not ACB.size:
-		ACB.size = Equal(acos((a ** 2 + b ** 2 - c ** 2) / (2 * a * b)) * 180 / pi, 3)
+		ACB.size = Size(acos(((a ** 2 + b ** 2 - c ** 2) / (2 * a * b)).value) * 180 / pi)
 	if not BAC.size:
-		BAC.size = Equal(acos((c ** 2 + b ** 2 - a ** 2) / (2 * c * b)) * 180 / pi, 3)
+		BAC.size = Size(acos(((c ** 2 + b ** 2 - a ** 2) / (2 * c * b)).value) * 180 / pi)
 
 	return new_A, new_B, new_C
 
@@ -352,10 +353,10 @@ def CreateTriangleWithSideAndContraAngle(a, alpha, alpha_name):
 
 
 def CreateTriangleWithOneSideAndTwoAngles(a, beta, gamma, beta_name, gamma_name):
-	B = MyPoint(0, 0, beta_name[1])
-	C = MyPoint(a, 0, gamma_name[1])
+	B = MyPoint(Size('0'), Size('0'), beta_name[1])
+	C = MyPoint(a, Size('0'), gamma_name[1])
 	
-	l1 = LineWithTiltAngle(C, 180 - gamma)
+	l1 = LineWithTiltAngle(C, Size('180') - gamma)
 	l2 = LineWithTiltAngle(B, beta)
 	
 	A = LineIntersectionPoint(l1, l2)
@@ -434,7 +435,7 @@ def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, a_name, gamma_
 	
 def CreateTriangle(sides, angles, angles_names, sides_names):
 	if angles.count(None) <= 1:
-		test_angle = 180
+		test_angle = Size('180')
 		
 		for angle in angles:
 			if angle:
