@@ -1,5 +1,4 @@
 import math
-from copy import deepcopy
 from fractions import Fraction
 
 
@@ -29,16 +28,19 @@ class Size:
 
         if outward_type == 'usual':
             self.value = Fraction(value)
-            if len(str(float(self.value)).split('.')[1]) < 3:
-                self.outward = str(float(self.value))
+            if len(str(self.value)) < 5:
+                self.outward = str(self.value)
             else:
-                self.outward = str(f"{float(self.value):.{2}f}")
+                self.outward = str(f"{float(self.value):.{2}f}").replace('.00', '')
         elif outward_type == 'sqrt':
             self.value = Fraction(math.sqrt(value))
-            if len(str(float(self.value)).split('.')[1]) < 3:
-                self.outward = str(float(self.value))
+            if len(str(self.value)) < 5:
+                self.outward = str(self.value)
             else:
-                self.outward = f'√{Fraction(value)}'
+                if len(str(float(self.value)).split('.')[1]) < 3:
+                    self.outward = str(float(self.value))
+                else:
+                    self.outward = f'√{Fraction(value)}'
 
     def __neg__(self):
         return Size(-self.value)
