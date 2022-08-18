@@ -96,6 +96,12 @@ class Size:
     def __abs__(self):
         return Size(abs(self.value))
 
+    def __float__(self):
+        return float(self.value)
+
+    def __round__(self, n=None):
+        return round(self.value, n)
+
     def __str__(self):
         return f'{self.outward}'
 
