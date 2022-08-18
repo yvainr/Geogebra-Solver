@@ -1,4 +1,3 @@
-# from fractions import Fraction
 from random import uniform
 from objects_types import Objects, Size
 
@@ -224,7 +223,7 @@ class Fact:
         elif self.fact_type == 'size' and self.objects[0].__class__.__name__ == 'Segment' and self.value:
             A, B = self.objects[0].points
             draw_data.append(
-                f'text=Text(Distance({A.name}, {B.name}), ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), true, true)')
+                f'text=Text({self.value}, ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), true, true)')
 
         return draw_data
 
@@ -252,13 +251,13 @@ class Fact:
 
 
 task_data = Objects()
-drawer_data = Objects()
+# drawer_data = Objects()
 solver_data = Objects()
 
 
 def polygons_create(text):
     if len(text.split()) > 0:
-        for data in [task_data, drawer_data, solver_data]:
+        for data in [task_data, solver_data]:
             for polygon in text.split(','):
                 vertices_list = list(polygon.split()[0])
                 vertices_class_list = list()
@@ -282,11 +281,13 @@ def polygons_create(text):
 
                 if len(vertices_list) == 3:
                     data.polygons.append(Polygon(vertices_class_list))
+                
+                # точка внутри многоугольника
+                # if len(vertices_list) == 1:
+                #     if polygon.split()[1] == 'in':
+                #         vertices_class_list[0].in_polygon = find_polygon_with_points(polygon.split()[2], data)
 
-                if len(vertices_list) == 1:
-                    if polygon.split()[1] == 'in':
-                        vertices_class_list[0].in_polygon = find_polygon_with_points(polygon.split()[2], data)
-
+                # замечательные точки
                 # if len(vertices_list) == 1:
                 #     S = vertices_class_list[0]
                 #
@@ -343,7 +344,7 @@ def polygons_create(text):
 
 def segments_create(text):
     if len(text.split()) > 0:
-        for data in [task_data, drawer_data, solver_data]:
+        for data in [task_data, solver_data]:
             for segment in text.split(','):
                 segment = segment.split()
                 try:
@@ -357,21 +358,19 @@ def segments_create(text):
 
 def angles_create(text):
     if len(text.split()) > 0:
-        for data in [task_data, drawer_data, solver_data]:
+        for data in [task_data, solver_data]:
             for angle in text.split(','):
                 angle = angle.split()
                 angle_name, angle_size = angle
                 A, B, C = list(angle_name)
                 if A != B != C != A:
-                    A, B, C = check_angle_in_polygon(A, B, C, data)
-
-                    find_angle_with_points(A, B, C, data).size = Size(angle_size)
-                    find_angle_with_points(C, B, A, data).size = Size(360) - Size(angle_size)
+                    find_angle_with_points(A, B, C, data, True).size = Size(angle_size)
+                    # find_angle_with_points(C, B, A, data).size = Size(360) - Size(angle_size)
 
 
 def segments_relations_create(text):
     if len(text.split()) > 0:
-        for data in [task_data, drawer_data, solver_data]:
+        for data in [task_data, solver_data]:
             for relation in text.split(','):
                 if len(relation.split()[0]) == len(relation.split()[1]) == 2:
                     seg_1 = find_segment_with_points(relation.split()[0][0], relation.split()[0][1], data)
@@ -420,12 +419,12 @@ def segments_relations_create(text):
 
 def angles_relations_create(text):
     if len(text.split()) > 0:
-        for data in [task_data, drawer_data, solver_data]:
+        for data in [task_data, solver_data]:
             for relation in text.split(','):
                 ang_1, ang_2, val = relation.split()
 
-                ang_1 = find_angle_with_points(*check_angle_in_polygon(ang_1[0], ang_1[1], ang_1[2], data), data)
-                ang_2 = find_angle_with_points(*check_angle_in_polygon(ang_2[0], ang_2[1], ang_2[2], data), data)
+                ang_1 = find_angle_with_points(ang_1[0], ang_1[1], ang_1[2], data, True)
+                ang_2 = find_angle_with_points(ang_2[0], ang_2[1], ang_2[2], data, True)
 
                 if len(relation.split()[0]) == len(relation.split()[1]) == 3:
                     ang_1.relations[ang_2] = Size(val)
@@ -442,7 +441,7 @@ def angles_relations_create(text):
 
 def polygons_relations_create(text):
     if len(text.split()) > 0:
-        for data in [task_data, drawer_data, solver_data]:
+        for data in [task_data, solver_data]:
             for relation in text.split(','):
                 polygon_1, polygon_2, rel = relation.split()
 
@@ -469,7 +468,7 @@ def polygons_relations_create(text):
 
 def line_intersection_create(text):
     if len(text.split()) > 0:
-        for data in [task_data, drawer_data, solver_data]:
+        for data in [task_data, solver_data]:
             for intersection in text.split(','):
                 l1, l2, P = intersection.split()
 
@@ -484,7 +483,7 @@ def line_intersection_create(text):
 
 def questions_create(text):
     if len(text.split()) > 0:
-        for data in [task_data, drawer_data, solver_data]:
+        for data in [task_data, solver_data]:
             for question in text.split(','):
                 if len(question.split()) == 2:
                     try:
@@ -496,7 +495,7 @@ def questions_create(text):
                         seg = find_segment_with_points(question.split()[0][0], question.split()[0][1], data)
                         data.questions.append(Fact(len(data.questions), None, 'size', [seg], val, True))
                     if len(question.split()[0]) == 3:
-                        ang = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2], data), data)
+                        ang = find_angle_with_points(question.split()[0][0], question.split()[0][1], question.split()[0][2], data, True)
                         data.questions.append(Fact(len(data.questions), None, 'size', [ang], val, True))
 
                 if len(question.split()) == 3:
@@ -510,8 +509,8 @@ def questions_create(text):
                             data.questions.append(Fact(len(data.questions), None, 'relation', [seg_1, seg_2], Size(question.split()[2]), True))
 
                     elif question.split()[0][0] != '/' and len(question.split()[0]) == 3 and len(question.split()[1]) == 3:
-                        ang_1 = find_angle_with_points(*check_angle_in_polygon(question.split()[0][0], question.split()[0][1], question.split()[0][2], data), data)
-                        ang_2 = find_angle_with_points(*check_angle_in_polygon(question.split()[1][0], question.split()[1][1], question.split()[1][2], data), data)
+                        ang_1 = find_angle_with_points(question.split()[0][0], question.split()[0][1], question.split()[0][2], data, True)
+                        ang_2 = find_angle_with_points(question.split()[1][0], question.split()[1][1], question.split()[1][2], data, True)
 
                         if question.split()[2] == '?':
                             data.questions.append(Fact(len(data.questions), None, 'relation', [ang_1, ang_2], None, True))
@@ -531,7 +530,7 @@ def questions_create(text):
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
 def find_segment_with_points(A, B, data=None):
     if not data:
-        data = drawer_data
+        data = solver_data
 
     a = find_point_with_name(A, data)
     b = find_point_with_name(B, data)
@@ -548,7 +547,7 @@ def find_segment_with_points(A, B, data=None):
 # вспомогательная функция для поиска прямой по точкам на ней, указываются имена точек
 def find_line_with_points(A, B, data=None):
     if not data:
-        data = drawer_data
+        data = solver_data
 
     a = find_point_with_name(A, data)
     b = find_point_with_name(B, data)
@@ -565,7 +564,7 @@ def find_line_with_points(A, B, data=None):
 # вспомогательная функция для поиска прямой по отрезку на ней
 def find_line_with_segment(seg, data=None):
     if not data:
-        data = drawer_data
+        data = solver_data
 
     A, B = seg.points
     return find_line_with_points(A.name, B.name, data)
@@ -574,7 +573,7 @@ def find_line_with_segment(seg, data=None):
 # вспомогательная функция для поиска угла по прямым, его задающим
 def find_angle_with_rays(r1, r2, data=None):
     if not data:
-        data = drawer_data
+        data = solver_data
 
     for angle in data.angles:
         if angle.rays == [r1, r2]:
@@ -587,7 +586,7 @@ def find_angle_with_rays(r1, r2, data=None):
 
 def find_ray_with_points(A, B, data=None):
     if not data:
-        data = drawer_data
+        data = solver_data
 
     a = find_point_with_name(A, data)
     b = find_point_with_name(B, data)
@@ -602,9 +601,12 @@ def find_ray_with_points(A, B, data=None):
 
 
 # вспомогательная функция для поиска угла по точкам
-def find_angle_with_points(A, B, C, data=None):
+def find_angle_with_points(A, B, C, data=None, check_in_triangle=False):
     if not data:
-        data = drawer_data
+        data = solver_data
+
+    if check_in_triangle:
+        A, B, C = check_angle_in_polygon(A, B, C, data)
 
     r1 = find_ray_with_points(B, A, data)
     r2 = find_ray_with_points(B, C, data)
@@ -621,18 +623,18 @@ def find_angle_with_points(A, B, C, data=None):
 # вспомогательная функция для поиска многоугольника по его вершинам
 def find_polygon_with_points(points, data=None):
     if not data:
-        data = drawer_data
+        data = solver_data
 
     for polygon in data.polygons:
         polygon_points_names = get_points_names_from_list(polygon.points)
         if len(polygon_points_names) == len(points):
-            if len(points) == 3:
-                if set(polygon_points_names) == set(points):
+            # if len(points) == 3:
+            #     if set(polygon_points_names) == set(points):
+            #         return polygon
+            # else:
+            for i in range(len(points)):
+                if (points[i:] + points[:i]) == polygon_points_names:
                     return polygon
-            else:
-                for i in range(len(points)):
-                    if (points[i:] + points[:i]) == polygon_points_names:
-                        return polygon
 
     new_points = list()
     for point in points:
@@ -645,7 +647,7 @@ def find_polygon_with_points(points, data=None):
 # вспомогательная функция для поиска точки по её имени
 def find_point_with_name(A, data=None):
     if not data:
-        data = drawer_data
+        data = solver_data
 
     for point in data.points:
         if A == point.name:
@@ -665,7 +667,10 @@ def get_points_names_from_list(points_list):
     return ret
 
 
-def check_angle_in_polygon(A, B, C, data):
+def check_angle_in_polygon(A, B, C, data=None):
+    if not data:
+        data = solver_data
+
     for polygon in data.polygons:
         for i in range(len(polygon.points)):
             uA, uB, uC = polygon.points[i - 2].name, polygon.points[i - 1].name, polygon.points[i].name
@@ -677,32 +682,3 @@ def check_angle_in_polygon(A, B, C, data):
                 return A, B, C
 
     return A, B, C
-
-
-def create_new_data_in_parser(objects):
-    none_count = 0
-
-    for obj in objects:
-        if not obj.size:
-            none_count += 1
-
-    for n in range(none_count):
-
-        for i in range(len(objects)):
-            obj_1 = objects[i]
-
-            if not obj_1.size:
-                for j in range(len(objects)):
-                    obj_2 = objects[j]
-
-                    if obj_2.size:
-                        try:
-                            obj_1.size = float(obj_2.size / obj_2.relations[obj_1])
-                        except Exception:
-                            try:
-                                obj_1.size = obj_2.size - obj_2.difference[obj_1]
-                            except Exception:
-                                try:
-                                    obj_1.size = obj_2.addition[obj_1] - obj_2.size
-                                except Exception:
-                                    pass
