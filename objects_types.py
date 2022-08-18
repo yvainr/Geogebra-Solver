@@ -93,6 +93,9 @@ class Size:
     def __gt__(self, other):
         return get_values(self) > get_values(other)
 
+    def __abs__(self):
+        return Size(abs(self.value))
+
     def __str__(self):
         return f'{self.outward}'
 
@@ -104,7 +107,9 @@ def get_values(obj):
 
 
 def sqrt(obj):
-    return Size(obj.value, 'sqrt')
+    if obj.__class__.__name__ == 'Size':
+        return Size(obj.value, 'sqrt')
+    return math.sqrt(obj)
 
 
 # print(Size('1/4').sqrt())
