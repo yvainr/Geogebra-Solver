@@ -1,12 +1,14 @@
-from drawer_ggb import geogebra_html_generator as geogebra_html_generator
+import geogebra_html_generator
 import shapely.geometry
 import triangle_drawer as triad
 import task_parser as tp
+import normal_solver as ns
 from math import *
 from itertools import combinations, permutations
 from objects_types import Objects
 from random import uniform
 from check_triangle import check_triangle
+from pprint import pprint
 
 
 def get_random_point_in_polygon(point_name, polygon):
@@ -26,19 +28,17 @@ def get_random_point_in_polygon(point_name, polygon):
             return find_point
 
 
-def get_triangle_parameter(A, B, C, data=None):
-    if not data:
-        data = tp.drawer_data
+def get_triangle_parameter(A, B, C):
 
-    AB = tp.find_segment_with_points(A, B, data).size
-    BC = tp.find_segment_with_points(B, C, data).size
-    CA = tp.find_segment_with_points(C, A, data).size
+    AB = tp.find_segment_with_points(A, B).size
+    BC = tp.find_segment_with_points(B, C).size
+    CA = tp.find_segment_with_points(C, A).size
 
     sides, sides_names = [BC, CA, AB], [f"{B}{C}", f"{C}{A}", f"{A}{B}"]
 
-    CBA = tp.find_angle_with_points(C, B, A, data).size
-    ACB = tp.find_angle_with_points(A, C, B, data).size
-    BAC = tp.find_angle_with_points(B, A, C, data).size
+    CBA = tp.find_angle_with_points(C, B, A).size
+    ACB = tp.find_angle_with_points(A, C, B).size
+    BAC = tp.find_angle_with_points(B, A, C).size
 
     angles, angles_names = [BAC, CBA, ACB], [f"{B}{A}{C}", f"{C}{B}{A}", f"{A}{C}{B}"]
 
@@ -128,7 +128,7 @@ def create_polygon(vertices):
 def set_screen_size(realize_data):
     x_cords, y_cords = list(), list()
 
-    for point in tp.drawer_data.points:
+    for point in tp.solver_data.points:
         x_cords.append(point.x)
         y_cords.append(point.y)
 
@@ -140,11 +140,11 @@ def set_screen_size(realize_data):
     realize_data.append(f'ZoomIn({xmin - 0.25 * abs(xmin - xmax)}, {ymin - 0.25 * abs(ymin - ymax)}, {xmax + 0.25 * abs(xmin - xmax)}, {ymax + 0.25 * abs(ymin - ymax)})')
 
 
-def text_splitter(text, input_file_name):
+def text_splitter(text):
     realize_data = list()
 
     tp.task_data = Objects()
-    tp.drawer_data = Objects()
+    # tp.drawer_data = Objects()
     tp.solver_data = Objects()
 
     text = text.replace('\r', '').split('\n')
@@ -161,15 +161,15 @@ def text_splitter(text, input_file_name):
     except IndexError:
         pass
 
-    for polygon in tp.drawer_data.polygons:
-        tp.create_new_data_in_parser(tp.drawer_data.segments)
-        tp.create_new_data_in_parser(tp.drawer_data.angles)
-        ret = create_polygon(tp.get_points_names_from_list(polygon.points))
+    ns.solving_process()
+
+    for polygon in text[0].split(','):
+        ret = create_polygon(tp.get_points_names_from_list(tp.find_polygon_with_points(list(polygon.replace(' ', ''))).points))
         if type(ret) == str:
             return ret
         draw_polygon(ret, realize_data)
 
-    for point in tp.drawer_data.points:
+    for point in tp.solver_data.points:
         if point.in_polygon:
             get_random_point_in_polygon(point.name, point.in_polygon)
             realize_data.append(f'{point.name}({point.x}, {point.y})')
@@ -183,6 +183,6 @@ def text_splitter(text, input_file_name):
 
     # set_screen_size(realize_data)
 
-    geogebra_html_generator.insert_commands(realize_data, input_file_name=input_file_name)
+    geogebra_html_generator.insert_commands(realize_data)
 
     return 200
