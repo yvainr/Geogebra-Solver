@@ -1,6 +1,6 @@
 import task_parser as tp
 from math import tan, pi, cos, sin, acos
-from random import *
+from random import choice, uniform
 from itertools import combinations
 from objects_types import Size, sqrt
 
@@ -238,11 +238,11 @@ def Shift(new_A, new_B, new_C):
 	phi = uniform(-pi, pi)
 	vec = (cos(phi) * 2, sin(phi) * 2)
 
-	if set(tp.get_points_names_from_list(tp.drawer_data.polygons[0].points)) != {new_A.name, new_B.name, new_C.name}:
+	if set(tp.get_points_names_from_list(tp.solver_data.polygons[0].points)) != {new_A.name, new_B.name, new_C.name}:
 		while True:
 			stop = True
 
-			for polygon in tp.drawer_data.polygons:
+			for polygon in tp.solver_data.polygons:
 				if set(tp.get_points_names_from_list(polygon.points)) != {new_A.name, new_B.name, new_C.name}:
 
 					if CheckTrianglesIntersection(polygon.points, (new_A, new_B, new_C)):
@@ -326,8 +326,8 @@ def CheckQuadrangleConvex(A, B, C, D):
 
 
 def CreateTriangleWithThreeSides(a, b, c, angle):
-	C = MyPoint(0, 0, angle[0])
-	B = MyPoint(a, 0, angle[1])
+	C = MyPoint(Size(0), Size(0), angle[0])
+	B = MyPoint(a, Size(0), angle[1])
 	A = CirclesIntersectionPoint(b, c, C, B)
 	A.name = angle[2]
 
