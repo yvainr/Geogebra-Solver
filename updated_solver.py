@@ -1,7 +1,6 @@
 import task_parser as tp
 from itertools import combinations, permutations
 from objects_types import Size, sqrt
-# from math import sqrt
 
 
 def count_sizes_of_angles_and_segments(objects, facts_generation, actual_question):
@@ -142,8 +141,8 @@ def count_sides_and_angles_of_similar_polygons(facts_generation, actual_question
                             return True
 
                 for k in range(len(polygon_1.points)):
-                    ang_1 = tp.find_angle_with_points(polygon_1.points[k].name, polygon_1.points[k - 1].name, polygon_1.points[k - 2].name, tp.solver_data)
-                    ang_2 = tp.find_angle_with_points(polygon_2.points[k].name, polygon_2.points[k - 1].name, polygon_2.points[k - 2].name, tp.solver_data)
+                    ang_1 = tp.find_angle_with_points(polygon_1.points[k].name, polygon_1.points[k - 1].name, polygon_1.points[k - 2].name)
+                    ang_2 = tp.find_angle_with_points(polygon_2.points[k].name, polygon_2.points[k - 1].name, polygon_2.points[k - 2].name)
 
                     try:
                         ang_1.relations[ang_2]
@@ -191,10 +190,10 @@ def find_simmilar_triangles(facts_generation, actual_question):
 
     for i in range(len(triangles)):
         for j in range(len(triangles)):
-            if i != j:
-                tr1 = tp.find_polygon_with_points(tp.get_points_names_from_list(triangles[i]), tp.solver_data)
-                tr2 = tp.find_polygon_with_points(tp.get_points_names_from_list(triangles[j]), tp.solver_data)
-
+            tr1 = tp.find_polygon_with_points(tp.get_points_names_from_list(triangles[i]))
+            tr2 = tp.find_polygon_with_points(tp.get_points_names_from_list(triangles[j]))
+            
+            if tr1 != tr2:
                 try:
                     tr1.relations[tr2]
 
@@ -202,19 +201,21 @@ def find_simmilar_triangles(facts_generation, actual_question):
                     A, B, C = tp.get_points_names_from_list(triangles[i])
                     D, E, F = tp.get_points_names_from_list(triangles[j])
 
-                    seg11 = tp.find_segment_with_points(C, A, tp.solver_data)
-                    seg12 = tp.find_segment_with_points(A, B, tp.solver_data)
-                    seg13 = tp.find_segment_with_points(B, C, tp.solver_data)
-                    seg21 = tp.find_segment_with_points(F, D, tp.solver_data)
-                    seg22 = tp.find_segment_with_points(D, E, tp.solver_data)
-                    seg23 = tp.find_segment_with_points(E, F, tp.solver_data)
+                    seg11 = tp.find_segment_with_points(C, A)
+                    seg12 = tp.find_segment_with_points(A, B)
+                    seg13 = tp.find_segment_with_points(B, C)
 
-                    ang11 = tp.find_angle_with_points(A, B, C, tp.solver_data)
-                    ang12 = tp.find_angle_with_points(B, C, A, tp.solver_data)
-                    ang13 = tp.find_angle_with_points(C, A, B, tp.solver_data)
-                    ang21 = tp.find_angle_with_points(D, E, F, tp.solver_data)
-                    ang22 = tp.find_angle_with_points(E, F, D, tp.solver_data)
-                    ang23 = tp.find_angle_with_points(F, D, E, tp.solver_data)
+                    seg21 = tp.find_segment_with_points(F, D)
+                    seg22 = tp.find_segment_with_points(D, E)
+                    seg23 = tp.find_segment_with_points(E, F)
+
+                    ang11 = tp.find_angle_with_points(A, B, C, tp.solver_data, True)
+                    ang12 = tp.find_angle_with_points(B, C, A, tp.solver_data, True)
+                    ang13 = tp.find_angle_with_points(C, A, B, tp.solver_data, True)
+
+                    ang21 = tp.find_angle_with_points(D, E, F, tp.solver_data, True)
+                    ang22 = tp.find_angle_with_points(E, F, D, tp.solver_data, True)
+                    ang23 = tp.find_angle_with_points(F, D, E, tp.solver_data, True)
 
                     segments_list_1 = [seg11, seg12, seg13]
                     segments_list_2 = [seg21, seg22, seg23]
@@ -397,6 +398,11 @@ def find_simmilar_triangles(facts_generation, actual_question):
                         tp.solver_data.facts.append(simmilar_fact_1)
 
                         if simmilar_fact_1.objects == actual_question.objects and simmilar_fact_1.fact_type == actual_question.fact_type:
+                            print(*segments_list_1)
+                            print(*segments_list_2)
+                            print(*angles_list_1)
+                            print(*angles_list_2)
+                            print()
                             return True
 
                         # simmilar_fact_2.value = 1 / tp.solver_data.facts[first_segments_relation].value
@@ -472,13 +478,13 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
         B = B.name
         C = C.name
 
-        seg_1 = tp.find_segment_with_points(C, A, tp.solver_data)
-        seg_2 = tp.find_segment_with_points(A, B, tp.solver_data)
-        seg_3 = tp.find_segment_with_points(B, C, tp.solver_data)
+        seg_1 = tp.find_segment_with_points(C, A)
+        seg_2 = tp.find_segment_with_points(A, B)
+        seg_3 = tp.find_segment_with_points(B, C)
 
-        ang_1 = tp.find_angle_with_points(*tp.check_angle_in_polygon(A, B, C, tp.solver_data), tp.solver_data)
-        ang_2 = tp.find_angle_with_points(*tp.check_angle_in_polygon(B, C, A, tp.solver_data), tp.solver_data)
-        ang_3 = tp.find_angle_with_points(*tp.check_angle_in_polygon(C, A, B, tp.solver_data), tp.solver_data)
+        ang_1 = tp.find_angle_with_points(A, B, C, tp.solver_data, True)
+        ang_2 = tp.find_angle_with_points(B, C, A, tp.solver_data, True)
+        ang_3 = tp.find_angle_with_points(C, A, B, tp.solver_data, True)
 
         segments = [seg_1, seg_2, seg_3]
         angles = [ang_1, ang_2, ang_3]
@@ -772,22 +778,6 @@ def create_null_facts_generation():
                 {ang, add_ang},
                 ang.addition[add_ang]
             ))
-
-    # for i in range(len(tp.solver_data.segments) - 1):
-    #     for j in range(i + 1, len(tp.solver_data.segments)):
-    #         if tp.solver_data.segments[i].size and tp.solver_data.segments[j].size:
-    #             find_fact_id_with_objects([tp.solver_data.segments[i], tp.solver_data.segments[j]], 'relation',
-    #                                       tp.solver_data.segments[i].size / tp.solver_data.segments[j].size, 0)
-    #             find_fact_id_with_objects([tp.solver_data.segments[j], tp.solver_data.segments[i]], 'relation',
-    #                                       tp.solver_data.segments[j].size / tp.solver_data.segments[i].size, 0)
-    #
-    # for i in range(len(tp.solver_data.angles) - 1):
-    #     for j in range(i + 1, len(tp.solver_data.angles)):
-    #         if tp.solver_data.angles[i].size and tp.solver_data.angles[j].size:
-    #             find_fact_id_with_objects([tp.solver_data.angles[i], tp.solver_data.angles[j]], 'relation',
-    #                                       tp.solver_data.angles[i].size / tp.solver_data.angles[j].size, 0)
-    #             find_fact_id_with_objects([tp.solver_data.angles[j], tp.solver_data.angles[i]], 'relation',
-    #                                       tp.solver_data.angles[j].size / tp.solver_data.angles[i].size, 0)
 
     for pol in tp.solver_data.polygons:
         for rel_pol in pol.relations:
