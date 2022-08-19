@@ -2,11 +2,6 @@ import task_parser as tp
 from random import choice
 
 
-# def Equal(x, digits=2):
-#     x = float(x)
-#     return float(f"{x:.{digits}f}")
-
-
 def pretty_name(obj, dative=False, genitive=False):
     if obj.__class__.__name__ == 'Segment':
         A, B = obj.points
@@ -37,19 +32,19 @@ def pretty_name(obj, dative=False, genitive=False):
 
 def pretty_description(fact, called=False):
     if fact.fact_type == 'size':
-        answer = f'{pretty_name(fact.objects[0])} равен {fact.value.outward}'
+        answer = f'{pretty_name(fact.objects[0])} равен {fact.value.conversion_to_latex()}'
     if fact.fact_type == 'relation':
         if fact.value != 1:
-            answer = f'{pretty_name(fact.objects[0])} подобен {pretty_name(fact.objects[1], True)} с коэффициентом {fact.value.outward}'
+            answer = f'{pretty_name(fact.objects[0])} подобен {pretty_name(fact.objects[1], True)} с коэффициентом {fact.value.conversion_to_latex()}'
         else:
             answer = f'{pretty_name(fact.objects[0])} равен {pretty_name(fact.objects[1], True)}'
     if fact.fact_type == 'difference':
-        answer = f'разность {pretty_name(fact.objects[0], False, True)} и {pretty_name(fact.objects[1], False, True)} равна {fact.value.outward}'
+        answer = f'разность {pretty_name(fact.objects[0], False, True)} и {pretty_name(fact.objects[1], False, True)} равна {fact.value.conversion_to_latex()}'
     if fact.fact_type == 'addition':
         answer = 'сумма '
         for obj in fact.objects:
             answer += f'{pretty_name(obj, False, True)}, '
-        answer = answer[:-2] + f' равна {fact.value.outward}'
+        answer = answer[:-2] + f' равна {fact.value.conversion_to_latex()}'
         answer = answer[:answer.rfind(',')] + ' и' + answer[answer.rfind(',') + 1:]
 
     if called:
