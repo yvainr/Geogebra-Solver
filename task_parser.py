@@ -129,6 +129,12 @@ class Polygon:
         self.convex = convex
         self.relations = dict()
         self.name = f"polygon_{''.join(get_points_names_from_list(vertices))}"
+        self.sides = list()
+        self.angles = list()
+        
+        for i in range(len(self.points)):
+            self.sides.append(find_segment_with_points(self.points[i].name, self.points[i - 1].name))
+            self.angles.append(find_angle_with_points(self.points[i - 1].name, self.points[i - 2].name, self.points[i].name, solver_data, True))
 
     def __str__(self):
         return f'name: {self.name}, convex: {self.convex}'
@@ -223,7 +229,7 @@ class Fact:
         elif self.fact_type == 'size' and self.objects[0].__class__.__name__ == 'Segment' and self.value:
             A, B = self.objects[0].points
             draw_data.append(
-                f'text=Text({self.value}, ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), true, true)')
+                f'text=Text("{self.value}", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), true, true)')
 
         return draw_data
 
@@ -628,13 +634,13 @@ def find_polygon_with_points(points, data=None):
     for polygon in data.polygons:
         polygon_points_names = get_points_names_from_list(polygon.points)
         if len(polygon_points_names) == len(points):
-            # if len(points) == 3:
-            #     if set(polygon_points_names) == set(points):
-            #         return polygon
-            # else:
-            for i in range(len(points)):
-                if (points[i:] + points[:i]) == polygon_points_names:
+            if len(points) == 3:
+                if set(polygon_points_names) == set(points):
                     return polygon
+            else:
+                for i in range(len(points)):
+                    if (points[i:] + points[:i]) == polygon_points_names:
+                        return polygon
 
     new_points = list()
     for point in points:
