@@ -77,342 +77,258 @@ def count_sizes_of_angles_and_segments(objects, facts_generation, actual_questio
                                     pass
 
 
-def count_sides_and_angles_of_similar_polygons(facts_generation, actual_question):
-    for i in range(len(tp.solver_data.polygons) - 1):
-        for j in range(i + 1, len(tp.solver_data.polygons)):
-            polygon_1 = tp.solver_data.polygons[i]
-            polygon_2 = tp.solver_data.polygons[j]
+def count_sides_and_angles_of_similar_triangles(facts_generation, actual_question, polygon_1, polygon_2, segments_list_1, angles_list_1, segments_list_2, angles_list_2):
+    try:
+        rel = polygon_1.relations[polygon_2]
+
+    except KeyError:
+        try:
+            rel = 1 / polygon_2.relations[polygon_1]
+
+        except KeyError:
+            rel = None
+
+    if rel:
+        for k in range(3):
+            seg_1 = segments_list_1[k]
+            seg_2 = segments_list_2[k]
 
             try:
-                rel = polygon_1.relations[polygon_2]
+                seg_1.relations[seg_2]
 
             except KeyError:
-                try:
-                    rel = 1 / polygon_2.relations[polygon_1]
+                seg_1.relations[seg_2] = rel
 
-                except KeyError:
-                    rel = None
+                new_fact = tp.Fact(
+                    len(tp.solver_data.facts),
+                    facts_generation,
+                    'relation',
+                    [seg_1, seg_2],
+                    rel
+                )
+                tp.solver_data.facts.append(new_fact)
+                new_fact.root_facts.add(find_fact_id_with_objects([polygon_1, polygon_2], 'relation'))
+                new_fact.description = 'из подобия многоугольников'
 
-            if rel:
-                for k in range(len(polygon_1.points)):
-                    seg_1 = tp.find_segment_with_points(polygon_1.points[k - 1].name, polygon_1.points[k].name,
-                                                        tp.solver_data)
-                    seg_2 = tp.find_segment_with_points(polygon_2.points[k - 1].name, polygon_2.points[k].name,
-                                                        tp.solver_data)
+                if new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
+                    return True
 
-                    try:
-                        seg_1.relations[seg_2]
+        for k in range(3):
+            ang_1 = angles_list_1[k]
+            ang_2 = angles_list_2[k]
 
-                    except KeyError:
-                        seg_1.relations[seg_2] = rel
+            try:
+                ang_1.relations[ang_2]
 
-                        new_fact = tp.Fact(
-                            len(tp.solver_data.facts),
-                            facts_generation,
-                            'relation',
-                            [seg_1, seg_2],
-                            rel
-                        )
-                        tp.solver_data.facts.append(new_fact)
-                        new_fact.root_facts.add(find_fact_id_with_objects([polygon_1, polygon_2], 'relation'))
-                        new_fact.description = 'из подобия многоугольников'
+            except KeyError:
+                ang_1.relations[ang_2] = Size(1)
 
-                        if new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
-                            return True
+                new_fact = tp.Fact(
+                    len(tp.solver_data.facts),
+                    facts_generation,
+                    'relation',
+                    [ang_1, ang_2],
+                    Size(1)
+                )
+                tp.solver_data.facts.append(new_fact)
+                new_fact.root_facts.add(find_fact_id_with_objects([polygon_1, polygon_2], 'relation'))
+                new_fact.description = 'из подобия многоугольников'
 
-                    try:
-                        seg_2.relations[seg_1]
-
-                    except KeyError:
-                        seg_2.relations[seg_1] = 1 / rel
-
-                        new_fact = tp.Fact(
-                            len(tp.solver_data.facts),
-                            facts_generation,
-                            'relation',
-                            [seg_2, seg_1],
-                            1 / rel
-                        )
-                        tp.solver_data.facts.append(new_fact)
-                        new_fact.root_facts.add(find_fact_id_with_objects([polygon_2, polygon_1], 'relation'))
-                        new_fact.description = 'из подобия многоугольников'
-
-                        if new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
-                            return True
-
-                for k in range(len(polygon_1.points)):
-                    ang_1 = tp.find_angle_with_points(polygon_1.points[k].name, polygon_1.points[k - 1].name, polygon_1.points[k - 2].name)
-                    ang_2 = tp.find_angle_with_points(polygon_2.points[k].name, polygon_2.points[k - 1].name, polygon_2.points[k - 2].name)
-
-                    try:
-                        ang_1.relations[ang_2]
-
-                    except KeyError:
-                        ang_1.relations[ang_2] = Size(1)
-
-                        new_fact = tp.Fact(
-                            len(tp.solver_data.facts),
-                            facts_generation,
-                            'relation',
-                            [ang_1, ang_2],
-                            Size(1)
-                        )
-                        tp.solver_data.facts.append(new_fact)
-                        new_fact.root_facts.add(find_fact_id_with_objects([polygon_1, polygon_2], 'relation'))
-                        new_fact.description = 'из подобия многоугольников'
-
-                        if new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
-                            return True
-
-                    try:
-                        ang_2.relations[ang_1]
-
-                    except KeyError:
-                        ang_2.relations[ang_1] = Size(1)
-
-                        new_fact = tp.Fact(
-                            len(tp.solver_data.facts),
-                            facts_generation,
-                            'relation',
-                            [ang_2, ang_1],
-                            Size(1)
-                        )
-                        tp.solver_data.facts.append(new_fact)
-                        new_fact.root_facts.add(find_fact_id_with_objects([polygon_2, polygon_1], 'relation'))
-                        new_fact.description = 'из подобия многоугольников'
-
-                        if new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
-                            return True
+                if new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
+                    return True
 
 
 def find_simmilar_triangles(facts_generation, actual_question):
-    triangles = list(permutations(tp.solver_data.points, 3))
+    for triangle_couple in list(permutations(combinations(tp.solver_data.points, 3), 2)):
+        tr1 = tp.find_polygon_with_points(tp.get_points_names_from_list(list(triangle_couple[0])))
+        tr2 = tp.find_polygon_with_points(tp.get_points_names_from_list(list(triangle_couple[1])))
 
-    for i in range(len(triangles)):
-        for j in range(len(triangles)):
-            tr1 = tp.find_polygon_with_points(tp.get_points_names_from_list(triangles[i]))
-            tr2 = tp.find_polygon_with_points(tp.get_points_names_from_list(triangles[j]))
-            
-            if tr1 != tr2:
+        try:
+            tr1.relations[tr2]
+
+        except KeyError:
+            if check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
+                return True
+
+
+def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
+    segments_list_1 = tr1.sides
+    angles_list_1 = tr1.angles
+
+    for second_triangle_data in [[tr2.sides, tr2.angles], [tr2.sides[::-1], tr2.angles[::-1]]]:
+        for shift in range(3):
+            segments_list_2 = second_triangle_data[0][shift:] + second_triangle_data[0][:shift]
+            angles_list_2 = second_triangle_data[1][shift:] + second_triangle_data[1][:shift]
+
+            simmilar_fact = tp.Fact(
+                None,
+                facts_generation,
+                'relation',
+                [tr1, tr2],
+                None
+            )
+
+            # проверка подобия по углу и сторонам рядом с ним
+            for k in range(3):
                 try:
-                    tr1.relations[tr2]
-
-                except KeyError:
-                    A, B, C = tp.get_points_names_from_list(triangles[i])
-                    D, E, F = tp.get_points_names_from_list(triangles[j])
-
-                    seg11 = tp.find_segment_with_points(C, A)
-                    seg12 = tp.find_segment_with_points(A, B)
-                    seg13 = tp.find_segment_with_points(B, C)
-
-                    seg21 = tp.find_segment_with_points(F, D)
-                    seg22 = tp.find_segment_with_points(D, E)
-                    seg23 = tp.find_segment_with_points(E, F)
-
-                    ang11 = tp.find_angle_with_points(A, B, C, tp.solver_data, True)
-                    ang12 = tp.find_angle_with_points(B, C, A, tp.solver_data, True)
-                    ang13 = tp.find_angle_with_points(C, A, B, tp.solver_data, True)
-
-                    ang21 = tp.find_angle_with_points(D, E, F, tp.solver_data, True)
-                    ang22 = tp.find_angle_with_points(E, F, D, tp.solver_data, True)
-                    ang23 = tp.find_angle_with_points(F, D, E, tp.solver_data, True)
-
-                    segments_list_1 = [seg11, seg12, seg13]
-                    segments_list_2 = [seg21, seg22, seg23]
-                    angles_list_1 = [ang11, ang12, ang13]
-                    angles_list_2 = [ang21, ang22, ang23]
-
-                    simmilar_fact_1 = tp.Fact(
-                        None,
-                        facts_generation,
-                        'relation',
-                        [tr1, tr2],
-                        None
-                    )
-
-                    # simmilar_fact_2 = tp.Fact(
-                    #     None,
-                    #     facts_generation,
-                    #     'relation',
-                    #     [tr2, tr1],
-                    #     None
-                    # )
-
-                    # проверка подобия по углу и сторонам рядом с ним
-                    for k in range(3):
-                        try:
-                            angles_relation = angles_list_1[k].size / angles_list_2[k].size
-                        except TypeError:
-                            try:
-                                angles_relation = tp.solver_data.facts[
-                                    find_fact_id_with_objects([angles_list_1[k], angles_list_2[k]], 'relation', None, Size(1))].value
-                            except TypeError:
-                                angles_relation = None
-
-                        if angles_relation == Size(1):
-                            if not angles_list_1[k].size or angles_list_1[k].size < 180:
-                                try:
-                                    first_segments_relation = segments_list_1[k - 1].size / segments_list_2[k - 1].size
-                                except TypeError:
-                                    try:
-                                        first_segments_relation = tp.solver_data.facts[
-                                            find_fact_id_with_objects([segments_list_1[k - 1], segments_list_2[k - 1]], 'relation')].value
-                                    except TypeError:
-                                        first_segments_relation = None
-
-                                try:
-                                    second_segments_relation = segments_list_1[k - 2].size / segments_list_2[k - 2].size
-                                except TypeError:
-                                    try:
-                                        second_segments_relation = tp.solver_data.facts[
-                                            find_fact_id_with_objects([segments_list_1[k - 2], segments_list_2[k - 2]], 'relation')].value
-                                    except TypeError:
-                                        second_segments_relation = None
-
-                                if first_segments_relation and first_segments_relation == second_segments_relation:
-                                    tr1.relations[tr2] = first_segments_relation
-                                    # tr2.relations[tr1] = 1 / tp.solver_data.facts[first_angles_relation].value
-
-                                    simmilar_fact_1.value = first_segments_relation
-                                    simmilar_fact_1.root_facts.add(create_fact_about_objects_relations(
-                                        [angles_list_1[k], angles_list_2[k]], facts_generation))
-                                    simmilar_fact_1.root_facts.add(create_fact_about_objects_relations(
-                                        [segments_list_1[k - 1], segments_list_2[k - 1]], facts_generation))
-                                    simmilar_fact_1.root_facts.add(create_fact_about_objects_relations(
-                                        [segments_list_1[k - 2], segments_list_2[k - 2]], facts_generation))
-                                    simmilar_fact_1.description = 'по первому признаку подобия'
-                                    simmilar_fact_1.id = len(tp.solver_data.facts)
-                                    tp.solver_data.facts.append(simmilar_fact_1)
-
-                                    if simmilar_fact_1.objects == actual_question.objects and simmilar_fact_1.fact_type == actual_question.fact_type:
-                                        return True
-
-                                    # simmilar_fact_2.value = 1 / tp.solver_data.facts[first_angles_relation].value
-                                    # simmilar_fact_2.root_facts.add(first_angles_relation)
-                                    # simmilar_fact_2.root_facts.add(second_angles_relation)
-                                    # simmilar_fact_2.root_facts.add(segments_relation)
-                                    # simmilar_fact_2.id = len(tp.solver_data.facts)
-                                    # tp.solver_data.facts.append(simmilar_fact_2)
-
-                                    continue
-
-                    # проверка подобия по стороне и углам рядом с ним
-                    for k in range(3):
-                        try:
-                            segments_relation = segments_list_1[k].size / segments_list_2[k].size
-                        except TypeError:
-                            try:
-                                segments_relation = tp.solver_data.facts[
-                                    find_fact_id_with_objects([segments_list_1[k], segments_list_2[k]], 'relation')].value
-                            except TypeError:
-                                segments_relation = None
-
-                        if segments_relation:
-                            try:
-                                first_angles_relation = angles_list_1[k - 1].size / angles_list_2[k - 1].size
-                            except TypeError:
-                                try:
-                                    first_angles_relation = tp.solver_data.facts[
-                                        find_fact_id_with_objects([angles_list_1[k - 1], angles_list_2[k - 1]],
-                                                                  'relation', None, Size(1))].value
-                                except TypeError:
-                                    first_angles_relation = None
-
-                            try:
-                                second_angles_relation = angles_list_1[k - 2].size / angles_list_2[k - 2].size
-                            except TypeError:
-                                try:
-                                    second_angles_relation = tp.solver_data.facts[
-                                        find_fact_id_with_objects([angles_list_1[k - 2], angles_list_2[k - 2]],
-                                                                  'relation', None, Size(1))].value
-                                except TypeError:
-                                    second_angles_relation = None
-
-                            if first_angles_relation == second_angles_relation == Size(1):
-                                if (not angles_list_1[k - 1].size or angles_list_1[k - 1].size < 180) and (
-                                        not angles_list_1[k - 2].size or angles_list_1[k - 2].size < 180):
-                                    tr1.relations[tr2] = segments_relation
-                                    # tr2.relations[tr1] = 1 / tp.solver_data.facts[first_angles_relation].value
-
-                                    simmilar_fact_1.value = segments_relation
-                                    simmilar_fact_1.root_facts.add(create_fact_about_objects_relations(
-                                        [angles_list_1[k - 1], angles_list_2[k - 1]], facts_generation))
-                                    simmilar_fact_1.root_facts.add(create_fact_about_objects_relations(
-                                        [angles_list_1[k - 2], angles_list_2[k - 2]], facts_generation))
-                                    simmilar_fact_1.root_facts.add(create_fact_about_objects_relations(
-                                        [segments_list_1[k], segments_list_2[k]], facts_generation))
-                                    simmilar_fact_1.description = 'по второму признаку подобия'
-                                    simmilar_fact_1.id = len(tp.solver_data.facts)
-                                    tp.solver_data.facts.append(simmilar_fact_1)
-
-                                    if simmilar_fact_1.objects == actual_question.objects and simmilar_fact_1.fact_type == actual_question.fact_type:
-                                        return True
-
-                                    # simmilar_fact_2.value = 1 / tp.solver_data.facts[first_angles_relation].value
-                                    # simmilar_fact_2.root_facts.add(first_angles_relation)
-                                    # simmilar_fact_2.root_facts.add(second_angles_relation)
-                                    # simmilar_fact_2.root_facts.add(segments_relation)
-                                    # simmilar_fact_2.id = len(tp.solver_data.facts)
-                                    # tp.solver_data.facts.append(simmilar_fact_2)
-
-                                    continue
-
-                    # проверка подобия по 3 сторонам
+                    angles_relation = angles_list_1[k].size / angles_list_2[k].size
+                except TypeError:
                     try:
-                        first_segments_relation = seg11.size / seg21.size
+                        angles_relation = tp.solver_data.facts[
+                            find_fact_id_with_objects([angles_list_1[k], angles_list_2[k]], 'relation', Size(1))].value
+                    except TypeError:
+                        angles_relation = None
+
+                if angles_relation == Size(1):
+                    if not angles_list_1[k].size or angles_list_1[k].size < 180:
+                        try:
+                            first_segments_relation = segments_list_1[k - 1].size / segments_list_2[k - 1].size
+                        except TypeError:
+                            try:
+                                first_segments_relation = tp.solver_data.facts[
+                                    find_fact_id_with_objects([segments_list_1[k - 1], segments_list_2[k - 1]], 'relation')].value
+                            except TypeError:
+                                first_segments_relation = None
+
+                        try:
+                            second_segments_relation = segments_list_1[k - 2].size / segments_list_2[k - 2].size
+                        except TypeError:
+                            try:
+                                second_segments_relation = tp.solver_data.facts[
+                                    find_fact_id_with_objects([segments_list_1[k - 2], segments_list_2[k - 2]], 'relation')].value
+                            except TypeError:
+                                second_segments_relation = None
+
+                        if first_segments_relation and first_segments_relation == second_segments_relation:
+                            tr1.relations[tr2] = first_segments_relation
+
+                            simmilar_fact.value = first_segments_relation
+                            simmilar_fact.root_facts.add(create_fact_about_objects_relations(
+                                [angles_list_1[k], angles_list_2[k]], facts_generation))
+                            simmilar_fact.root_facts.add(create_fact_about_objects_relations(
+                                [segments_list_1[k - 1], segments_list_2[k - 1]], facts_generation))
+                            simmilar_fact.root_facts.add(create_fact_about_objects_relations(
+                                [segments_list_1[k - 2], segments_list_2[k - 2]], facts_generation))
+                            simmilar_fact.description = 'по первому признаку подобия'
+                            simmilar_fact.id = len(tp.solver_data.facts)
+                            tp.solver_data.facts.append(simmilar_fact)
+
+                            if simmilar_fact.objects == actual_question.objects and simmilar_fact.fact_type == actual_question.fact_type:
+                                return True
+
+                            if count_sides_and_angles_of_similar_triangles(facts_generation, actual_question, tr1, tr2,
+                                                                           segments_list_1, angles_list_1,
+                                                                           segments_list_2, angles_list_2):
+                                return True
+
+                            break
+
+            # проверка подобия по стороне и углам рядом с ним
+            for k in range(3):
+                try:
+                    segments_relation = segments_list_1[k].size / segments_list_2[k].size
+                except TypeError:
+                    try:
+                        segments_relation = tp.solver_data.facts[
+                            find_fact_id_with_objects([segments_list_1[k], segments_list_2[k]], 'relation')].value
+                    except TypeError:
+                        segments_relation = None
+
+                if segments_relation:
+                    try:
+                        first_angles_relation = angles_list_1[k - 1].size / angles_list_2[k - 1].size
                     except TypeError:
                         try:
-                            first_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([seg11, seg21], 'relation')].value
+                            first_angles_relation = tp.solver_data.facts[
+                                find_fact_id_with_objects([angles_list_1[k - 1], angles_list_2[k - 1]],
+                                                          'relation', Size(1))].value
                         except TypeError:
-                            continue
+                            first_angles_relation = None
 
                     try:
-                        second_segments_relation = seg12.size / seg22.size
+                        second_angles_relation = angles_list_1[k - 2].size / angles_list_2[k - 2].size
                     except TypeError:
                         try:
-                            second_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([seg12, seg22], 'relation')].value
+                            second_angles_relation = tp.solver_data.facts[
+                                find_fact_id_with_objects([angles_list_1[k - 2], angles_list_2[k - 2]],
+                                                          'relation', Size(1))].value
                         except TypeError:
-                            continue
+                            second_angles_relation = None
 
-                    try:
-                        third_segments_relation = seg13.size / seg23.size
-                    except TypeError:
-                        try:
-                            third_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([seg13, seg23], 'relation')].value
-                        except TypeError:
-                            continue
+                    if first_angles_relation == second_angles_relation == Size(1):
+                        if (not angles_list_1[k - 1].size or angles_list_1[k - 1].size < 180) and (
+                                not angles_list_1[k - 2].size or angles_list_1[k - 2].size < 180):
+                            tr1.relations[tr2] = segments_relation
 
-                    if first_segments_relation == second_segments_relation == third_segments_relation:
-                        tr1.relations[tr2] = first_segments_relation
-                        # tr2.relations[tr1] = 1 / tp.solver_data.facts[first_segments_relation].value
+                            simmilar_fact.value = segments_relation
+                            simmilar_fact.root_facts.add(create_fact_about_objects_relations(
+                                [angles_list_1[k - 1], angles_list_2[k - 1]], facts_generation))
+                            simmilar_fact.root_facts.add(create_fact_about_objects_relations(
+                                [angles_list_1[k - 2], angles_list_2[k - 2]], facts_generation))
+                            simmilar_fact.root_facts.add(create_fact_about_objects_relations(
+                                [segments_list_1[k], segments_list_2[k]], facts_generation))
+                            simmilar_fact.description = 'по второму признаку подобия'
+                            simmilar_fact.id = len(tp.solver_data.facts)
+                            tp.solver_data.facts.append(simmilar_fact)
 
-                        simmilar_fact_1.value = first_segments_relation
-                        simmilar_fact_1.root_facts.add(
-                            create_fact_about_objects_relations([seg11, seg21], facts_generation))
-                        simmilar_fact_1.root_facts.add(
-                            create_fact_about_objects_relations([seg12, seg22], facts_generation))
-                        simmilar_fact_1.root_facts.add(
-                            create_fact_about_objects_relations([seg13, seg23], facts_generation))
-                        simmilar_fact_1.description = 'по третьему признаку подобия'
-                        simmilar_fact_1.id = len(tp.solver_data.facts)
-                        tp.solver_data.facts.append(simmilar_fact_1)
+                            if simmilar_fact.objects == actual_question.objects and simmilar_fact.fact_type == actual_question.fact_type:
+                                return True
 
-                        if simmilar_fact_1.objects == actual_question.objects and simmilar_fact_1.fact_type == actual_question.fact_type:
-                            print(*segments_list_1)
-                            print(*segments_list_2)
-                            print(*angles_list_1)
-                            print(*angles_list_2)
-                            print()
-                            return True
+                            if count_sides_and_angles_of_similar_triangles(facts_generation, actual_question, tr1, tr2,
+                                                                           segments_list_1, angles_list_1,
+                                                                           segments_list_2, angles_list_2):
+                                return True
 
-                        # simmilar_fact_2.value = 1 / tp.solver_data.facts[first_segments_relation].value
-                        # simmilar_fact_2.root_facts.add(first_segments_relation)
-                        # simmilar_fact_2.root_facts.add(second_segments_relation)
-                        # simmilar_fact_2.root_facts.add(third_segments_relation)
-                        # simmilar_fact_2.id = len(tp.solver_data.facts)
-                        # tp.solver_data.facts.append(simmilar_fact_2)
+                            return None
 
-                        continue
+            # проверка подобия по 3 сторонам
+            try:
+                first_segments_relation = segments_list_1[0].size / segments_list_2[0].size
+            except TypeError:
+                try:
+                    first_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([segments_list_1[0], segments_list_2[0]], 'relation')].value
+                except TypeError:
+                    first_segments_relation = None
+
+            try:
+                second_segments_relation = segments_list_1[1].size / segments_list_2[1].size
+            except TypeError:
+                try:
+                    second_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([segments_list_1[1], segments_list_2[1]], 'relation')].value
+                except TypeError:
+                    second_segments_relation = None
+
+            try:
+                third_segments_relation = segments_list_1[2].size / segments_list_2[2].size
+            except TypeError:
+                try:
+                    third_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([segments_list_1[2], segments_list_2[2]], 'relation')].value
+                except TypeError:
+                    third_segments_relation = None
+
+            if first_segments_relation and first_segments_relation == second_segments_relation == third_segments_relation:
+                tr1.relations[tr2] = first_segments_relation
+
+                simmilar_fact.value = first_segments_relation
+                simmilar_fact.root_facts.add(
+                    create_fact_about_objects_relations([segments_list_1[0], segments_list_2[0]], facts_generation))
+                simmilar_fact.root_facts.add(
+                    create_fact_about_objects_relations([segments_list_1[1], segments_list_2[1]], facts_generation))
+                simmilar_fact.root_facts.add(
+                    create_fact_about_objects_relations([segments_list_1[2], segments_list_2[2]], facts_generation))
+                simmilar_fact.description = 'по третьему признаку подобия'
+                simmilar_fact.id = len(tp.solver_data.facts)
+                tp.solver_data.facts.append(simmilar_fact)
+
+                if simmilar_fact.objects == actual_question.objects and simmilar_fact.fact_type == actual_question.fact_type:
+                    return True
+
+                if count_sides_and_angles_of_similar_triangles(facts_generation, actual_question, tr1, tr2,
+                                                               segments_list_1, angles_list_1,
+                                                               segments_list_2, angles_list_2):
+                    return True
+
+                return None
 
 
 def create_fact_about_objects_relations(objects, facts_generation):
@@ -442,7 +358,7 @@ def create_fact_about_objects_relations(objects, facts_generation):
     return ans2
 
 
-def find_fact_id_with_objects(objects, fact_type, facts_generation=None, value=None):
+def find_fact_id_with_objects(objects, fact_type, value=None, facts_generation=None):
     for fact in tp.solver_data.facts:
         if objects == fact.objects:
             if not fact_type:
@@ -472,22 +388,12 @@ def find_fact_id_with_objects(objects, fact_type, facts_generation=None, value=N
 def find_new_angles_in_triangles(facts_generation, actual_question):
     for triangle in combinations(tp.solver_data.points, 3):
         try_find_equal_sides = False
+
         A, B, C = triangle
+        tr = tp.find_polygon_with_points([A.name, B.name, C.name])
 
-        A = A.name
-        B = B.name
-        C = C.name
-
-        seg_1 = tp.find_segment_with_points(C, A)
-        seg_2 = tp.find_segment_with_points(A, B)
-        seg_3 = tp.find_segment_with_points(B, C)
-
-        ang_1 = tp.find_angle_with_points(A, B, C, tp.solver_data, True)
-        ang_2 = tp.find_angle_with_points(B, C, A, tp.solver_data, True)
-        ang_3 = tp.find_angle_with_points(C, A, B, tp.solver_data, True)
-
-        segments = [seg_1, seg_2, seg_3]
-        angles = [ang_1, ang_2, ang_3]
+        segments = tr.sides
+        angles = tr.angles
 
         for i in range(3):
             if angles[i].size == 90:
@@ -548,7 +454,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                 break
 
         else:
-            if seg_1.size and seg_2.size and seg_3.size:
+            if segments[0].size and segments[1].size and segments[2].size:
                 for i in range(3):
                     if not angles[i].size and abs(segments[i].size ** 2 - segments[i - 1].size ** 2 - segments[i - 2].size ** 2) < 0.001:
                         angles[i].size = 90
@@ -557,7 +463,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                             facts_generation,
                             'size',
                             [angles[i]],
-                            90
+                            Size('90')
                         )
                         tp.solver_data.facts.append(back_pythagoras_fact)
                         back_pythagoras_fact.root_facts.add(find_fact_id_with_objects([segments[i]], 'size'))
@@ -572,9 +478,8 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
 
         for i in range(3):
             if (segments[i].size and segments[i - 1].size and segments[i].size == segments[
-                i - 1].size) or find_fact_id_with_objects([segments[i], segments[i - 1]], 'relation', None,
-                                                          Size(1)) or find_fact_id_with_objects(
-                    [segments[i - 1], segments[i]], 'relation', None, Size(1)):
+                i - 1].size) or find_fact_id_with_objects([segments[i], segments[i - 1]], 'relation', Size(1)) or \
+                    find_fact_id_with_objects([segments[i - 1], segments[i]], 'relation', None, Size(1)):
                 try:
                     angles[i].relations[angles[i - 1]]
                 except KeyError:
@@ -584,7 +489,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                         facts_generation,
                         'relation',
                         [angles[i], angles[i - 1]],
-                        Size(1)
+                        Size('1')
                     )
                     tp.solver_data.facts.append(angles_equal_fact_1)
                     angles_equal_fact_1.root_facts.add(create_fact_about_objects_relations([segments[i], segments[i - 1]], facts_generation))
@@ -611,7 +516,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                     if angles_equal_fact_2.objects == actual_question.objects and angles_equal_fact_2.fact_type == actual_question.fact_type:
                         return True
 
-        if [ang_1.size, ang_2.size, ang_3.size].count(None) == 1:
+        if [angles[0].size, angles[1].size, angles[2].size].count(None) == 1:
             for i in range(3):
                 if angles[i - 2].size and angles[i - 1].size and not angles[i].size:
                     angles[i].size = Size('180') - angles[i - 1].size - angles[i - 2].size
@@ -627,7 +532,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                     third_angle_size_fact.root_facts.add(find_fact_id_with_objects([angles[i - 1]], 'size'))
                     third_angle_size_fact.root_facts.add(find_fact_id_with_objects([angles[i - 2]], 'size'))
                     third_angle_size_fact.root_facts.add(
-                        find_fact_id_with_objects({ang_1, ang_2, ang_3}, 'addition', facts_generation, Size(180)))
+                        find_fact_id_with_objects(set(angles), 'addition', Size(180), facts_generation))
                     # third_angle_size_fact.description = 'из суммы углов в треугольнике 180'
 
                     if third_angle_size_fact.objects == actual_question.objects and third_angle_size_fact.fact_type == actual_question.fact_type:
@@ -637,7 +542,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
 
                     break
 
-        if [ang_1.size, ang_2.size, ang_3.size].count(None) == 2:
+        if [angles[0].size, angles[1].size, angles[2].size].count(None) == 2:
             for i in range(3):
                 if not angles[i - 2].size and not angles[i - 1].size and angles[i].size:
                     try:
@@ -657,7 +562,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                         third_angle_size_fact.root_facts.add(
                             find_fact_id_with_objects([angles[i - 1], angles[i - 2]], 'relation'))
                         third_angle_size_fact.root_facts.add(
-                            find_fact_id_with_objects({ang_1, ang_2, ang_3}, 'addition', facts_generation, Size(180)))
+                            find_fact_id_with_objects({ang_1, ang_2, ang_3}, 'addition', Size(180), facts_generation))
                         # third_angle_size_fact.description = 'из суммы углов в треугольнике 180'
 
                         try_find_equal_sides = True
@@ -673,9 +578,8 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
         if try_find_equal_sides:
             for i in range(3):
                 if angles[i].size == angles[i - 1].size or find_fact_id_with_objects([angles[i], angles[i - 1]],
-                                                                                     'relation', None, Size(
-                                1)) or find_fact_id_with_objects([angles[i - 1], angles[i]], 'relation', None,
-                                                                 Size(1)):
+                                                                                     'relation',  Size(1)) \
+                        or find_fact_id_with_objects([angles[i - 1], angles[i]], 'relation', Size(1)):
                     segments[i].relations[segments[i - 1]] = Size(1)
                     segments[i - 1].relations[segments[i]] = Size(1)
 
@@ -827,8 +731,6 @@ def solving_process():
             if find_new_angles_in_triangles(facts_generation, question):
                 break
             if find_simmilar_triangles(facts_generation, question):
-                break
-            if count_sides_and_angles_of_similar_polygons(facts_generation, question):
                 break
             if facts_list_length == len(tp.solver_data.facts):
                 break
