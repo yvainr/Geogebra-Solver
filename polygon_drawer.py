@@ -2,7 +2,7 @@ import geogebra_html_generator
 import shapely.geometry
 import triangle_drawer as triad
 import task_parser as tp
-import normal_solver as ns
+import ggb_solver as ns
 from math import *
 from itertools import combinations, permutations
 from objects_types import Objects
