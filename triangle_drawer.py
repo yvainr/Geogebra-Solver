@@ -1,6 +1,6 @@
 import task_parser as tp
 from math import tan, pi, cos, sin, acos
-from random import choice, uniform
+from random import choice, uniform, randint
 from itertools import combinations
 from objects_types import Size, sqrt
 
@@ -269,7 +269,7 @@ def PointSymmetryAboutLine(P, l1):
 	l2 = PerpendicularLineWithPoint(P, l1)
 	Q = LineIntersectionPoint(l1, l2)
 	
-	return MyPoint(2*Q.x - P.x, 2*Q.y - P.y, P.name)
+	return MyPoint(2 * Q.x - P.x, 2 * Q.y - P.y, P.name)
 
 
 def SaveTriangleData(A, B, C):
@@ -326,8 +326,8 @@ def CheckQuadrangleConvex(A, B, C, D):
 
 
 def CreateTriangleWithThreeSides(a, b, c, angle):
-	C = MyPoint(Size(0), Size(0), angle[0])
-	B = MyPoint(a, Size(0), angle[1])
+	C = MyPoint(Size('0'), Size('0'), angle[0])
+	B = MyPoint(a, Size('0'), angle[1])
 	A = CirclesIntersectionPoint(b, c, C, B)
 	A.name = angle[2]
 
@@ -370,8 +370,8 @@ def CreateTriangleWithOneSideAndTwoAngles(a, beta, gamma, beta_name, gamma_name)
 
 
 def CreateTriangleWithTwoSidesAndAngleBetweenThem(a, b, gamma, a_name, gamma_name):
-	C = MyPoint(0, 0)
-	B = MyPoint(a, 0, gamma_name[1])
+	C = MyPoint(Size('0'), Size('0'))
+	B = MyPoint(a, Size('0'), gamma_name[1])
 	
 	if a_name[0] != gamma_name[1]:
 		C.name = a_name[0]
@@ -402,8 +402,8 @@ def CreateTriangleWithTwoSidesAndAngleBetweenThem(a, b, gamma, a_name, gamma_nam
 
 
 def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, a_name, gamma_name):
-	C = MyPoint(0, 0)
-	B = MyPoint(a, 0)
+	C = MyPoint(Size('0'), Size('0'))
+	B = MyPoint(a, Size('0'))
 		
 	l = LineWithTiltAngle(C, gamma)
 
