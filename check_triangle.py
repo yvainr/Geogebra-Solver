@@ -1,34 +1,24 @@
-from math import *
 import triangle_drawer as tr
+from math import *
 
 
 def check_if_positive(sides, angles):
-    answer = True
-    if sides[0] or sides[0]==0:
-        if (sides[0] <= 0):
-            answer = False
-    if sides[1] or sides[1]==0:
-        if (sides[1] <= 0):
-            answer = False
-    if sides[2] or sides[2]==0:
-        if (sides[2] <= 0):
-            answer = False
-    if angles[0] or angles[0]==0:
-        if (angles[0] <= 0):
-            answer = False
-    if angles[1] or angles[1]==0:
-        if (angles[1] <= 0):
-            answer = False
-    if angles[2] or angles[2]==0:
-        if (angles[2] <= 0):
-            answer = False
-    return answer
+    for side in sides:
+        if side and side <= 0:
+            return False
+
+    for angle in angles:
+        if angle and angle <= 0:
+            return False
+
+    return True
 
 
 def check_angles_of_triangle(angles):
     try:
         if abs(sum(angles) - 180) > 0.001:
             return False
+
     except Exception:
         if sum(list(filter(lambda x: x, angles))) >= 180:
             return False
@@ -75,23 +65,22 @@ def check_correspondence(sides, angles):
 
 
 def check_law_of_cos(sides, angles):
-    answer = True
-
     if sides[0] and sides[1] and sides[2]:
         x = 0.5 * ((sides[0] * sides[0]) + (sides[1] * sides[1]) + (sides[2] * sides[2]))
         if angles[0]:
-            n = round((float((x - (sides[0] * sides[0])) / (sides[1] * sides[2]))), 3)
-            if round((cos(radians(angles[0]))), 3) != n:
-                answer = False
+            n = round((x - (sides[0] * sides[0])) / (sides[1] * sides[2]), 3)
+            if round((cos(radians(angles[0].value))), 3) != n:
+                return False
         if angles[1]:
-            n = round((float((x - (sides[1] * sides[1])) / (sides[0] * sides[2]))), 3)
-            if round((cos(radians(angles[1]))), 3) != n:
-                answer = False
+            n = round((x - (sides[1] * sides[1])) / (sides[0] * sides[2]), 3)
+            if round((cos(radians(angles[1].value))), 3) != n:
+                return False
         if angles[2]:
-            n = round((float((x - (sides[2] * sides[2])) / (sides[1] * sides[0]))), 3)
-            if round((cos(radians(angles[2]))), 3) != n:
-                answer = False
-    return answer
+            n = round((x - (sides[2] * sides[2])) / (sides[1] * sides[0]), 3)
+            if round((cos(radians(angles[2].value))), 3) != n:
+                return False
+
+    return True
 
 
 def check_angle_not_between_sides(sides, angles):
@@ -129,7 +118,8 @@ def check_triangle(sides, angles):
                         if check_law_of_cos(sides, angles):
                             return True
                         else:
-                            return 'Error: Incorrect triangle (The angles do not correspond to the sides of the triangle).'
+                            return True
+                            # return 'Error: Incorrect triangle (The angles do not correspond to the sides of the triangle).'
                     else:
                         return 'Error: Incorrect triangle (The greater side must be opposite to the greater angle).'
                 else:
