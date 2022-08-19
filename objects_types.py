@@ -28,19 +28,22 @@ class Size:
 
         if outward_type == 'usual':
             self.value = Fraction(value)
-            if len(str(self.value)) < 5:
+            if len(str(self.value)) < 5 and '/' in str(self.value):
                 self.outward = str(self.value)
             else:
                 self.outward = str(f"{float(self.value):.{2}f}").replace('.00', '')
         elif outward_type == 'sqrt':
             self.value = Fraction(math.sqrt(value))
-            if len(str(self.value)) < 5:
+            if len(str(self.value)) < 5 and '/' in str(self.value):
                 self.outward = str(self.value)
             else:
                 if len(str(float(self.value)).split('.')[1]) < 3:
-                    self.outward = str(float(self.value))
+                    self.outward = str(f"{float(self.value):.{2}f}").replace('.00', '')
                 else:
-                    self.outward = f'√{Fraction(value)}'
+                    if len(str(Fraction(value))) < 5 and '/' in str(Fraction(value)):
+                        self.outward = f'√{str(Fraction(value))}'
+                    else:
+                        self.outward = f'√{str(f"{float(value):.{2}f}").replace(".00", "")}'
 
     def __neg__(self):
         return Size(-self.value)
@@ -96,11 +99,23 @@ class Size:
     def __abs__(self):
         return Size(abs(self.value))
 
-    def __float__(self):
-        return float(self.value)
-
     def __round__(self, n=None):
         return round(self.value, n)
+
+    def conversion_to_latex(self):
+        if '√' in self.outward:
+            proccesed_outward = self.outward[1:]
+            if '/' in proccesed_outward:
+                numerator, denominator = proccesed_outward.split('/')
+                proccesed_outward = '\( \\frac{' + numerator + '}{' + denominator + '} \)'
+            proccesed_outward = '\( \sqrt{' + proccesed_outward + '} \)'
+        else:
+            proccesed_outward = self.outward
+            if '/' in proccesed_outward:
+                numerator, denominator = proccesed_outward.split('/')
+                proccesed_outward = '\( \\frac{' + numerator + '}{' + denominator + '} \)'
+                
+        return proccesed_outward
 
     def __str__(self):
         return f'{self.outward}'
