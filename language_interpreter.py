@@ -1,19 +1,20 @@
 from re import *
-#number of output strings = 8
+# number of output strings = 8
+
 
 def text_analyze(inp_str, output_num=7):
     """main function"""
     inp_str = inp_str.split("\n")
     statement = inp_str[0]
-    question_existence = len(inp_str) > 1 # check question existence
-    if question_existence: # creat question if exist
+    question_existence = len(inp_str) > 1  # check question existence
+    if question_existence:  # creat question if exist
         question = inp_str[1]
 
     statement = string_split(statement)
     ret = new_assign_to_classes(statement)
     ret = list(ret)
 
-    if question_existence: # analyze question if exist
+    if question_existence:  # analyze question if exist
         ret.append(question_processing(question))
 
     for i in range(output_num):
@@ -31,6 +32,8 @@ def text_analyze(inp_str, output_num=7):
 def string_split(inp_str):
     """creating list with diff objects"""
     inp_str = sub(" и ",  ",", inp_str)
+    inp_str = sub(r"([A-Z, А-Я])(\s*=\s*)([A-Z, А-Я, 0-9])", r"\1 = \3", inp_str)
+    print(inp_str)
     inp_str = inp_str.split(",")
     return inp_str
 
@@ -48,13 +51,13 @@ def spaces_normalize(part):
 def output_formatting(part):
     """putting segment relation in correct order"""
     part = distillation(part)
-    part = sub(r"(^[A-Z]\s)([A-Z][A-Z]$)", r'\2 \1', part)
+    part = sub(r"(^[A-Z, А-Я]\s)([A-Z, А-Я][A-Z, А-Я]$)", r'\2 \1', part)
     return part
 
 
 def summ_formatting(part):
     """new format for task_parser"""
-    part = sub(r"([+-])([A-Z]+)", r"\2\1", part)
+    part = sub(r"([+-])([A-Z, А-Я]+)", r"\2\1", part)
     return part
 
 
@@ -64,9 +67,9 @@ def distillation(part):
     new_part = ""
     for i in range(len(part)):
         try:
-            if ord(part[i]) == 42 or ord(part[i]) == 43 or (44 < ord(part[i])< 58) or (64 < ord(part[i]) < 91) or ord(part[i]) == 32:
+            if ord(part[i]) == 42 or ord(part[i]) == 43 or (44 < ord(part[i]) < 58) or (64 < ord(part[i]) < 91) or ord(part[i]) == 32 or (1039 < ord(part[i]) < 1072):  # with russian capitals
                 new_part = new_part[:] + str(part[i])
-        except:
+        except Exception as exc:
             pass
 
     new_part = spaces_normalize(new_part)
@@ -74,10 +77,13 @@ def distillation(part):
     return new_part.strip()
 
 
-def equality_of_elem(part):
-    """finding equal figures and transforming into output format""" 
-    part = sub(r"([A-Z][A-Z][A-Z])( = )([A-Z][A-Z][A-Z])", r'\1 \3 1/1', part)
-    part = sub(r"([A-Z][A-Z])( = )([A-Z][A-Z])", r'\1 \3 1/1', part)
+def equality_of_elem(part) -> str:
+    """finding equal figures and transforming into output format"""
+    if "равн" in part or "равен" in part:
+        part = distillation(part)
+        part = sub(r'([A-Z, А-Я]{2,})(\s)([A-Z, А-Я]{2,})', r'\1 = \3', part)
+    part = sub(r"([A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])( = )([A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])", r'\1 \3 1/1', part)
+    part = sub(r"([A-Z, А-Я][A-Z, А-Я])( = )([A-Z, А-Я][A-Z, А-Я])", r'\1 \3 1/1', part)
     return part
 
 
@@ -85,16 +91,16 @@ def algebraic_sum(part):
     """formatting sum and diff of angles and segments"""
     if "больш" in part:
         part = distillation(part)
-        part = sub(r"(^[A-Z][A-Z])(\s)([A-Z][A-Z])", r"-\1 \3 ", part)
-        part = sub(r"(^[A-Z][A-Z][A-Z])(\s)([A-Z][A-Z][A-Z])", r"-\1 \3 ", part)
+        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я])", r"-\1 \3 ", part)
+        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])", r"-\1 \3 ", part)
     elif "меньш" in part:
         part = distillation(part)
-        part = sub(r"(^[A-Z][A-Z])(\s)([A-Z][A-Z])", r"-\3 \1 ", part)
-        part = sub(r"(^[A-Z][A-Z][A-Z])(\s)([A-Z][A-Z][A-Z])", r"-\3 \1 ", part)
+        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я])", r"-\3 \1 ", part)
+        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])", r"-\3 \1 ", part)
     elif "сумм" in part:
         part = distillation(part)
-        part = sub(r"(^[A-Z][A-Z])(\s)([A-Z][A-Z])", r"+\1 \3 ", part)
-        part = sub(r"(^[A-Z][A-Z][A-Z])(\s)([A-Z][A-Z][A-Z])", r"+\1 \3 ", part)
+        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я])", r"+\1 \3 ", part)
+        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])", r"+\1 \3 ", part)
     return part
 
 
@@ -102,8 +108,9 @@ def within_polygon(part):
     """formatting points within polygon"""
     if "леж" in part or "внутр" in part or "наход" in part:
         part = distillation(part)
-        part = sub(r"(^[A-Z])(\s)([A-Z]+)$", r"\1 /// \3", part)
-        # part = sub(r"([A-Z]+)(\s)([A-Z])(\s)", r"\3 * \1", part)
+        part = sub(r"(^[A-Z, А-Я])(\s)([A-Z, А-Я]+)$", r"\1 /// \3", part)
+        part = sub(r"([A-Z, А-Я]{2,})(\s)([A-Z, А-Я])$", r"\3 /// \1", part)
+        # part = sub(r"([A-Z, А-Я]+)(\s)([A-Z, А-Я])(\s)", r"\3 * \1", part)
     return part
 
 
@@ -152,7 +159,7 @@ def class_analyze(part):
                 segments_parts += 1
             elif len(object) > 2:
                 let_parts += 1
-        elif ord(object[0]) == 43 or  ord(object[0]) == 45:
+        elif ord(object[0]) == 43 or ord(object[0]) == 45:
             if len(object) == 3:
                 segments_parts += 1
             elif len(object) == 4:
@@ -238,17 +245,10 @@ def question_processing(question):
         question = sub(r"(^\w+)(\s*)(\w*$)", r'/\1 \3 ?', question)
     elif "больш" in question or "меньш" in question or "сумм" in question:
         question = algebraic_sum(question)
-        question = sub(r"([A-Z])(\s*)$", r"\1 ?", question)
+        question = sub(r"([A-Z, А-Я])(\s*)$", r"\1 ?", question)
         question = summ_formatting(question)
     else:
         question = distillation(question)
         question = sub(r"(^\w+)(\s)(\w*)(\s)(\d+)", r'\1 \3 \5', question)
         question = sub(r"(^\w+)(\s*)(\w*$)", r'\1 \3 ?', question)
     return question
-
-
-# inputt = "Треугольник ABC и  AB = 10, угол BAC равен 40, AC относится к AB как 3/5, I - точка пересечения биссектрис ABC \n Найти угол ABC"
-# inpu = 'ABC, DEF, ABC подобен DEF с коэффициентом 1/2, relation of sides AB and DE is 1/2 \n prove that BC relate EF like 1/2'
-# inp = 'треугольники ABC = HFG, ABCD невыпуклый, AB = 5, сторона BC равна 4, AB = AC, angle RUS меньше и UTS стороны на 5, ACB равен 90, I -- инцентр в ABC, точкой M сторона AB делится в отношении 1/2 \n найти сумму ABC DEF'
-# print(text_analyze(inputt))
-
