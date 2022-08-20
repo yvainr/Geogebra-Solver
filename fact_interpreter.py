@@ -1,7 +1,4 @@
-import Solver_alpha
 import task_parser as taskp
-import updated_solver
-from re import *
 
 
 def fact_objects_name(fact):
@@ -20,14 +17,14 @@ def fact_objects_name(fact):
         elif isinstance(item, taskp.Point):
             naming += item.name
         elif isinstance(item, taskp.Line):
-             naming += (list(item.points))[0].name
-             naming += (list(item.points))[1].name
+            naming += (list(item.points))[0].name
+            naming += (list(item.points))[1].name
         elif isinstance(item, taskp.Polygon):
             for point in item.points:
                 naming += point.name
         elif isinstance(item, taskp.Ray):
-             naming += ray.main_point.name
-             naming += (list(ray.points))[0].name
+            naming += ray.main_point.name
+            naming += (list(ray.points))[0].name
         names.append(naming)
     return names
 
@@ -41,7 +38,7 @@ def angle_formalization(fact):
     return angle
 
 
-def fact_output(fact):
+def new_fact_output(fact):
     """main func: collecting data for output and choosing template"""
     try:
         equality = False
@@ -64,49 +61,34 @@ def fact_output(fact):
 
         names = fact_objects_name(fact)
 
-        if value == None:
+        if value is None:
             value = "?"
 
-        if angle_formalization(fact):
-            if equality:
-                return "{S}{N1} = {S}{N2}".format(N1=names[0], N2=names[1], S=u"\u2220")
-            elif relation:
-                return "{S}{N1}/{S}{N2} = {V}".format(N1=names[0], N2=names[1], V=value, S=u"\u2220")
-            elif size:
-                return "{S}{N1} = {V}{D}".format(N1=names[0], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
-            elif diff:
-                if len(fact.objects) == 3:
-                    return "{S}{N1} - {S}{N2} - {N3} = {V}{D}".format(N1=names[0], N2=names[1],  N3=names[2], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
-                else:
-                    return "{S}{N1} - {S}{N2} = {V}{D}".format(N1=names[0], N2=names[1], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
-            elif add:
-                if len(fact.objects) == 3:
-                    return "{S}{N1} + {S}{N2} + {S}{N3} = {V}{D}".format(N1=names[0], N2=names[1], N3=names[2], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
-                else:
-                    return "{S}{N1} + {S}{N2} = {V}{D}".format(N1=names[0], N2=names[1], V=value, D=u"\N{DEGREE SIGN}", S=u"\u2220")
-            else:
-                return ""
+        name1 = names[0]
+        ang_sign = u"\u2220"
+        deg_sign = u"\N{DEGREE SIGN}"
+
+        if size:
+            return f'{ang_sign if angle_formalization(fact) else ""}{name1} = {value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
         else:
+            name2 = names[1]
             if equality:
-                return "{N1} = {N2}".format(N1=names[0], N2=names[1])
+                return f'{ang_sign if angle_formalization(fact) else ""}{name1} = {ang_sign if angle_formalization(fact) else ""}{name2}'
             elif relation:
-                return "{N1}/{N2} = {V}".format(N1=names[0], N2=names[1], V=value)
-            elif size:
-                return "{N1} = {V}".format(N1=names[0], V=value)
+                return f'{ang_sign if angle_formalization(fact) else ""}{name1}/{ang_sign if angle_formalization(fact) else ""}{name2} = {value.conversion_to_latex()}'
             elif diff:
                 if len(fact.objects) == 3:
-                    return "{N1} - {N2} - {N3} = {V}".format(N1=names[0], N2=names[1], N3=names[2], V=value)
+                    name3 = names[2]
+                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} - {ang_sign if angle_formalization(fact) else ""}{name2} - {name3} = {value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
                 else:
-                    return "{N1} - {N2} = {V}".format(N1=names[0], N2=names[1], V=value)
+                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} - {ang_sign if angle_formalization(fact) else ""}{name2} = {value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
             elif add:
                 if len(fact.objects) == 3:
-                    return "{N1} + {N2} + {N3} = {V}".format(N1=names[0], N2=names[1], N3=names[2], V=value)
+                    name3 = names[2]
+                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} + {ang_sign if angle_formalization(fact) else ""}{name2} + {ang_sign if angle_formalization(fact) else ""}{name3} = {value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
                 else:
-                    return "{N1} + {N2} = {V}".format(N1=names[0], N2=names[1], V=value)
+                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} + {ang_sign if angle_formalization(fact) else ""}{name2} = {value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
             else:
                 return ""
     except:
         return ""
-
-
-
