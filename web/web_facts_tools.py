@@ -6,7 +6,7 @@ import task_parser
 
 from polygon_drawer import text_splitter
 from language_interpreter import text_analyze
-from updated_solver import solving_process
+from ggb_solver import solving_process
 from datetime import datetime
 
 BUTTON_TYPES = {'red':'danger', 'green':'success'}
@@ -54,8 +54,42 @@ def get_dict_of_facts(return_dict, data):
 
     print(datetime.now() - stat, 'RETURNING RESULT')
     # print(return_dict)
+    # print(data.points)
+    # for point in data.points:
+    #     print(point.name, point.x, point.y)
 
     return return_dict
+
+def get_extreme_points(points: list) -> dict:
+    xs = []
+    ys = []
+    for point in points:
+        xs.append(float(point.x.value))
+        ys.append(float(point.y.value))
+
+    return {'max_x': max(xs),
+            'min_x': min(xs),
+            'max_y': max(ys),
+            'min_y': min(ys)}
+
+def get_necessary_coords_size(points: list) -> list:
+    ext_points = get_extreme_points(points)
+    x_mid = (ext_points['max_x'] + ext_points['min_x']) / 2
+    y_mid = (ext_points['max_y'] + ext_points['min_y']) / 2
+
+    x_lenght = abs(ext_points['max_x'] - ext_points['min_x'])
+    y_lenght = abs(ext_points['max_y'] - ext_points['min_y'])
+
+    max_x = x_mid + (x_lenght / 2) * 1.2
+    min_x = x_mid - (x_lenght / 2) * 1.2
+
+    max_y = y_mid + (y_lenght / 2) * 1.2
+    min_y = y_mid - (y_lenght / 2) * 1.2
+
+    print([min_x, min_y, max_x, max_y])
+
+    return [min_x, min_y, max_x, max_y]
+
 
 
 # insert_test_facts()

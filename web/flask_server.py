@@ -13,13 +13,13 @@ import task_parser as taskp
 from polygon_drawer import text_splitter
 import polygon_drawer
 from language_interpreter import text_analyze
-from web_facts_tools import get_dict_of_facts
-from Solver_alpha import to_str
+from web_facts_tools import get_dict_of_facts, get_necessary_coords_size
+# from Solver_alpha import to_str
 from fact_interpreter import fact_output
 from copy import deepcopy
 from datetime import datetime
 from random import choice
-from updated_solver import tree_levels_proccesing
+from ggb_solver import tree_levels_proccesing
 from pretty_answer import pretty_detailed_description
 # from normal_solver import solving_process
 
@@ -36,27 +36,13 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 SOLVING_TIME_LIMIT = 30 #seconds
 
-# def text_splitter(text):
-#     text = text.split('\n')
-#
-#     try:
-#         taskp.polygons_create(text[1])
-#         taskp.segments_create(text[2])
-#         taskp.angles_create(text[3])
-#         taskp.segments_relations_create(text[4])
-#         taskp.angles_relations_create(text[5])
-#         taskp.line_intersection_create(text[6])
-#     except IndexError:
-#         pass
-#
-#     triangle_from_task_drawer(taskp.polygons[0].points[0].name, taskp.polygons[0].points[1].name, taskp.polygons[0].points[2].name)
-
-app.jinja_env.globals.update(to_str=to_str)
+# app.jinja_env.globals.update(to_str=to_str)
 app.jinja_env.globals.update(fact_output=fact_output)
 app.jinja_env.globals.update(solution_interpreter=pretty_detailed_description)
 app.jinja_env.globals.update(list=list)
 app.jinja_env.globals.update(str=str)
 app.jinja_env.globals.update(set=set)
+app.jinja_env.globals.update(get_necessary_coords_size=get_necessary_coords_size)
 
 
 def split_commands(commands_text: str):
@@ -178,7 +164,7 @@ def analyze_text():
 
             manager = multiprocessing.Manager()
             resp_dict = manager.dict()
-            solving_process = multiprocessing.Process(target=get_dict_of_facts, args=(resp_dict, taskp.task_data))
+            solving_process = multiprocessing.Process(target=get_dict_of_facts, args=(resp_dict, taskp.solver_data))
             solving_process.start()
             solving_process.join(SOLVING_TIME_LIMIT)
 
@@ -228,6 +214,8 @@ def analyze_text():
 
                 logger.info('Text commands splitted and inserted in geogebra')
 
+                # print(get_extreme_points(return_dict['data'].points))
+
                 return render_template('geogebra_page.html',
                                        text=text,
                                        commands_text=commands_text,
@@ -238,6 +226,8 @@ def analyze_text():
                                        question=question_fact,
 
                                        answer=answer_fact,
+
+                                       necessary_coords_size = get_necessary_coords_size(return_dict['data'].points)
                                        )
             else:
                 logger.info('Question not found')
