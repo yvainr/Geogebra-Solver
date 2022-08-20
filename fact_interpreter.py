@@ -38,7 +38,7 @@ def angle_formalization(fact):
     return angle
 
 
-def new_fact_output(fact):
+def fact_output(fact):
     """main func: collecting data for output and choosing template"""
     try:
         equality = False
