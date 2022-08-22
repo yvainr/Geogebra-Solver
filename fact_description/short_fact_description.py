@@ -1,4 +1,4 @@
-import task_parser as taskp
+from ggb_data_proccesing import task_parser as taskp
 
 
 def fact_objects_name(fact):

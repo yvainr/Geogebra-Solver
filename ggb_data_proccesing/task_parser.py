@@ -1,5 +1,4 @@
-from random import uniform
-from objects_types import Objects, Size
+from ggb_data_proccesing.objects_types import Objects, Size
 
 
 class Point:

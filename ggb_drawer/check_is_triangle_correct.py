@@ -121,8 +121,7 @@ def check_triangle(sides, angles):
                             return True
                             # return 'Error: Incorrect triangle (The angles do not correspond to the sides of the triangle).'
                     else:
-                        return True
-                        # return 'Error: Incorrect triangle (The greater side must be opposite to the greater angle).'
+                        return 'Error: Incorrect triangle (The greater side must be opposite to the greater angle).'
                 else:
                     return 'Error: Incorrect triangle (The triangle inequality is violated).'
             else:

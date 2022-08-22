@@ -1,12 +1,11 @@
 from pprint import pprint
-import multiprocessing
 
-import Solver_alpha
-import task_parser
+from other import Solver_alpha
+from ggb_data_proccesing import task_parser
 
-from polygon_drawer import text_splitter
-from language_interpreter import text_analyze
-from ggb_solver import solving_process
+from ggb_drawer.polygon_drawer import text_splitter
+from ggb_text_proccesing.language_interpreter import text_analyze
+from ggb_solver.normal_solver import solving_process
 from datetime import datetime
 
 BUTTON_TYPES = {'red':'danger', 'green':'success'}

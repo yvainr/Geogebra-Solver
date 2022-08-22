@@ -1,8 +1,8 @@
-import task_parser as tp
+from ggb_data_proccesing import task_parser as tp
 from math import tan, pi, cos, sin, acos
 from random import choice, uniform, randint
 from itertools import combinations
-from objects_types import Size, sqrt
+from ggb_data_proccesing.objects_types import Size, sqrt
 
 
 class MyPoint:

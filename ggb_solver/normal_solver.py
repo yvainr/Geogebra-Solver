@@ -1,6 +1,16 @@
-import task_parser as tp
+import ggb_data_proccesing.task_parser as tp
+# import sys
 from itertools import combinations, permutations
-from objects_types import Size, sqrt
+from ggb_data_proccesing.objects_types import Size, sqrt
+
+# sys.setrecursionlimit(2000)
+
+
+# на случай реорганизации набора фактов
+def update_facts(fact_type, new_fact, actual_question):
+    tp.solver_data.facts[fact_type].append(new_fact)
+    if new_fact.objects == actual_question.objects and fact_type == actual_question.fact_type:
+        return True
 
 
 def count_sizes_of_angles_and_segments(objects, facts_generation, actual_question):
@@ -36,7 +46,7 @@ def count_sizes_of_angles_and_segments(objects, facts_generation, actual_questio
                             new_fact.root_facts.add(find_fact_id_with_objects([obj_2], 'size'))
                             new_fact.root_facts.add(create_fact_about_objects_relations([obj_2, obj_1], facts_generation))
 
-                            if new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
+                            if actual_question and new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
                                 return True
 
                         except KeyError:
@@ -53,7 +63,7 @@ def count_sizes_of_angles_and_segments(objects, facts_generation, actual_questio
                                 new_fact.root_facts.add(find_fact_id_with_objects([obj_2], 'size'))
                                 new_fact.root_facts.add(find_fact_id_with_objects([obj_2, obj_1], 'difference'))
 
-                                if new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
+                                if actual_question and new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
                                     return True
 
                             except KeyError:
@@ -70,14 +80,34 @@ def count_sizes_of_angles_and_segments(objects, facts_generation, actual_questio
                                     new_fact.root_facts.add(find_fact_id_with_objects([obj_2], 'size'))
                                     new_fact.root_facts.add(find_fact_id_with_objects({obj_2, obj_1}, 'addition'))
 
-                                    if new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
+                                    if actual_question and new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
                                         return True
 
                                 except KeyError:
                                     pass
 
+    for obj1 in objects:
+        for obj2 in list(obj1.relations):
+            for obj3 in obj2.relations:
+                if obj3 not in obj1.relations and obj3 != obj1:
+                    obj1.relations[obj3] = obj1.relations[obj2] * obj2.relations[obj3]
+                    double_simmilar_fact = tp.Fact(
+                        len(tp.solver_data.facts),
+                        facts_generation,
+                        'relation',
+                        [obj1, obj3],
+                        obj1.relations[obj3]
+                    )
+                    tp.solver_data.facts.append(double_simmilar_fact)
+                    double_simmilar_fact.root_facts.add(find_fact_id_with_objects([obj1, obj2], 'relation'))
+                    double_simmilar_fact.root_facts.add(find_fact_id_with_objects([obj2, obj3], 'relation'))
 
-def count_sides_and_angles_of_similar_triangles(facts_generation, actual_question, polygon_1, polygon_2, segments_list_1, angles_list_1, segments_list_2, angles_list_2):
+                    if double_simmilar_fact.objects == actual_question.objects and double_simmilar_fact.fact_type == actual_question.fact_type:
+                        return True
+
+
+def count_sides_and_angles_of_similar_triangles(facts_generation, actual_question, polygon_1, polygon_2,
+                                                segments_list_1, angles_list_1, segments_list_2, angles_list_2):
     try:
         rel = polygon_1.relations[polygon_2]
 
@@ -221,7 +251,7 @@ def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
                                                                            segments_list_2, angles_list_2):
                                 return True
 
-                            break
+                            return None
 
             # проверка подобия по стороне и углам рядом с ним
             for k in range(3):
@@ -562,7 +592,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                         third_angle_size_fact.root_facts.add(
                             find_fact_id_with_objects([angles[i - 1], angles[i - 2]], 'relation'))
                         third_angle_size_fact.root_facts.add(
-                            find_fact_id_with_objects({ang_1, ang_2, ang_3}, 'addition', Size(180), facts_generation))
+                            find_fact_id_with_objects({angles[i], angles[i - 1], angles[i - 2]}, 'addition', Size(180), facts_generation))
                         # third_angle_size_fact.description = 'из суммы углов в треугольнике 180'
 
                         try_find_equal_sides = True
@@ -723,7 +753,7 @@ def solving_process():
 
     for question in tp.solver_data.questions:
         facts_list_length = len(tp.solver_data.facts)
-        while not find_fact_id_with_objects(question.objects, question.fact_type):
+        while True:
             if count_sizes_of_angles_and_segments(tp.solver_data.segments, facts_generation, question):
                 break
             if count_sizes_of_angles_and_segments(tp.solver_data.angles, facts_generation, question):

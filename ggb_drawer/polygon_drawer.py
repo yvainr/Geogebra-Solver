@@ -1,11 +1,11 @@
-import geogebra_html_generator
+from ggb_html_generator.geogebra_html_generator import insert_commands
 import shapely.geometry
 import ggb_drawer.triangle_drawer as td
-import task_parser as tp
-import normal_solver as ns
+from ggb_data_proccesing import task_parser as tp
+import ggb_solver.normal_solver as ns
 from math import *
 from itertools import combinations, permutations
-from objects_types import Objects
+from ggb_data_proccesing.objects_types import Objects
 from random import uniform
 from ggb_drawer.check_is_triangle_correct import check_triangle
 
@@ -125,22 +125,7 @@ def create_polygon(vertices):
         A, B, C = td.CreateTriangle(get_triangle_parameter(perspective_triangle[0], perspective_triangle[1], perspective_triangle[2]))
 
 
-def set_screen_size(realize_data):
-    x_cords, y_cords = list(), list()
-
-    for point in tp.solver_data.points:
-        x_cords.append(point.x)
-        y_cords.append(point.y)
-
-    xmin = min(x_cords)
-    ymin = min(y_cords)
-    xmax = max(x_cords)
-    ymax = max(y_cords)
-
-    realize_data.append(f'ZoomIn({xmin - 0.25 * abs(xmin - xmax)}, {ymin - 0.25 * abs(ymin - ymax)}, {xmax + 0.25 * abs(xmin - xmax)}, {ymax + 0.25 * abs(ymin - ymax)})')
-
-
-def text_splitter(text):
+def text_splitter(text, input_file_name):
     realize_data = list()
 
     tp.task_data = Objects()
@@ -182,6 +167,6 @@ def text_splitter(text):
 
     # set_screen_size(realize_data)
 
-    geogebra_html_generator.insert_commands(realize_data)
+    insert_commands(realize_data, input_file_name=input_file_name)
 
     return 200
