@@ -60,8 +60,9 @@ def fact_output(fact):
             add = True
 
         names = fact_objects_name(fact)
-
+        question = False
         if value is None:
+            question = True
             value = "?"
 
         name1 = names[0]
@@ -69,26 +70,27 @@ def fact_output(fact):
         deg_sign = u"\N{DEGREE SIGN}"
 
         if size:
-            return f'{ang_sign if angle_formalization(fact) else ""}{name1} = {value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
+            return f'{ang_sign if angle_formalization(fact) else ""}{name1} = {value if question else value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
         else:
             name2 = names[1]
             if equality:
                 return f'{ang_sign if angle_formalization(fact) else ""}{name1} = {ang_sign if angle_formalization(fact) else ""}{name2}'
             elif relation:
-                return f'{ang_sign if angle_formalization(fact) else ""}{name1}/{ang_sign if angle_formalization(fact) else ""}{name2} = {value.conversion_to_latex()}'
+                return f'{ang_sign if angle_formalization(fact) else ""}{name1}/{ang_sign if angle_formalization(fact) else ""}{name2} = {value if question else value.conversion_to_latex()}'
             elif diff:
                 if len(fact.objects) == 3:
                     name3 = names[2]
-                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} - {ang_sign if angle_formalization(fact) else ""}{name2} - {name3} = {value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
+                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} - {ang_sign if angle_formalization(fact) else ""}{name2} - {name3} = {value if question else value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
                 else:
-                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} - {ang_sign if angle_formalization(fact) else ""}{name2} = {value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
+                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} - {ang_sign if angle_formalization(fact) else ""}{name2} = {value if question else value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
             elif add:
                 if len(fact.objects) == 3:
                     name3 = names[2]
-                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} + {ang_sign if angle_formalization(fact) else ""}{name2} + {ang_sign if angle_formalization(fact) else ""}{name3} = {value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
+                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} + {ang_sign if angle_formalization(fact) else ""}{name2} + {ang_sign if angle_formalization(fact) else ""}{name3} = {value if question else value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
                 else:
-                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} + {ang_sign if angle_formalization(fact) else ""}{name2} = {value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
+                    return f'{ang_sign if angle_formalization(fact) else ""}{name1} + {ang_sign if angle_formalization(fact) else ""}{name2} = {value if question else value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
             else:
                 return ""
-    except:
+    except Exception as exc:
+        print(exc)
         return ""
