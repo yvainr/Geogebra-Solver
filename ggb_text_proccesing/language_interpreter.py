@@ -32,7 +32,7 @@ def text_analyze(inp_str, output_num=7):
 def string_split(inp_str):
     """creating list with diff objects"""
     inp_str = sub(" и ",  ",", inp_str)
-    inp_str = sub(r"([A-Z, А-Я])(\s*=\s*)([A-Z, А-Я, 0-9])", r"\1 = \3", inp_str)
+    inp_str = sub(r"([A-Z])(\s*=\s*)([A-Z, 0-9])", r"\1 = \3", inp_str)
     print(inp_str)
     inp_str = inp_str.split(",")
     return inp_str
@@ -51,13 +51,13 @@ def spaces_normalize(part):
 def output_formatting(part):
     """putting segment relation in correct order"""
     part = distillation(part)
-    part = sub(r"(^[A-Z, А-Я]\s)([A-Z, А-Я][A-Z, А-Я]$)", r'\2 \1', part)
+    part = sub(r"(^[A-Z]\s)([A-Z][A-Z]$)", r'\2 \1', part)
     return part
 
 
 def summ_formatting(part):
     """new format for task_parser"""
-    part = sub(r"([+-])([A-Z, А-Я]+)", r"\2\1", part)
+    part = sub(r"([+-])([A-Z]+)", r"\2\1", part)
     return part
 
 
@@ -67,7 +67,7 @@ def distillation(part):
     new_part = ""
     for i in range(len(part)):
         try:
-            if ord(part[i]) == 42 or ord(part[i]) == 43 or (44 < ord(part[i]) < 58) or (64 < ord(part[i]) < 91) or ord(part[i]) == 32 or (1039 < ord(part[i]) < 1072):  # with russian capitals
+            if ord(part[i]) == 42 or ord(part[i]) == 43 or (44 < ord(part[i]) < 58) or (64 < ord(part[i]) < 91) or ord(part[i]) == 32:  # without russian capitals
                 new_part = new_part[:] + str(part[i])
         except Exception as exc:
             pass
@@ -81,9 +81,9 @@ def equality_of_elem(part) -> str:
     """finding equal figures and transforming into output format"""
     if "равн" in part or "равен" in part:
         part = distillation(part)
-        part = sub(r'([A-Z, А-Я]{2,})(\s)([A-Z, А-Я]{2,})', r'\1 = \3', part)
-    part = sub(r"([A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])( = )([A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])", r'\1 \3 1/1', part)
-    part = sub(r"([A-Z, А-Я][A-Z, А-Я])( = )([A-Z, А-Я][A-Z, А-Я])", r'\1 \3 1/1', part)
+        part = sub(r'([A-Z]{2,})(\s)([A-Z]{2,})', r'\1 = \3', part)
+    part = sub(r"([A-Z][A-Z][A-Z])( = )([A-Z][A-Z][A-Z])", r'\1 \3 1/1', part)
+    part = sub(r"([A-Z][A-Z])( = )([A-Z][A-Z])", r'\1 \3 1/1', part)
     return part
 
 
@@ -91,16 +91,16 @@ def algebraic_sum(part):
     """formatting sum and diff of angles and segments"""
     if "больш" in part:
         part = distillation(part)
-        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я])", r"-\1 \3 ", part)
-        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])", r"-\1 \3 ", part)
+        part = sub(r"(^[A-Z][A-Z])(\s)([A-Z][A-Z])", r"-\1 \3 ", part)
+        part = sub(r"(^[A-Z][A-Z][A-Z])(\s)([A-Z][A-Z][A-Z])", r"-\1 \3 ", part)
     elif "меньш" in part:
         part = distillation(part)
-        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я])", r"-\3 \1 ", part)
-        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])", r"-\3 \1 ", part)
+        part = sub(r"(^[A-Z][A-Z])(\s)([A-Z][A-Z])", r"-\3 \1 ", part)
+        part = sub(r"(^[A-Z][A-Z][A-Z])(\s)([A-Z][A-Z][A-Z])", r"-\3 \1 ", part)
     elif "сумм" in part:
         part = distillation(part)
-        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я])", r"+\1 \3 ", part)
-        part = sub(r"(^[A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])(\s)([A-Z, А-Я][A-Z, А-Я][A-Z, А-Я])", r"+\1 \3 ", part)
+        part = sub(r"(^[A-Z][A-Z])(\s)([A-Z][A-Z])", r"+\1 \3 ", part)
+        part = sub(r"(^[A-Z][A-Z][A-Z])(\s)([A-Z][A-Z][A-Z])", r"+\1 \3 ", part)
     return part
 
 
@@ -108,9 +108,9 @@ def within_polygon(part):
     """formatting points within polygon"""
     if "леж" in part or "внутр" in part or "наход" in part:
         part = distillation(part)
-        part = sub(r"(^[A-Z, А-Я])(\s)([A-Z, А-Я]+)$", r"\1 /// \3", part)
-        part = sub(r"([A-Z, А-Я]{2,})(\s)([A-Z, А-Я])$", r"\3 /// \1", part)
-        # part = sub(r"([A-Z, А-Я]+)(\s)([A-Z, А-Я])(\s)", r"\3 * \1", part)
+        part = sub(r"(^[A-Z])(\s)([A-Z]+)$", r"\1 /// \3", part)
+        part = sub(r"([A-Z]{2,})(\s)([A-Z])$", r"\3 /// \1", part)
+        # part = sub(r"([A-Z]+)(\s)([A-Z])(\s)", r"\3 * \1", part)
     return part
 
 
@@ -245,7 +245,7 @@ def question_processing(question):
         question = sub(r"(^\w+)(\s*)(\w*$)", r'/\1 \3 ?', question)
     elif "больш" in question or "меньш" in question or "сумм" in question:
         question = algebraic_sum(question)
-        question = sub(r"([A-Z, А-Я])(\s*)$", r"\1 ?", question)
+        question = sub(r"([A-Z])(\s*)$", r"\1 ?", question)
         question = summ_formatting(question)
     else:
         question = distillation(question)
