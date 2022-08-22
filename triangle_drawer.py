@@ -19,7 +19,7 @@ class MyLine:
 		self.c = c	
 
 
-#точка пересечения прямых
+# точка пересечения прямых
 def LineIntersectionPoint(L1, L2):
 	x = (L1.b*L2.c - L1.c*L2.b)/(L1.a*L2.b - L1.b*L2.a)
 	y = (L1.a*L2.c - L1.c*L2.a)/(L1.b*L2.a - L1.a*L2.b)
@@ -27,7 +27,7 @@ def LineIntersectionPoint(L1, L2):
 	return MyPoint(x, y)
 	
 	
-#прямая по двум точкам	
+# прямая по двум точкам
 def TwoPointsLine(P, Q):
 	a = P.y - Q.y
 	b = Q.x - P.x
@@ -56,19 +56,19 @@ def IsLineParallel(L1, L2):
 # 	return float(f"{float(x.value):.{digits}f}")
 
 
-#перпендикулярная прямая через точку
+# перпендикулярная прямая через точку
 def PerpendicularLineWithPoint(P, l):
 	c = - P.x*l.b + P.y*l.a
 	
 	return MyLine(l.b, -l.a, c)
 
 
-#расстояние между точками
+# расстояние между точками
 def DistanceBetweenPoints(A, B):
 	return sqrt((A.x - B.x)**2 + (A.y - B.y)**2)
 	
 
-#точка, делящая отрезок в заданном отношении k
+# точка, делящая отрезок в заданном отношении k
 def DividingPoint(A, B, k):
 	return MyPoint((A.x + k*B.x)/(1+k), (A.y + k*B.y)/(1+k))
 
@@ -288,30 +288,44 @@ def SaveTriangleData(A, B, C):
 		new_C.y = C.y
 
 	AB = tp.find_segment_with_points(A.name, B.name)
-	BC = tp.find_segment_with_points(C.name, B.name)
-	AC = tp.find_segment_with_points(A.name, C.name)
+	BC = tp.find_segment_with_points(B.name, C.name)
+	CA = tp.find_segment_with_points(C.name, A.name)
 
 	if not AB.size:
-		AB.size = DistanceBetweenPoints(A, B)
+		AB.size = DistanceBetweenPoints(new_A, new_B)
+	for rel in AB.relations:
+		if not rel.size:
+			rel.size = AB.size / AB.relations[rel]
 	if not BC.size:
-		BC.size = DistanceBetweenPoints(C, B)
-	if not AC.size:
-		AC.size = DistanceBetweenPoints(A, C)
+		BC.size = DistanceBetweenPoints(new_B, new_C)
+	for rel in BC.relations:
+		if not rel.size:
+			rel.size = BC.size / BC.relations[rel]
+	if not CA.size:
+		CA.size = DistanceBetweenPoints(new_C, new_A)
+	for rel in CA.relations:
+		if not rel.size:
+			rel.size = CA.size / CA.relations[rel]
 
-	CBA = tp.find_angle_with_points(new_C.name, new_B.name, new_A.name)
 	ACB = tp.find_angle_with_points(new_A.name, new_C.name, new_B.name)
 	BAC = tp.find_angle_with_points(new_B.name, new_A.name, new_C.name)
-
-	c = AB.size
-	a = BC.size
-	b = AC.size
+	CBA = tp.find_angle_with_points(new_C.name, new_B.name, new_A.name)
 
 	if not CBA.size:
-		CBA.size = Size(acos(((a ** 2 + c ** 2 - b ** 2) / (2 * a * c)).value) * 180 / pi)
+		CBA.size = Size(acos(((BC.size ** 2 + AB.size ** 2 - CA.size ** 2) / (2 * BC.size * AB.size)).value) * 180 / pi)
+	for rel in CBA.relations:
+		if not rel.size:
+			rel.size = CBA.size / CBA.relations[rel]
 	if not ACB.size:
-		ACB.size = Size(acos(((a ** 2 + b ** 2 - c ** 2) / (2 * a * b)).value) * 180 / pi)
+		ACB.size = Size(acos(((BC.size ** 2 + CA.size ** 2 - AB.size ** 2) / (2 * BC.size * CA.size)).value) * 180 / pi)
+	for rel in ACB.relations:
+		if not rel.size:
+			rel.size = ACB.size / ACB.relations[rel]
 	if not BAC.size:
-		BAC.size = Size(acos(((c ** 2 + b ** 2 - a ** 2) / (2 * c * b)).value) * 180 / pi)
+		BAC.size = Size(acos(((AB.size ** 2 + CA.size ** 2 - BC.size ** 2) / (2 * AB.size * CA.size)).value) * 180 / pi)
+	for rel in BAC.relations:
+		if not rel.size:
+			rel.size = BAC.size / BAC.relations[rel]
 
 	return new_A, new_B, new_C
 

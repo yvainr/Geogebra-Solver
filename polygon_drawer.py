@@ -1,14 +1,13 @@
 import geogebra_html_generator
 import shapely.geometry
-import triangle_drawer as triad
+import ggb_drawer.triangle_drawer as td
 import task_parser as tp
-import ggb_solver as ns
+import normal_solver as ns
 from math import *
 from itertools import combinations, permutations
 from objects_types import Objects
 from random import uniform
-from check_triangle import check_triangle
-from pprint import pprint
+from ggb_drawer.check_is_triangle_correct import check_triangle
 
 
 def get_random_point_in_polygon(point_name, polygon):
@@ -66,12 +65,12 @@ def draw_polygon(points, realize_data):
 #             B = tp.find_point_with_name(point.specific_properties_triangle[1])
 #             C = tp.find_point_with_name(point.specific_properties_triangle[2])
 #
-#             for draw_data in triad.SpecificPointGeneration(point.name, point.specific_properties_point, A, B, C):
+#             for draw_data in td.SpecificPointGeneration(point.name, point.specific_properties_point, A, B, C):
 #                 realize_data.append(draw_data)
 
 
 def triangle_with_segment_synchronization(A, B, C, P1, P2):
-    r = triad.DistanceBetweenPoints(P1, P2)
+    r = td.DistanceBetweenPoints(P1, P2)
 
     for P in [A, B, C]:
         if P.name == P1.name:
@@ -84,7 +83,7 @@ def triangle_with_segment_synchronization(A, B, C, P1, P2):
 
     for P in [A, B, C]:
         if P1.name != P.name != P2.name:
-            P3 = triad.MyPoint(P.x * cos(phi) - P.y * sin(phi), P.y * cos(phi) + P.x * sin(phi), P.name)
+            P3 = td.MyPoint(P.x * cos(phi) - P.y * sin(phi), P.y * cos(phi) + P.x * sin(phi), P.name)
 
     P2.x += P1.x; P2.y += P1.y; P3.x += P1.x; P3.y += P1.y
 
@@ -105,10 +104,11 @@ def create_polygon(vertices):
         A, B, C = vertices
 
         # проверка треугольников
-        if type(check_triangle(*get_triangle_parameter(A, B, C)[:2])) == str:
-            return check_triangle(*get_triangle_parameter(A, B, C)[:2])
+        check = check_triangle(*get_triangle_parameter(A, B, C)[:2])
+        if check.__class__.__name__ == 'str':
+            return check
 
-        for points_with_cords in permutations(triad.CreateTriangle(*get_triangle_parameter(A, B, C)), 3):
+        for points_with_cords in permutations(td.CreateTriangle(*get_triangle_parameter(A, B, C)), 3):
             if (A, B, C) == (points_with_cords[0].name, points_with_cords[1].name, points_with_cords[2].name):
                 return points_with_cords
 
@@ -122,7 +122,7 @@ def create_polygon(vertices):
             if perspective_size >= perspective_current_size:
                 perspective_triangle = triangle
 
-        A, B, C = triad.CreateTriangle(get_triangle_parameter(perspective_triangle[0], perspective_triangle[1], perspective_triangle[2]))
+        A, B, C = td.CreateTriangle(get_triangle_parameter(perspective_triangle[0], perspective_triangle[1], perspective_triangle[2]))
 
 
 def set_screen_size(realize_data):
@@ -140,11 +140,10 @@ def set_screen_size(realize_data):
     realize_data.append(f'ZoomIn({xmin - 0.25 * abs(xmin - xmax)}, {ymin - 0.25 * abs(ymin - ymax)}, {xmax + 0.25 * abs(xmin - xmax)}, {ymax + 0.25 * abs(ymin - ymax)})')
 
 
-def text_splitter(text, input_file_name):
+def text_splitter(text):
     realize_data = list()
 
     tp.task_data = Objects()
-    # tp.drawer_data = Objects()
     tp.solver_data = Objects()
 
     text = text.replace('\r', '').split('\n')
@@ -183,6 +182,6 @@ def text_splitter(text, input_file_name):
 
     # set_screen_size(realize_data)
 
-    geogebra_html_generator.insert_commands(realize_data, input_file_name=input_file_name)
+    geogebra_html_generator.insert_commands(realize_data)
 
     return 200
