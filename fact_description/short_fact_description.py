@@ -1,4 +1,4 @@
-from ggb_data_proccesing import task_parser as taskp
+import task_parser as taskp
 
 
 def fact_objects_name(fact):
@@ -33,7 +33,7 @@ def angle_formalization(fact):
     """adding angle signs"""
     angle = False
     for item in fact.objects:
-        if isinstance(item, taskp.Angle):
+        if isinstance(item, taskp.Angle) and fact.value is not None:
             angle = True
     return angle
 
