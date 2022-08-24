@@ -3,7 +3,14 @@
     <head>
         <!-- Required meta tags -->
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name='viewport'
+              content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+              charset="utf-8">
+<!--        <meta name='viewport' -->
+<!--              content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>-->
+<!--        <link rel="stylesheet" href="../static/style.css">-->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
 
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -49,16 +56,22 @@
                         <h3 class="col-8">
                             <label>Условие задачи</label>
                         </h3>
-                        <div class="form-group">
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary col-sm-17">Анализ</button>
-                            </div>
+                        <div class="form-group col">
+                            <button type="submit" class="btn btn-primary col-sm-17">Анализ</button>
                         </div>
                     </div>
                 </div>
-                <textarea name="text" placeholder="Дорогой пользователь, вводи команды правильно, для этого прочитай инструкцию!" class="form-control" rows="8">{{ text if text != None else '' }}</textarea>
+                <textarea name="text" id="task_area"
+                          placeholder="Дорогой пользователь, вводи условие правильно, для этого прочитай инструкцию!"
+                          class="form-control"
+                          rows="5">{{ text if text != None else '' }}</textarea>
             </div>
         </form>
+
+
+        <div class="col 2 col-15" id="short_cuts"></div>
+
+        <br><br>
 
         <form method="post" action="/analysis_commands" id="parse-result-block">
             <div class="form-group">
@@ -72,14 +85,17 @@
                         <div class="form-group">
                             <button id="solve-button" type="submit" class="btn btn-primary col-sm-17">Решить</button>
                         </div>
-                        </div>
+
                     </div>
                 </div>
                 <input type="hidden" name="text" value="{{ text }}">
                 <input type="hidden" name="type" value="text">
                 <input type="hidden" name="screen-width" id="screen-width-container">
                 <input type="hidden" name="screen-height" id="screen-height-container">
-                <textarea name="text_commands" placeholder="Дорогой тестировщик, вводи команды правильно" class="form-control" rows="8">{{ commands_text if commands_text != None else '' }}</textarea>
+                <textarea name="text_commands"
+                          placeholder="Дорогой тестировщик, вводи команды правильно"
+                          class="form-control"
+                          rows="12">{{ commands_text if commands_text != None else '' }}</textarea>
             </div>
         </form>
         <div id="loading">
@@ -92,11 +108,24 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
         <script type="text/javascript">
+            // window.onscroll = function () { window.scrollTo(0, 0)};
+
+
+            let short_cuts_symbols = 'ABCDEFHIM∠=△,'.split('');
+
+            for (s in short_cuts_symbols) {
+                sym = short_cuts_symbols[s];
+                document.getElementById('short_cuts').innerHTML += `<button  class="btn btn-light btn-md active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
+            }
+
+
+
             document.getElementById("loading").hidden = true;
 
             document.getElementById("solve-button").onclick = function () {
                 document.getElementById("text-input-block").hidden = true;
                 document.getElementById("parse-result-block").hidden = true;
+                document.getElementById("short_cuts").hidden = true;
                 document.getElementById("loading").hidden = false;
 
             }
@@ -110,6 +139,34 @@
             window.addEventListener('resize', Get_screen_size);
 
             Get_screen_size();
+
+            function Add_text_to_task(text, sep=false) {
+                let area = document.getElementById('task_area');
+
+                if (sep) {
+                    text = ' ' + text + ' ';
+                }
+
+                if (text === '=') {
+                    text = ' = ';
+                }
+
+                if (text === ',') {
+                    text = ', ';
+                }
+
+                if (text === '△' && area.value.slice(-1) !== ' ' && area.value.length > 0) {
+                    text = ' △';
+                }
+
+                area.value += text;
+
+                let end = area.value.length;
+
+                area.setSelectionRange(end, end);
+
+                // area.setFocusAt(area.value.length);
+            }
 
         </script>
 <!--    <img src="loading.gif" alt="this slowpoke moves"/>-->
