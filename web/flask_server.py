@@ -1,26 +1,17 @@
-from flask import Flask, render_template, request, url_for, flash, redirect
-from time import sleep
-from werkzeug.exceptions import abort
+from flask import Flask, render_template, request, flash
 import logging
-import sqlite3
 import multiprocessing
-import threading
 
-import task_parser
-from drawer_ggb.geogebra_html_generator import insert_commands
-import triangle_drawer
-import task_parser as taskp
-from polygon_drawer import text_splitter
-import polygon_drawer
-from language_interpreter import text_analyze
+from ggb_data_proccesing import task_parser, task_parser as taskp
+from ggb_html_generator.geogebra_html_generator import insert_commands
+from ggb_drawer.polygon_drawer import text_splitter
+from ggb_text_proccesing.language_interpreter import text_analyze
 from web_facts_tools import get_dict_of_facts, get_necessary_coords_size
 # from Solver_alpha import to_str
-from fact_interpreter import fact_output
-from copy import deepcopy
-from datetime import datetime
+from fact_description.short_fact_description import fact_output
 from random import choice
-from ggb_solver import tree_levels_proccesing
-from pretty_answer import pretty_detailed_description
+from ggb_solver.normal_solver import tree_levels_proccesing
+from fact_description.detailed_fact_description import pretty_detailed_description
 # from normal_solver import solving_process
 
 logging.basicConfig(

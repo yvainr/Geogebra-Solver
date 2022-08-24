@@ -1,5 +1,5 @@
 from fractions import Fraction
-import task_parser as tp
+from ggb_data_proccesing import task_parser as tp
 
 Proportion_theorem = True
 Cos_theorem_allowed = True

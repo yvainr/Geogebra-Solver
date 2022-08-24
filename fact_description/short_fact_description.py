@@ -1,4 +1,4 @@
-import task_parser as taskp
+import ggb_data_proccesing.task_parser as tp
 
 
 def fact_objects_name(fact):
@@ -6,23 +6,23 @@ def fact_objects_name(fact):
     names = []
     for item in fact.objects:
         naming = ""
-        if isinstance(item, taskp.Segment):
+        if isinstance(item, tp.Segment):
             for point in item.points:
                 naming += point.name
-        elif isinstance(item, taskp.Angle):
+        elif isinstance(item, tp.Angle):
             for ray in item.rays:
                 naming += ray.main_point.name
                 naming += (list(ray.points))[0].name
             naming = naming[1:]
-        elif isinstance(item, taskp.Point):
+        elif isinstance(item, tp.Point):
             naming += item.name
-        elif isinstance(item, taskp.Line):
+        elif isinstance(item, tp.Line):
             naming += (list(item.points))[0].name
             naming += (list(item.points))[1].name
-        elif isinstance(item, taskp.Polygon):
+        elif isinstance(item, tp.Polygon):
             for point in item.points:
                 naming += point.name
-        elif isinstance(item, taskp.Ray):
+        elif isinstance(item, tp.Ray):
             naming += ray.main_point.name
             naming += (list(ray.points))[0].name
         names.append(naming)
@@ -33,10 +33,17 @@ def angle_formalization(fact):
     """adding angle signs"""
     angle = False
     for item in fact.objects:
-        if isinstance(item, taskp.Angle):
+        if isinstance(item, tp.Angle) and fact.value is not None:
             angle = True
     return angle
 
+def triangle_formalization(fact):
+    """adding triangle sign"""
+    triangle = False
+    for item in fact.objects:
+        if isinstance(item, tp.Polygon):
+            triangle = True
+    return triangle
 
 def fact_output(fact):
     """main func: collecting data for output and choosing template"""
@@ -68,15 +75,16 @@ def fact_output(fact):
         name1 = names[0]
         ang_sign = u"\u2220"
         deg_sign = u"\N{DEGREE SIGN}"
+        triangle_sign = u"\N{WHITE UP-POINTING TRIANGLE}"
 
         if size:
             return f'{ang_sign if angle_formalization(fact) else ""}{name1} = {value if question else value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
         else:
             name2 = names[1]
             if equality:
-                return f'{ang_sign if angle_formalization(fact) else ""}{name1} = {ang_sign if angle_formalization(fact) else ""}{name2}'
+                return f'{triangle_sign if triangle_formalization(fact) else ""}{ang_sign if angle_formalization(fact) else ""}{name1} = {triangle_sign if triangle_formalization(fact) else ""}{ang_sign if angle_formalization(fact) else ""}{name2}'
             elif relation:
-                return f'{ang_sign if angle_formalization(fact) else ""}{name1}/{ang_sign if angle_formalization(fact) else ""}{name2} = {value if question else value.conversion_to_latex()}'
+                return f'{triangle_sign if triangle_formalization(fact) else ""}{ang_sign if angle_formalization(fact) else ""}{name1}/{triangle_sign if triangle_formalization(fact) else ""}{ang_sign if angle_formalization(fact) else ""}{name2} = {value if question else value.conversion_to_latex()}'
             elif diff:
                 if len(fact.objects) == 3:
                     name3 = names[2]

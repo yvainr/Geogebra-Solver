@@ -1,8 +1,8 @@
-import task_parser as tp
+from ggb_data_proccesing import task_parser as tp
 from math import tan, pi, cos, sin, acos
 from random import choice, uniform, randint
 from itertools import combinations
-from objects_types import Size, sqrt
+from ggb_data_proccesing.objects_types import Size, sqrt
 
 
 class MyPoint:
@@ -16,23 +16,23 @@ class MyLine:
 	def __init__(self, a, b, c):
 		self.a = a
 		self.b = b
-		self.c = c	
+		self.c = c
 
 
-#точка пересечения прямых
+# точка пересечения прямых
 def LineIntersectionPoint(L1, L2):
 	x = (L1.b*L2.c - L1.c*L2.b)/(L1.a*L2.b - L1.b*L2.a)
 	y = (L1.a*L2.c - L1.c*L2.a)/(L1.b*L2.a - L1.a*L2.b)
-	
+
 	return MyPoint(x, y)
-	
-	
-#прямая по двум точкам	
+
+
+# прямая по двум точкам
 def TwoPointsLine(P, Q):
 	a = P.y - Q.y
 	b = Q.x - P.x
 	c = -b*P.y - a*P.x
-	
+
 	return MyLine(a, b, c)
 
 
@@ -56,19 +56,19 @@ def IsLineParallel(L1, L2):
 # 	return float(f"{float(x.value):.{digits}f}")
 
 
-#перпендикулярная прямая через точку
+# перпендикулярная прямая через точку
 def PerpendicularLineWithPoint(P, l):
 	c = - P.x*l.b + P.y*l.a
-	
+
 	return MyLine(l.b, -l.a, c)
 
 
-#расстояние между точками
+# расстояние между точками
 def DistanceBetweenPoints(A, B):
 	return sqrt((A.x - B.x)**2 + (A.y - B.y)**2)
-	
 
-#точка, делящая отрезок в заданном отношении k
+
+# точка, делящая отрезок в заданном отношении k
 def DividingPoint(A, B, k):
 	return MyPoint((A.x + k*B.x)/(1+k), (A.y + k*B.y)/(1+k))
 
@@ -81,7 +81,7 @@ def MediansIntersection(A, B, C):
 	AN = TwoPointsLine(A, N)
 
 	return LineIntersectionPoint(CM, AN)
-	
+
 
 def CircumscribedCircleCenter(A, B, C):
 	BC = TwoPointsLine(B, C)
@@ -133,20 +133,20 @@ def SpecificPointGeneration(point_name, point_specific_name, A, B, C):
 		ret.append(f"{point_name}=Intersect({A.name}{B.name}{C.name}median, {B.name}{C.name}{A.name}median)")
 
 	return ret
-	
-	
+
+
 def CirclesIntersectionPoint(r1, r2, O1, O2):
 	O = MyPoint(O2.x - O1.x, O2.y - O1.y)
 	x = -(r2**2 - r1**2 - O.x**2)/(2*O.x)
 	y = sqrt(r1**2 - x**2)
-	
+
 	return MyPoint(x + O1.x, y + O1.y)
 
 
 def LineWithTiltAngle(P, alpha):
 	k = tan((alpha * pi / 180).value)
 	b = P.y - P.x * k
-	
+
 	return MyLine(-k, 1, -b)
 
 
@@ -156,17 +156,17 @@ def LineAndCircleIntersectionPoints(l, O, r):
 	d = sqrt(r**2 - DistanceBetweenPoints(P, O)**2)
 	k = -l.a/l.b
 	b = -l.c/l.b
-		
+
 	w = 1 + k**2
 	p = 2*k*b - 2*k*P.y - 2*P.x
 	q = b**2 + P.x**2 + P.y**2 - 2*b*P.y - d**2
-		
+
 	x1 = (-p + sqrt(p**2 - 4*q*w))/(2*w)
 	x2 = (-p - sqrt(p**2 - 4*q*w))/(2*w)
-		
+
 	y1 = k*x1 + b
 	y2 = k*x2 + b
-		
+
 	return MyPoint(x1, y1), MyPoint(x2, y2)
 
 
@@ -229,8 +229,8 @@ def RandomRotation(A, B, C):
 	C.y += O.y
 
 	return A, B, C
-		
-	
+
+
 def Shift(new_A, new_B, new_C):
 
 	new_A, new_B, new_C = RandomRotation(new_A, new_B, new_C)
@@ -268,7 +268,7 @@ def Shift(new_A, new_B, new_C):
 def PointSymmetryAboutLine(P, l1):
 	l2 = PerpendicularLineWithPoint(P, l1)
 	Q = LineIntersectionPoint(l1, l2)
-	
+
 	return MyPoint(2 * Q.x - P.x, 2 * Q.y - P.y, P.name)
 
 
@@ -288,30 +288,44 @@ def SaveTriangleData(A, B, C):
 		new_C.y = C.y
 
 	AB = tp.find_segment_with_points(A.name, B.name)
-	BC = tp.find_segment_with_points(C.name, B.name)
-	AC = tp.find_segment_with_points(A.name, C.name)
+	BC = tp.find_segment_with_points(B.name, C.name)
+	CA = tp.find_segment_with_points(C.name, A.name)
 
 	if not AB.size:
-		AB.size = DistanceBetweenPoints(A, B)
+		AB.size = DistanceBetweenPoints(new_A, new_B)
+	for rel in AB.relations:
+		if not rel.size:
+			rel.size = AB.size / AB.relations[rel]
 	if not BC.size:
-		BC.size = DistanceBetweenPoints(C, B)
-	if not AC.size:
-		AC.size = DistanceBetweenPoints(A, C)
+		BC.size = DistanceBetweenPoints(new_B, new_C)
+	for rel in BC.relations:
+		if not rel.size:
+			rel.size = BC.size / BC.relations[rel]
+	if not CA.size:
+		CA.size = DistanceBetweenPoints(new_C, new_A)
+	for rel in CA.relations:
+		if not rel.size:
+			rel.size = CA.size / CA.relations[rel]
 
-	CBA = tp.find_angle_with_points(new_C.name, new_B.name, new_A.name)
 	ACB = tp.find_angle_with_points(new_A.name, new_C.name, new_B.name)
 	BAC = tp.find_angle_with_points(new_B.name, new_A.name, new_C.name)
-
-	c = AB.size
-	a = BC.size
-	b = AC.size
+	CBA = tp.find_angle_with_points(new_C.name, new_B.name, new_A.name)
 
 	if not CBA.size:
-		CBA.size = Size(acos(((a ** 2 + c ** 2 - b ** 2) / (2 * a * c)).value) * 180 / pi)
+		CBA.size = Size(acos(((BC.size ** 2 + AB.size ** 2 - CA.size ** 2) / (2 * BC.size * AB.size)).value) * 180 / pi)
+	for rel in CBA.relations:
+		if not rel.size:
+			rel.size = CBA.size / CBA.relations[rel]
 	if not ACB.size:
-		ACB.size = Size(acos(((a ** 2 + b ** 2 - c ** 2) / (2 * a * b)).value) * 180 / pi)
+		ACB.size = Size(acos(((BC.size ** 2 + CA.size ** 2 - AB.size ** 2) / (2 * BC.size * CA.size)).value) * 180 / pi)
+	for rel in ACB.relations:
+		if not rel.size:
+			rel.size = ACB.size / ACB.relations[rel]
 	if not BAC.size:
-		BAC.size = Size(acos(((c ** 2 + b ** 2 - a ** 2) / (2 * c * b)).value) * 180 / pi)
+		BAC.size = Size(acos(((AB.size ** 2 + CA.size ** 2 - BC.size ** 2) / (2 * AB.size * CA.size)).value) * 180 / pi)
+	for rel in BAC.relations:
+		if not rel.size:
+			rel.size = BAC.size / BAC.relations[rel]
 
 	return new_A, new_B, new_C
 
@@ -342,25 +356,25 @@ def CreateTriangleWithSideAndContraAngle(a, alpha, alpha_name):
 		O = MyPoint(a/2, (1/tan(alph))*(a/2))
 	else:
 		O = MyPoint(a/2, 0)
-	
+
 	r = DistanceBetweenPoints(O, B)
 	x = uniform(-r + a/2, r + a/2)
 	y = sqrt(r**2 - (x - a/2)**2) + O.y
-	
+
 	A = MyPoint(x, y, alpha_name[1])
-	
+
 	return Shift(A, B, C)
 
 
 def CreateTriangleWithOneSideAndTwoAngles(a, beta, gamma, beta_name, gamma_name):
 	B = MyPoint(Size('0'), Size('0'), beta_name[1])
 	C = MyPoint(a, Size('0'), gamma_name[1])
-	
+
 	l1 = LineWithTiltAngle(C, Size('180') - gamma)
 	l2 = LineWithTiltAngle(B, beta)
-	
+
 	A = LineIntersectionPoint(l1, l2)
-	
+
 	if gamma_name[0] != beta_name[1]:
 		A.name = gamma_name[0]
 	else:
@@ -372,39 +386,39 @@ def CreateTriangleWithOneSideAndTwoAngles(a, beta, gamma, beta_name, gamma_name)
 def CreateTriangleWithTwoSidesAndAngleBetweenThem(a, b, gamma, a_name, gamma_name):
 	C = MyPoint(Size('0'), Size('0'))
 	B = MyPoint(a, Size('0'), gamma_name[1])
-	
+
 	if a_name[0] != gamma_name[1]:
 		C.name = a_name[0]
 	else:
 		C.name = a_name[1]
-	
+
 	l = LineWithTiltAngle(C, gamma)
-	
+
 	k = -l.a
 	t = -l.c
-	
+
 	if gamma <= 90:
 		x = (-2*t*k + sqrt(4*t**2*k**2 - 4*(k**2 + 1)*(t**2 - b**2))) / (2*(k**2 + 1))
 	else:
 		x = (-2*t*k - sqrt(4*t**2*k**2 - 4*(k**2 + 1)*(t**2 - b**2))) / (2*(k**2 + 1))
 	y = k*x + t
-	
+
 	A = MyPoint(x, y)
-	
+
 	if gamma_name[0] not in a_name:
 		A.name = gamma_name[0]
 	else:
 		A.name = gamma_name[2]
 
 	A = PointSymmetryAboutLine(A, PerpendicularLineWithPoint(DividingPoint(B, C, 1), TwoPointsLine(B, C)))
-	
+
 	return Shift(A, B, C)
 
 
 def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, a_name, gamma_name):
 	C = MyPoint(Size('0'), Size('0'))
 	B = MyPoint(a, Size('0'))
-		
+
 	l = LineWithTiltAngle(C, gamma)
 
 	A1, A2 = LineAndCircleIntersectionPoints(l, B, c)
@@ -431,28 +445,28 @@ def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, a_name, gamma_
 		A = PointSymmetryAboutLine(A, PerpendicularLineWithPoint(DividingPoint(B, C, 1), TwoPointsLine(B, C)))
 
 	return Shift(A, B, C)
-	
-	
+
+
 def CreateTriangle(sides, angles, angles_names, sides_names):
 	if angles.count(None) <= 1:
 		test_angle = Size('180')
-		
+
 		for angle in angles:
 			if angle:
 				test_angle -= angle
-				
+
 		try:
 			angles[angles.index(None)] = test_angle
 		except Exception:
 			pass
-		
+
 		for i in range(3):
 			if sides[i]:
 				return CreateTriangleWithOneSideAndTwoAngles(sides[i], angles[i-1], angles[(i+1)%3], angles_names[i-1], angles_names[(i+1)%3])
-		else:	
+		else:
 			random_index = randint(0,2)
 			return CreateTriangleWithOneSideAndTwoAngles(uniform(3, 6), angles[random_index-1], angles[(random_index+1)%3], angles_names[random_index-1], angles_names[(random_index+1)%3])
-		
+
 	else:
 		for i in range(3):
 			if angles[i]:
@@ -473,15 +487,15 @@ def CreateTriangle(sides, angles, angles_names, sides_names):
 		else:
 			if sides.count(None) == 3:
 				sides[0] = uniform(3, 5)
-				
+
 			if sides.count(None) == 2:
 				for side in sides:
 					if side:
 						i = sides.index(side)
 				sides[i-1] = sides[i] * uniform(0.5, 1.5)
-				
+
 			if sides.count(None) == 1:
 				i = sides.index(None)
 				sides[i] = uniform(abs(sides[i-1] - sides[(i+1)%3]), sides[i-1] + sides[(i+1)%3])
-			
+
 			return CreateTriangleWithThreeSides(sides[0], sides[1], sides[2], angles_names[1])
