@@ -1,4 +1,4 @@
-import triangle_drawer as tr
+import ggb_drawer.triangle_drawer as tr
 from math import *
 
 

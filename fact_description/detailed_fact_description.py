@@ -1,4 +1,4 @@
-import task_parser as tp
+from ggb_data_proccesing import task_parser as tp
 from random import choice
 
 
