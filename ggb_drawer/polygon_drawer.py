@@ -141,7 +141,8 @@ def text_splitter(text, input_file_name):
         tp.angles_relations_create(text[4])
         tp.polygons_relations_create(text[5])
         tp.line_intersection_create(text[6])
-        tp.questions_create(text[7])
+        tp.points_on_line_or_segment_create(text[7])
+        tp.questions_create(text[8])
     except IndexError:
         pass
 

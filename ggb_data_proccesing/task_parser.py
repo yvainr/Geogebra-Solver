@@ -87,8 +87,9 @@ class Segment:
                  point_one,
                  point_two,
                  size=None):
-        self.points = {point_one, point_two}
+        self.points = [point_one, point_two]
         self.size = size
+        self.interior_points = dict()
         self.relations = dict()
         self.difference = dict()
         self.addition = dict()
@@ -221,14 +222,14 @@ class Fact:
             except ValueError:
                 rel1, rel2 = self.value, 1
             draw_data.append(
-                f'text1=Text("{rel1}X", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), false, true)')
+                f'text1=Text("{rel1}X", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + {float(self.objects[0].size * 0.125)}), false, true)')
             draw_data.append(
-                f'text2=Text("{rel2}X", ((x({C.name}) + x({D.name})) / 2, ((y({C.name}) + y({D.name})) / 2) + 0.75), false, true)')
+                f'text2=Text("{rel2}X", ((x({C.name}) + x({D.name})) / 2, ((y({C.name}) + y({D.name})) / 2) + {float(self.objects[1].size * 0.125)}), false, true)')
 
         elif self.fact_type == 'size' and self.objects[0].__class__.__name__ == 'Segment' and self.value:
             A, B = self.objects[0].points
             draw_data.append(
-                f'text=Text("{self.value}", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + 0.75), true, true)')
+                f'text=Text("{self.value}", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + {float(self.objects[0].size * 0.125)}), true, true)')
 
         return draw_data
 
@@ -256,7 +257,6 @@ class Fact:
 
 
 task_data = Objects()
-# drawer_data = Objects()
 solver_data = Objects()
 
 
@@ -286,65 +286,6 @@ def polygons_create(text):
 
                 if len(vertices_list) == 3:
                     data.polygons.append(Polygon(vertices_class_list))
-                
-                # точка внутри многоугольника
-                # if len(vertices_list) == 1:
-                #     if polygon.split()[1] == 'in':
-                #         vertices_class_list[0].in_polygon = find_polygon_with_points(polygon.split()[2], data)
-
-                # замечательные точки
-                # if len(vertices_list) == 1:
-                #     S = vertices_class_list[0]
-                #
-                #     S.specific_properties_point = polygon.split()[1]
-                #     S.specific_properties_triangle = polygon.split()[2]
-                #
-                #     A = find_point_with_name(polygon.split()[2][0]).name
-                #     B = find_point_with_name(polygon.split()[2][1]).name
-                #     C = find_point_with_name(polygon.split()[2][2]).name
-                #
-                #     AB = find_line_with_points(A, B)
-                #     BC = find_line_with_points(C, B)
-                #     CA = find_line_with_points(A, C)
-                #
-                #     if polygon.split()[1] == 'H':
-                #         find_angle_with_lines(AB, find_line_with_points(C, S.name)).size = 90
-                #         find_angle_with_lines(find_line_with_points(C, S.name), AB).size = 90
-                #         find_angle_with_lines(BC, find_line_with_points(A, S.name)).size = 90
-                #         find_angle_with_lines(find_line_with_points(A, S.name), BC).size = 90
-                #         find_angle_with_lines(CA, find_line_with_points(B, S.name)).size = 90
-                #         find_angle_with_lines(find_line_with_points(B, S.name), CA).size = 90
-                #
-                #     if polygon.split()[1] == 'O':
-                #         AS = find_segment_with_points(A, S.name)
-                #         BS = find_segment_with_points(B, S.name)
-                #         CS = find_segment_with_points(C, S.name)
-                #
-                #         AS.relations[BS] = Size(1)
-                #         BS.relations[AS] = Size(1)
-                #         AS.relations[CS] = Size(1)
-                #         CS.relations[AS] = Size(1)
-                #         CS.relations[BS] = Size(1)
-                #         BS.relations[CS] = Size(1)
-                #
-                #     if polygon.split()[1] == 'I':
-                #         AS = find_line_with_points(A, S.name)
-                #         BS = find_line_with_points(B, S.name)
-                #         CS = find_line_with_points(C, S.name)
-                #
-                #         SAC = find_angle_with_lines(AS, CA)
-                #         BAS = find_angle_with_lines(AB, AS)
-                #         SBA = find_angle_with_lines(BS, AB)
-                #         CBS = find_angle_with_lines(BC, BS)
-                #         SCB = find_angle_with_lines(CS, BC)
-                #         ACS = find_angle_with_lines(CA, CS)
-                #
-                #         SAC.relations[BAS] = Size(1)
-                #         BAS.relations[SAC] = Size(1)
-                #         SBA.relations[CBS] = Size(1)
-                #         CBS.relations[SBA] = Size(1)
-                #         SCB.relations[ACS] = Size(1)
-                #         ACS.relations[SCB] = Size(1)
 
 
 def segments_create(text):
@@ -486,6 +427,21 @@ def line_intersection_create(text):
                     l2.points.add(find_point_with_name(P, data))
 
 
+def points_on_line_or_segment_create(text):
+    if len(text.split()) > 0:
+        for data in [task_data, solver_data]:
+            points, obj = text.split('in')
+            points = points.split()
+            if '/' in obj:
+                line = find_line_with_points(obj.split()[1], obj.split()[2], data)
+                for point in points:
+                    line.points.append(find_point_with_name(point, data))
+            else:
+                segment = find_segment_with_points(obj.split()[0], obj.split()[1], data)
+                for point in points:
+                    segment.interior_points[find_point_with_name(point, data)] = None
+
+
 def questions_create(text):
     if len(text.split()) > 0:
         for data in [task_data, solver_data]:
@@ -541,7 +497,7 @@ def find_segment_with_points(A, B, data=None):
     b = find_point_with_name(B, data)
 
     for seg in data.segments:
-        if {a, b} == seg.points:
+        if {a, b} == set(seg.points):
             return seg
 
     new_segment = Segment(a, b)
