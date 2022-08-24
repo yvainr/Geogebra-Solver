@@ -1,4 +1,4 @@
-import task_parser as taskp
+import ggb_data_proccesing.task_parser as tp
 
 
 def fact_objects_name(fact):
@@ -6,23 +6,23 @@ def fact_objects_name(fact):
     names = []
     for item in fact.objects:
         naming = ""
-        if isinstance(item, taskp.Segment):
+        if isinstance(item, tp.Segment):
             for point in item.points:
                 naming += point.name
-        elif isinstance(item, taskp.Angle):
+        elif isinstance(item, tp.Angle):
             for ray in item.rays:
                 naming += ray.main_point.name
                 naming += (list(ray.points))[0].name
             naming = naming[1:]
-        elif isinstance(item, taskp.Point):
+        elif isinstance(item, tp.Point):
             naming += item.name
-        elif isinstance(item, taskp.Line):
+        elif isinstance(item, tp.Line):
             naming += (list(item.points))[0].name
             naming += (list(item.points))[1].name
-        elif isinstance(item, taskp.Polygon):
+        elif isinstance(item, tp.Polygon):
             for point in item.points:
                 naming += point.name
-        elif isinstance(item, taskp.Ray):
+        elif isinstance(item, tp.Ray):
             naming += ray.main_point.name
             naming += (list(ray.points))[0].name
         names.append(naming)
@@ -33,7 +33,7 @@ def angle_formalization(fact):
     """adding angle signs"""
     angle = False
     for item in fact.objects:
-        if isinstance(item, taskp.Angle) and fact.value is not None:
+        if isinstance(item, tp.Angle) and fact.value is not None:
             angle = True
     return angle
 
