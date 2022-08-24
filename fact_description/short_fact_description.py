@@ -37,6 +37,13 @@ def angle_formalization(fact):
             angle = True
     return angle
 
+def triangle_formalization(fact):
+    """adding triangle sign"""
+    triangle = False
+    for item in fact.objects:
+        if isinstance(item, tp.Polygon):
+            triangle = True
+    return triangle
 
 def fact_output(fact):
     """main func: collecting data for output and choosing template"""
@@ -68,15 +75,16 @@ def fact_output(fact):
         name1 = names[0]
         ang_sign = u"\u2220"
         deg_sign = u"\N{DEGREE SIGN}"
+        triangle_sign = u"\N{WHITE UP-POINTING TRIANGLE}"
 
         if size:
             return f'{ang_sign if angle_formalization(fact) else ""}{name1} = {value if question else value.conversion_to_latex()}{deg_sign if angle_formalization(fact) else ""}'
         else:
             name2 = names[1]
             if equality:
-                return f'{ang_sign if angle_formalization(fact) else ""}{name1} = {ang_sign if angle_formalization(fact) else ""}{name2}'
+                return f'{triangle_sign if triangle_formalization(fact) else ""}{ang_sign if angle_formalization(fact) else ""}{name1} = {triangle_sign if triangle_formalization(fact) else ""}{ang_sign if angle_formalization(fact) else ""}{name2}'
             elif relation:
-                return f'{ang_sign if angle_formalization(fact) else ""}{name1}/{ang_sign if angle_formalization(fact) else ""}{name2} = {value if question else value.conversion_to_latex()}'
+                return f'{triangle_sign if triangle_formalization(fact) else ""}{ang_sign if angle_formalization(fact) else ""}{name1}/{triangle_sign if triangle_formalization(fact) else ""}{ang_sign if angle_formalization(fact) else ""}{name2} = {value if question else value.conversion_to_latex()}'
             elif diff:
                 if len(fact.objects) == 3:
                     name3 = names[2]
