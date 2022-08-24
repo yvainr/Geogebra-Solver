@@ -114,6 +114,9 @@
             let short_cuts_symbols = 'ABCDEFHIM∠=△,'.split('');
 
             for (s in short_cuts_symbols) {
+
+
+                
                 sym = short_cuts_symbols[s];
                 document.getElementById('short_cuts').innerHTML += `<button  class="btn btn-light btn-md active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
             }
