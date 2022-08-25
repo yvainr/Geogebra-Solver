@@ -76,16 +76,16 @@ def get_necessary_coords_size(points: list) -> list:
     x_mid = (ext_points['max_x'] + ext_points['min_x']) / 2
     y_mid = (ext_points['max_y'] + ext_points['min_y']) / 2
 
-    x_lenght = abs(ext_points['max_x'] - ext_points['min_x'])
-    y_lenght = abs(ext_points['max_y'] - ext_points['min_y'])
+    x_length = abs(ext_points['max_x'] - ext_points['min_x'])
+    y_length = abs(ext_points['max_y'] - ext_points['min_y'])
 
-    max_x = x_mid + (x_lenght / 2) * 1.2
-    min_x = x_mid - (x_lenght / 2) * 1.2
+    max_x = x_mid + (x_length / 2) * 1.2
+    min_x = x_mid - (x_length / 2) * 1.2
 
-    max_y = y_mid + (y_lenght / 2) * 1.2
-    min_y = y_mid - (y_lenght / 2) * 1.2
+    max_y = y_mid + (y_length / 2) * 1.2
+    min_y = y_mid - (y_length / 2) * 1.2
 
-    print([min_x, min_y, max_x, max_y])
+    # print([min_x, min_y, max_x, max_y])
 
     return [min_x, min_y, max_x, max_y]
 

@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, flash
 import logging
 import multiprocessing
 
-from ggb_data_processing import task_parser, task_parser as taskp
+from ggb_data_processing import task_parser as taskp
 from ggb_html_generator.geogebra_html_generator import insert_commands
 from ggb_drawer.polygon_drawer import text_splitter
 from ggb_text_processing.language_interpreter import text_analyze
@@ -146,60 +146,63 @@ def analyze_text():
 
         solving_template = 'templates/release_template.html'
 
-        resp = text_splitter(commands_text, input_file_name=solving_template)
         # logger.info(task_parser.angles)
         # logger.info(task_parser.segments)
         # logger.info(task_parser.polygons)
         # logger.info(resp)
         # print(taskp.task_data)
+        return_dict = {}
 
-        if resp == 200 and commands_text:
+        try:
+            return_dict = text_splitter(commands_text, input_file_name=solving_template)
+            if type(return_dict) == str:
+                logger.info(return_dict)
+                return_dict = {'errors': [return_dict]}
+            else:
+                return_dict['errors'] = []
 
-            return_dict = {}
+        except Exception as exc:
+            logger.info(exc)
+            logger.info('ERROR: Solver internal error')
+            return_dict['errors'] = ['Solver internal error']
 
-            manager = multiprocessing.Manager()
-            resp_dict = manager.dict()
-            solving_process = multiprocessing.Process(target=get_dict_of_facts, args=(resp_dict, taskp.solver_data))
-            solving_process.start()
-            solving_process.join(SOLVING_TIME_LIMIT)
+        print(return_dict)
 
+        if return_dict['errors'] == [] and commands_text:
 
-            solving_process.terminate()
-            for key in resp_dict.keys():
-                return_dict[key] = resp_dict[key]
+            try:
+                fact_key = list(return_dict['facts'].keys())[0]
+            except IndexError:
+                return {}
 
-            solving_process.is_alive()
+            question_fact = fact_key
+            solving_tree = return_dict['facts'][fact_key]['tree_levels']
 
-            manager.shutdown()
-
+            # print(solving_tree)
 
             solving_finished = False
 
             try:
-                task_parser.solver_data = return_dict['data']
-                if return_dict['list of reason facts']['tree_levels']:
+                if solving_tree:
                     solving_finished = True
 
             except Exception as exc:
-                logging.info(f'Error {exc}')
+                logging.info(f'ERROR: Error after solving: {exc}')
 
-            facts = return_dict
-
-            if solving_finished:
+            if solving_finished and question_fact:
                 logger.info('Question found')
 
-                facts['list of reason facts'] = tree_levels_proccesing(facts['list of reason facts']['tree_levels'])
-                fact_to_delete_duplicates = facts['list of reason facts']
+                solving_tree = tree_levels_proccesing(solving_tree)
+                fact_to_delete_duplicates = solving_tree
 
                 sorted_facts = [ii for n,ii in enumerate(fact_to_delete_duplicates) if ii not in fact_to_delete_duplicates[:n]]
 
-                facts['list of reason facts'] = sorted_facts
-                facts['question fact'] = sorted_facts[-1]
+                solving_tree_list = sorted_facts
 
-                solving_facts = facts['list of reason facts']
+                answer_fact = solving_tree_list[-1]
 
-                answer_fact = facts['question fact']
-                question_fact = taskp.task_data.questions[0]
+                solving_facts = solving_tree_list
+                # print(solving_facts)
 
                 # for fact in [question_fact] + solving_facts:
                 #     print(fact)
@@ -208,8 +211,6 @@ def analyze_text():
                 #     print(fact.value)
 
                 logger.info('Text commands splitted and inserted in geogebra')
-
-                # print(get_extreme_points(return_dict['data'].points))
 
                 return render_template('geogebra_page.html',
                                        text=text,
@@ -222,7 +223,7 @@ def analyze_text():
 
                                        answer=answer_fact,
 
-                                       necessary_coords_size = get_necessary_coords_size(return_dict['data'].points)
+                                       necessary_coords_size = get_necessary_coords_size(return_dict['data'].points) # TODO: можно заменить на taskp.solver_data.points
                                        )
             else:
                 logger.info('Question not found')
@@ -236,7 +237,7 @@ def analyze_text():
             if not commands_text:
                 flash('Commands are required!')
             else:
-                flash(resp)
+                flash('\n'.join(return_dict['errors']))
             return render_template('input.html', text=text, commands_text=commands_text, type='text')
 
     return render_template("input.html", commands_text='')
