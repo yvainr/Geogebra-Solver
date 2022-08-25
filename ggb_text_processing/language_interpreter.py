@@ -31,10 +31,15 @@ def text_analyze(inp_str, output_num=7):
 
 def string_split(inp_str):
     """creating list with diff objects"""
-    inp_str = sub(" и ",  ",", inp_str)
     inp_str = sub(r"([A-Z])(\s*=\s*)([A-Z, 0-9])", r"\1 = \3", inp_str)
-    print(inp_str)
     inp_str = inp_str.split(",")
+    for part in inp_str:
+        if " и " in part and not ("отношени" in part or "сумм" in part):
+            n_part = sub(" и ", ",", part)
+            n_part = n_part.split(",")
+            inp_str.remove(part)
+            for item in n_part:
+                inp_str.append(item)
     return inp_str
 
 
@@ -139,6 +144,8 @@ def remarkable_point_processing(part):
 def class_analyze(part):
     """analyzing to which class this part belong"""
 
+    part = sub(chr(9651), "треугольник ", part)
+    part = sub(chr(8736), "угол ", part)
     poly = False
     if "угольн" in part or "подоб" in part:
         poly = True
@@ -152,20 +159,20 @@ def class_analyze(part):
     segments_parts = 0
     let_parts = 0
     num_parts = 0
-    for object in part:
-        if 64 < ord(object[0]) < 91:
-            if len(object) == 1:
+    for objec in part:
+        if 64 < ord(objec[0]) < 91:
+            if len(objec) == 1:
                 points_parts += 1
-            elif len(object) == 2:
+            elif len(objec) == 2:
                 segments_parts += 1
-            elif len(object) > 2:
+            elif len(objec) > 2:
                 let_parts += 1
-        elif ord(object[0]) == 43 or ord(object[0]) == 45:
-            if len(object) == 3:
+        elif ord(objec[0]) == 43 or ord(objec[0]) == 45:
+            if len(objec) == 3:
                 segments_parts += 1
-            elif len(object) == 4:
+            elif len(objec) == 4:
                 let_parts += 1
-        elif 44 < ord(object[0]) < 59:
+        elif 44 < ord(objec[0]) < 59:
             num_parts += 1
 
     ret = "polygon"
@@ -236,6 +243,8 @@ def new_assign_to_classes(inp_str):
 
 def question_processing(question):
     """putting a question in the output format"""
+    question = sub(chr(9651), "треугольник ", question)
+    question = sub(chr(8736), "угол ", question)
     poly = False
     if "угольн" in question or "подоб" in question:
         poly = True
