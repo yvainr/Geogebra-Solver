@@ -15,6 +15,7 @@
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+
         <title>Geogebra text input</title>
     </head>
     <body>
@@ -92,10 +93,36 @@
                 <input type="hidden" name="type" value="text">
                 <input type="hidden" name="screen-width" id="screen-width-container">
                 <input type="hidden" name="screen-height" id="screen-height-container">
-                <textarea name="text_commands"
-                          placeholder="Дорогой тестировщик, вводи команды правильно"
-                          class="form-control"
-                          rows="12">{{ commands_text if commands_text != None else '' }}</textarea>
+
+
+                <table>
+                    <tr>
+                    <td valign="top" style="font-size: 17px; font-style: italic">
+                        <span>
+                            1
+                            2
+                            3
+                            4
+                            5
+                            6
+                            7
+                            8
+                            9
+                            10
+                            11
+                            12
+                        </span>
+                    </td>
+                    <td width="100%">
+<!--                        <div></div>-->
+                        <textarea name="text_commands"
+                                  placeholder="Дорогой тестировщик, вводи команды правильно"
+                                  class="form-control"
+                                  rows="12"
+                                  cols="12">{{ commands_text if commands_text != None else '' }}</textarea>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </form>
         <div id="loading">
@@ -118,7 +145,7 @@
 
                 
                 sym = short_cuts_symbols[s];
-                document.getElementById('short_cuts').innerHTML += `<button  class="btn btn-light btn-md active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
+                document.getElementById('short_cuts').innerHTML += `<button style="touch-action: manipulation" class="btn btn-light btn-md active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
             }
 
 
@@ -170,6 +197,7 @@
 
                 // area.setFocusAt(area.value.length);
             }
+        $('body').bind('touchmove', function(event) { event.preventDefault() }); // turns off
 
         </script>
 <!--    <img src="loading.gif" alt="this slowpoke moves"/>-->
