@@ -166,7 +166,7 @@ def analyze_text():
             logger.info('ERROR: Solver internal error')
             return_dict['errors'] = ['Solver internal error']
 
-        print(return_dict)
+        # print(return_dict)
 
         if return_dict['errors'] == [] and commands_text:
 
@@ -227,11 +227,20 @@ def analyze_text():
                                        )
             else:
                 logger.info('Question not found')
-                resp = text_splitter(commands_text, input_file_name='templates/drawing_template.html')
+                return_dict = text_splitter(commands_text, input_file_name='templates/drawing_template.html')
 
-                if resp == 200 and commands_text:
+                if type(return_dict) == str:
+                    logger.info(return_dict)
+                    return_dict = {'errors': [return_dict]}
+                else:
+                    return_dict['errors'] = []
+
+                if return_dict['errors'] == [] and commands_text:
                     logger.info('Text commands splitted and inserted in geogebra')
                     return render_template('geogebra_page.html', text=text, commands_text=commands_text, type='text')
+                else:
+                    flash('\n'.join(return_dict['errors']))
+                    return render_template('input.html', text=text, commands_text=commands_text, type='text')
 
         else:
             if not commands_text:
