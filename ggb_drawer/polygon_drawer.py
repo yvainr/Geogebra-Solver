@@ -151,7 +151,7 @@ def text_splitter(text, input_file_name):
     except IndexError:
         pass
 
-    ns.solving_process()
+    solution = ns.solving_process()
 
     for polygon in text[0].split(','):
         ret = create_polygon(tp.get_points_names_from_list(tp.find_polygon_with_points(list(polygon.replace(' ', ''))).points))
@@ -175,4 +175,4 @@ def text_splitter(text, input_file_name):
 
     insert_commands(realize_data, input_file_name=input_file_name)
 
-    return 200
+    return solution
