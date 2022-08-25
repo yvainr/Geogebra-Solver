@@ -777,12 +777,11 @@ def solving_process():
             solution_tree = {question_fact: dict()}
             solution_tree_levels = list()
             create_answer_tree(question_fact, solution_tree[question_fact], solution_tree_levels)
-            solutions[question] = {'tree': solution_tree, 'tree_levels': solution_tree_levels, 'errors': None}
+            solutions[question] = {'tree': solution_tree, 'tree_levels': solution_tree_levels, 'errors': []}
 
         except TypeError:
             solutions[question] = {'tree': {}, 'tree_levels': [],
-                                   'errors': 'Не смогли решить задачу. '
-                                             'Проверьте корректность введенного условия, '
-                                             'предварительно ознакомившись с инструкцией по вводу.'}
+                                   'errors': ['Не смогли решить задачу. Проверьте корректность введенного условия, '
+                                              'предварительно ознакомившись с инструкцией по вводу.']}
 
     return {'facts': solutions, 'data': tp.solver_data}
