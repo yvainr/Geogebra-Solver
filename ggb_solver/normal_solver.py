@@ -1,7 +1,7 @@
-import ggb_data_proccesing.task_parser as tp
+import ggb_data_processing.task_parser as tp
 # import sys
 from itertools import combinations, permutations
-from ggb_data_proccesing.objects_types import Size, sqrt
+from ggb_data_processing.objects_types import Size, sqrt
 
 # sys.setrecursionlimit(2000)
 
@@ -737,7 +737,7 @@ def create_answer_tree(fact, tree, tree_levels, level=0):
             create_answer_tree(tp.solver_data.facts[root_fact_id], tree[tp.solver_data.facts[root_fact_id]], tree_levels, level + 1)
 
 
-def tree_levels_proccesing(tree_levels):
+def tree_levels_processing(tree_levels):
     ret = list()
     for level in reversed(tree_levels):
         ret += list(level)
@@ -777,9 +777,11 @@ def solving_process():
             solution_tree = {question_fact: dict()}
             solution_tree_levels = list()
             create_answer_tree(question_fact, solution_tree[question_fact], solution_tree_levels)
-            solutions[question] = {'tree': solution_tree, 'tree_levels': solution_tree_levels}
+            solutions[question] = {'tree': solution_tree, 'tree_levels': solution_tree_levels, 'errors': []}
 
         except TypeError:
-            solutions[question] = {'tree': {}, 'tree_levels': []}
+            solutions[question] = {'tree': {}, 'tree_levels': [],
+                                   'errors': ['Не смогли решить задачу. Проверьте корректность введенного условия, '
+                                              'предварительно ознакомившись с инструкцией по вводу.']}
 
     return {'facts': solutions, 'data': tp.solver_data}

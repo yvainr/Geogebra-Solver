@@ -2,15 +2,15 @@ from flask import Flask, render_template, request, flash
 import logging
 import multiprocessing
 
-from ggb_data_proccesing import task_parser, task_parser as taskp
+from ggb_data_processing import task_parser, task_parser as taskp
 from ggb_html_generator.geogebra_html_generator import insert_commands
 from ggb_drawer.polygon_drawer import text_splitter
-from ggb_text_proccesing.language_interpreter import text_analyze
+from ggb_text_processing.language_interpreter import text_analyze
 from web_facts_tools import get_dict_of_facts, get_necessary_coords_size
 # from Solver_alpha import to_str
 from fact_description.short_fact_description import fact_output
 from random import choice
-from ggb_solver.normal_solver import tree_levels_proccesing
+from ggb_solver.normal_solver import tree_levels_processing
 from fact_description.detailed_fact_description import pretty_detailed_description
 # from normal_solver import solving_process
 
@@ -25,7 +25,7 @@ app = Flask(__name__, template_folder='./templates',static_folder='./static')
 app.config['SECRET_KEY'] = 'abcdef12345678'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-SOLVING_TIME_LIMIT = 30 #seconds
+SOLVING_TIME_LIMIT = 20 #seconds
 
 # app.jinja_env.globals.update(to_str=to_str)
 app.jinja_env.globals.update(fact_output=fact_output)
@@ -42,6 +42,7 @@ def split_commands(commands_text: str):
     commands_list = [command for command in commands_list if command]
     return commands_list
 
+
 @app.route('/commands_input', methods=('GET', 'POST'))
 def index(commands_text=''):
     logger.info('Commands input page requested')
@@ -50,6 +51,7 @@ def index(commands_text=''):
     logger.info(f'Commands: {commands_text}')
     # print(repr(commands_text))
     return render_template('index.html', commands_text=commands_text)
+
 
 @app.route('/', methods=('GET', 'POST'))
 def text_input(text='', commands_text=''):
@@ -71,6 +73,7 @@ def text_input(text='', commands_text=''):
     # print(repr(commands_text))
     return render_template('input.html', text=text, commands_text=commands_text, quote=quote)
 
+
 @app.route('/render_geogebra', methods=('GET', 'POST'))
 def create():
     logger.info('Render page requested')
@@ -90,8 +93,8 @@ def create():
 
             return render_template('geogebra_page.html', commands_text=commands_text, type='commands')
 
-
     return render_template("index.html", commands_text='')
+
 
 @app.route('/parse_text', methods=('GET', 'POST'))
 def parse_text():
@@ -127,6 +130,7 @@ def parse_text():
             return render_template("input.html", text=text, commands_text=parsed_text)
 
     return render_template("input.html", text='', commands_text='')
+
 
 @app.route('/analysis_commands', methods=('GET', 'POST'))
 def analyze_text():
@@ -184,7 +188,7 @@ def analyze_text():
             if solving_finished:
                 logger.info('Question found')
 
-                facts['list of reason facts'] = tree_levels_proccesing(facts['list of reason facts']['tree_levels'])
+                facts['list of reason facts'] = tree_levels_processing(facts['list of reason facts']['tree_levels'])
                 fact_to_delete_duplicates = facts['list of reason facts']
 
                 sorted_facts = [ii for n,ii in enumerate(fact_to_delete_duplicates) if ii not in fact_to_delete_duplicates[:n]]
@@ -237,6 +241,7 @@ def analyze_text():
 
     return render_template("input.html", commands_text='')
 
+
 @app.route('/instruction_edit2508', methods=('GET', 'POST'))
 def instruction():
     with open('templates/instruction.html', 'r') as file:
@@ -252,9 +257,11 @@ def instruction():
 
     return render_template('instruction_input.html', text=text)
 
+
 @app.route('/instruction', methods=['GET'])
 def show_instruction():
     return render_template('instruction.html')
+
 
 if __name__ == '__main__':
     app.run(debug=False, port=3600, threaded=False, host="0.0.0.0")

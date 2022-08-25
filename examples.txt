@@ -1,0 +1,80 @@
+ABC
+AB 3
+ABC 90, BAC 45
+
+
+
+
+
+
+BC ?
+
+******
+
+ABC, DEF
+AB 3, BC 4, DE 9, EF 12
+ABC 90, DEF 90
+
+
+
+
+
+
+ABC DEF ?
+
+******
+
+ABC, DEF
+AB 5, DE 10
+ABC 40, FED 40, BCA 50, EDF 90
+
+
+
+
+
+
+/ABC DEF ?
+
+******
+
+ABC, DEF
+AB 5
+ABC 40, FED 40, BCA 50, EDF 90
+BC FE 1/2
+
+
+
+
+
+ED ?
+
+******
+
+ABC, DEF, POI
+AB 5
+
+AB DE 1/1, AC DF 1/1, BC EF 1/1, EF OI 1/1, DF PI 1/1
+EFD OIP 1/1
+
+
+
+
+/ABC POI  ?
+
+******
+
+ABC, DEF
+AB 3
+ABC 90, BAC 45, DFE 45, FDE 90
+BC EF 1/2
+
+
+
+
+
+DF ?
+
+******
+
+Треугольник ABC, сторона AB 5, угол ABC 90, угол BCA 45
+Найти длину стороны BC

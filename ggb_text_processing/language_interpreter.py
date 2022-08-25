@@ -79,6 +79,7 @@ def distillation(part):
 
 def equality_of_elem(part) -> str:
     """finding equal figures and transforming into output format"""
+    part = sub(r'([A-Z, 0-9])(=)([A-Z, 0-9])', r'\1 = \3', part)
     if "равн" in part or "равен" in part:
         part = distillation(part)
         part = sub(r'([A-Z]{2,})(\s)([A-Z]{2,})', r'\1 = \3', part)
