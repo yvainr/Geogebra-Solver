@@ -737,7 +737,7 @@ def create_answer_tree(fact, tree, tree_levels, level=0):
             create_answer_tree(tp.solver_data.facts[root_fact_id], tree[tp.solver_data.facts[root_fact_id]], tree_levels, level + 1)
 
 
-def tree_levels_proccesing(tree_levels):
+def tree_levels_processing(tree_levels):
     ret = list()
     for level in reversed(tree_levels):
         ret += list(level)
@@ -780,6 +780,9 @@ def solving_process():
             solutions[question] = {'tree': solution_tree, 'tree_levels': solution_tree_levels, 'errors': None}
 
         except TypeError:
-            solutions[question] = {'tree': {}, 'tree_levels': [], 'errors': 'Не смогли решить задачу.'}
+            solutions[question] = {'tree': {}, 'tree_levels': [],
+                                   'errors': 'Не смогли решить задачу. '
+                                             'Проверьте корректность введенного условия, '
+                                             'предварительно ознакомившись с инструкцией по вводу.'}
 
     return {'facts': solutions, 'data': tp.solver_data}
