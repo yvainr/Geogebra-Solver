@@ -176,3 +176,4 @@ def text_splitter(text, input_file_name):
     insert_commands(realize_data, input_file_name=input_file_name)
 
     return solution
+
