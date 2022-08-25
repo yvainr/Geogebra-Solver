@@ -1,7 +1,7 @@
-import ggb_data_proccesing.task_parser as tp
+import ggb_data_processing.task_parser as tp
 # import sys
 from itertools import combinations, permutations
-from ggb_data_proccesing.objects_types import Size, sqrt
+from ggb_data_processing.objects_types import Size, sqrt
 
 # sys.setrecursionlimit(2000)
 

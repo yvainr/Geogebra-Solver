@@ -1,18 +1,18 @@
 from ggb_html_generator.geogebra_html_generator import insert_commands
 import shapely.geometry
 import ggb_drawer.triangle_drawer as td
-from ggb_data_proccesing import task_parser as tp
+from ggb_data_processing import task_parser as tp
 import ggb_solver.normal_solver as ns
 from math import *
 from itertools import combinations, permutations
-from ggb_data_proccesing.objects_types import Objects
+from ggb_data_processing.objects_types import Objects
 from random import uniform
 from ggb_drawer.check_is_triangle_correct import check_triangle
+from ggb_data_processing.objects_types import Size
 
 
 def get_random_point_in_polygon(point_name, polygon):
     new_polygon = list()
-
     for point in polygon.points:
         new_polygon.append((point.x, point.y))
     poly = shapely.geometry.Polygon(new_polygon)
@@ -22,7 +22,7 @@ def get_random_point_in_polygon(point_name, polygon):
         generated_point = shapely.geometry.Point(uniform(minx, maxx), uniform(miny, maxy))
         if poly.contains(generated_point):
             find_point = tp.find_point_with_name(point_name)
-            find_point.x, find_point.y = generated_point.x, generated_point.y
+            find_point.x, find_point.y = Size(generated_point.x), Size(generated_point.y)
 
             return find_point
 
@@ -83,11 +83,12 @@ def triangle_with_segment_synchronization(A, B, C, P1, P2):
 
     for P in [A, B, C]:
         if P1.name != P.name != P2.name:
-            P3 = td.MyPoint(P.x * cos(phi) - P.y * sin(phi), P.y * cos(phi) + P.x * sin(phi), P.name)
+            P3 = (P.x * cos(phi) - P.y * sin(phi), P.y * cos(phi) + P.x * sin(phi), P.name)
 
-    P2.x += P1.x; P2.y += P1.y; P3.x += P1.x; P3.y += P1.y
+    P3[0] += P1.x
+    P3[1] += P1.y
 
-    return P1, P2, P3
+    return P3
 
 
 def draw_lines_intersections(intersections, realize_data):
@@ -100,6 +101,9 @@ def draw_lines_intersections(intersections, realize_data):
 
 
 def create_polygon(vertices):
+    if len(vertices) == 2:
+        A, B = vertices
+
     if len(vertices) == 3:
         A, B, C = vertices
 
@@ -122,7 +126,7 @@ def create_polygon(vertices):
             if perspective_size >= perspective_current_size:
                 perspective_triangle = triangle
 
-        A, B, C = td.CreateTriangle(get_triangle_parameter(perspective_triangle[0], perspective_triangle[1], perspective_triangle[2]))
+        A, B, C = td.CreateTriangle(*get_triangle_parameter(perspective_triangle[0], perspective_triangle[1], perspective_triangle[2]))
 
 
 def text_splitter(text, input_file_name):
@@ -142,7 +146,8 @@ def text_splitter(text, input_file_name):
         tp.polygons_relations_create(text[5])
         tp.line_intersection_create(text[6])
         tp.points_on_line_or_segment_create(text[7])
-        tp.questions_create(text[8])
+        tp.points_in_polygon_create(text[8])
+        tp.questions_create(text[9])
     except IndexError:
         pass
 

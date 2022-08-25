@@ -1,4 +1,4 @@
-import ggb_drawer.triangle_drawer as tr
+import ggb_drawer.useful_geometry_functions as ugf
 from math import *
 
 
@@ -88,24 +88,24 @@ def check_angle_not_between_sides(sides, angles):
         if angles[i]:
             if sides[i] and sides[i - 1]:
                 return try_create_triangle_with_two_sides_and_angle_not_between_them(sides[i - 1], sides[i], angles[i])
-            if sides[i] and sides[(i + 1) % 3]:
-                return try_create_triangle_with_two_sides_and_angle_not_between_them(sides[(i + 1) % 3], sides[i], angles[i])
+            if sides[i] and sides[i - 2]:
+                return try_create_triangle_with_two_sides_and_angle_not_between_them(sides[i - 2], sides[i], angles[i])
 
     else:
         return True
 
 
 def try_create_triangle_with_two_sides_and_angle_not_between_them(a, c, gamma):
-    C = tr.MyPoint(0, 0)
-    B = tr.MyPoint(a, 0)
+    C = (0, 0)
+    B = (a, 0)
 
-    l = tr.LineWithTiltAngle(C, gamma)
+    l = ugf.LineWithTiltAngle(C, gamma)
 
     try:
-        tr.LineAndCircleIntersectionPoints(l, B, c)
+        ugf.LineAndCircleIntersectionPoints(l, B, c)
         return True
 
-    except Exception:
+    except IndexError:
         return False
 
 

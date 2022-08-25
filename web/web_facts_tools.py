@@ -1,10 +1,10 @@
 from pprint import pprint
 
 from other import Solver_alpha
-from ggb_data_proccesing import task_parser
+from ggb_data_processing import task_parser
 
 from ggb_drawer.polygon_drawer import text_splitter
-from ggb_text_proccesing.language_interpreter import text_analyze
+from ggb_text_processing.language_interpreter import text_analyze
 from ggb_solver.normal_solver import solving_process
 from datetime import datetime
 

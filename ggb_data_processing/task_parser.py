@@ -1,4 +1,4 @@
-from ggb_data_proccesing.objects_types import Objects, Size
+from ggb_data_processing.objects_types import Objects, Size
 
 
 class Point:
@@ -440,6 +440,15 @@ def points_on_line_or_segment_create(text):
                 segment = find_segment_with_points(obj.split()[0], obj.split()[1], data)
                 for point in points:
                     segment.interior_points[find_point_with_name(point, data)] = None
+
+
+def points_in_polygon_create(text):
+    if len(text.split()) > 0:
+        for data in [task_data, solver_data]:
+            points, polygon = text.split('in')
+            points = points.split()
+            for point in points:
+                find_point_with_name(point, data).in_polygon = find_polygon_with_points(list(polygon.replace(' ', '')), data)
 
 
 def questions_create(text):
