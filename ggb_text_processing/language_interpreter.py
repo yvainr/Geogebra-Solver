@@ -78,16 +78,31 @@ def distillation(part):
             pass
 
     new_part = spaces_normalize(new_part)
-    # new_part = output_formatting(new_part)
+    return new_part.strip()
+
+
+def eq_distillation(part):
+    """highlithing the parts for equality function"""
+    part = sub(r' [-]+ ', ' ', part)
+    new_part = ""
+    for i in range(len(part)):
+        try:
+            if ord(part[i]) == 61 or ord(part[i]) == 43 or (44 < ord(part[i]) < 58) or (64 < ord(part[i]) < 91) or ord(part[i]) == 32:  # without russian capitals
+                new_part = new_part[:] + str(part[i])
+        except Exception as exc:
+            pass
+
+    new_part = spaces_normalize(new_part)
     return new_part.strip()
 
 
 def equality_of_elem(part) -> str:
     """finding equal figures and transforming into output format"""
-    part = sub(r'([A-Z, 0-9])(=)([A-Z, 0-9])', r'\1 = \3', part)
-    if "равн" in part or "равен" in part:
+    if ("равн" in part or "равен" in part) and "сумм" not in part and "отношен" not in part:
         part = distillation(part)
         part = sub(r'([A-Z]{2,})(\s)([A-Z]{2,})', r'\1 = \3', part)
+    part = sub(r'(\s*)( = )(\s*)', r'\2', part)
+    part = eq_distillation(part)
     part = sub(r"([A-Z][A-Z][A-Z])( = )([A-Z][A-Z][A-Z])", r'\1 \3 1/1', part)
     part = sub(r"([A-Z][A-Z])( = )([A-Z][A-Z])", r'\1 \3 1/1', part)
     return part
