@@ -46,19 +46,19 @@ def get_random_point_in_polygon(find_point, polygon):
 
 
 def get_triangle_parameter(A, B, C):
-    AB = tp.find_segment_with_points(A, B).size
-    BC = tp.find_segment_with_points(B, C).size
-    CA = tp.find_segment_with_points(C, A).size
+    AB = tp.find_segment_with_points(A, B)
+    BC = tp.find_segment_with_points(B, C)
+    CA = tp.find_segment_with_points(C, A)
 
-    sides, sides_names = [BC, CA, AB], [f"{B}{C}", f"{C}{A}", f"{A}{B}"]
+    sides, sides_names = [BC.size, CA.size, AB.size], [f"{B}{C}", f"{C}{A}", f"{A}{B}"]
 
-    CBA = tp.find_angle_with_points(C, B, A).size
-    ACB = tp.find_angle_with_points(A, C, B).size
-    BAC = tp.find_angle_with_points(B, A, C).size
+    CBA = tp.find_angle_with_points(C, B, A)
+    ACB = tp.find_angle_with_points(A, C, B)
+    BAC = tp.find_angle_with_points(B, A, C)
 
-    angles, angles_names = [BAC, CBA, ACB], [f"{B}{A}{C}", f"{C}{B}{A}", f"{A}{C}{B}"]
+    angles, angles_names = [BAC.size, CBA.size, ACB.size], [f"{B}{A}{C}", f"{C}{B}{A}", f"{A}{C}{B}"]
 
-    return sides, angles, angles_names, sides_names
+    return sides, angles, [BC, CA, AB], [BAC, CBA, ACB], angles_names, sides_names
 
 
 def draw_polygon(points, realize_data):

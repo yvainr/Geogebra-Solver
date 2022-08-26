@@ -1,5 +1,6 @@
 import ggb_data_processing.task_parser as tp
 # import sys
+from time import time
 from itertools import combinations, permutations
 from ggb_data_processing.objects_types import Size, sqrt
 
@@ -745,24 +746,29 @@ def tree_levels_proccesing(tree_levels):
     return ret
 
 
+def check_time(start_time, dead_time=10):
+    return dead_time > (start_time - time())
+
+
 def solving_process():
     facts_generation = 1
     solutions = dict()
+    start_time = time()
 
     create_null_facts_generation()
 
     for question in tp.solver_data.questions:
         facts_list_length = len(tp.solver_data.facts)
         while True:
-            if count_sizes_of_angles_and_segments(tp.solver_data.segments, facts_generation, question):
+            if count_sizes_of_angles_and_segments(tp.solver_data.segments, facts_generation, question) or not check_time(start_time):
                 break
-            if count_sizes_of_angles_and_segments(tp.solver_data.angles, facts_generation, question):
+            if count_sizes_of_angles_and_segments(tp.solver_data.angles, facts_generation, question) or not check_time(start_time):
                 break
-            if find_new_angles_in_triangles(facts_generation, question):
+            if find_new_angles_in_triangles(facts_generation, question) or not check_time(start_time):
                 break
-            if find_simmilar_triangles(facts_generation, question):
+            if find_simmilar_triangles(facts_generation, question) or not check_time(start_time):
                 break
-            if facts_list_length == len(tp.solver_data.facts):
+            if facts_list_length == len(tp.solver_data.facts) or not check_time(start_time):
                 break
 
             facts_list_length = len(tp.solver_data.facts)

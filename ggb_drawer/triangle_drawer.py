@@ -273,7 +273,7 @@ def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, a_name, gamma_
 	return Shift(A, B, C)
 
 
-def CreateTriangle(sides, angles, angles_names, sides_names):
+def CreateTriangle(sides, angles, sides_links, angles_links, angles_names, sides_names):
 	if angles.count(None) <= 1:
 		test_angle = Size(180)
 
@@ -288,10 +288,10 @@ def CreateTriangle(sides, angles, angles_names, sides_names):
 
 		for i in range(3):
 			if sides[i]:
-				return CreateTriangleWithOneSideAndTwoAngles(sides[i], angles[i-1], angles[(i+1)%3], angles_names[i-1], angles_names[(i+1)%3])
+				return CreateTriangleWithOneSideAndTwoAngles(sides[i], angles[i - 1], angles[i - 2], angles_names[i - 1], angles_names[i - 2])
 		else:
-			random_index = randint(0,2)
-			return CreateTriangleWithOneSideAndTwoAngles(uniform(3, 6), angles[random_index-1], angles[(random_index+1)%3], angles_names[random_index-1], angles_names[(random_index+1)%3])
+			random_index = randint(0, 2)
+			return CreateTriangleWithOneSideAndTwoAngles(uniform(3, 6), angles[random_index - 1], angles[random_index - 2], angles_names[random_index - 1], angles_names[random_index - 2])
 
 	else:
 		for i in range(3):
@@ -313,15 +313,18 @@ def CreateTriangle(sides, angles, angles_names, sides_names):
 		else:
 			if sides.count(None) == 3:
 				sides[0] = uniform(3, 5)
+				# tp.find_segment_with_points(sides_names[0][0], sides_names[0][1]).size = Size(sides[0])
 
 			if sides.count(None) == 2:
 				for side in sides:
 					if side:
 						i = sides.index(side)
 				sides[i - 1] = sides[i] * uniform(0.5, 1.5)
+				# tp.find_segment_with_points(sides_names[i - 1][0], sides_names[i - 1][1]).size = Size(sides[i - 1])
 
 			if sides.count(None) == 1:
 				i = sides.index(None)
 				sides[i] = uniform(abs(sides[i - 1] - sides[i - 2]), sides[i - 1] + sides[i - 2])
+				# tp.find_segment_with_points(sides_names[i][0], sides_names[i][1]).size = Size(sides[i])
 
 			return CreateTriangleWithThreeSides(sides[0], sides[1], sides[2], angles_names[1])
