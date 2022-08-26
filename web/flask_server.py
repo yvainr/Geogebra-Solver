@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, redirect, url_for
 import logging
 import multiprocessing
 
@@ -29,6 +29,8 @@ PYW_ROUTE = ''
 # PYW_ROUTE = 'geogebra_app_release_version/Geogebra-Solver/web/' #comment if not pythonanywhere
 
 SOLVING_TIME_LIMIT = 20 #seconds
+
+SKIP_INTERNAL_LANGUAGE_INPUT = False
 
 # app.jinja_env.globals.update(to_str=to_str)
 app.jinja_env.globals.update(fact_output=fact_output)
@@ -130,7 +132,10 @@ def parse_text():
 
             # logger.info(f'Result of parsing:\n{parsed_text}')
 
-            return render_template("input.html", text=text, commands_text=parsed_text)
+            if not SKIP_INTERNAL_LANGUAGE_INPUT:
+                return render_template("input.html", text=text, commands_text=parsed_text)
+            else:
+                return redirect(url_for('analyze_text', text=text, text_commands=parsed_text))
 
     return render_template("input.html", text='', commands_text='')
 
@@ -138,12 +143,38 @@ def parse_text():
 @app.route('/analysis_commands', methods=('GET', 'POST'))
 def analyze_text():
     logger.info('Text commands analysis requested')
-    if request.method == 'POST':
+
+    text = ''
+    commands_text = ''
+
+    try:
         commands_text = request.form['text_commands']
+    except Exception as exc:
+        pass
+
+    try:
+        if not commands_text:
+            commands_text = request.args['text_commands']
+    except Exception as exc:
+        pass
+
+    try:
         text = request.form['text']
-        screen_width = int(request.form['screen-width'])
-        screen_height = int(request.form['screen-height'])
-        logger.info(f'SCREEN SIZE: WIDTH: {screen_width}, HEIGHT: {screen_height}')
+    except Exception as exc:
+        pass
+
+    try:
+        if not text:
+            text = request.args['text']
+    except Exception as exc:
+        pass
+
+
+    if request.method == 'POST' or commands_text:
+
+        # screen_width = int(request.form['screen-width'])
+        # screen_height = int(request.form['screen-height'])
+        # logger.info(f'SCREEN SIZE: WIDTH: {screen_width}, HEIGHT: {screen_height}')
         # print(commands_text)
         logger.info(f'Text of commands:\n{text}')
 
