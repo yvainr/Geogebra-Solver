@@ -25,6 +25,9 @@ app = Flask(__name__, template_folder='./templates',static_folder='./static')
 app.config['SECRET_KEY'] = 'abcdef12345678'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
+PYW_ROUTE = ''
+# PYW_ROUTE = 'geogebra_app_release_version/Geogebra-Solver/web/' #comment if not pythonanywhere
+
 SOLVING_TIME_LIMIT = 20 #seconds
 
 # app.jinja_env.globals.update(to_str=to_str)
@@ -63,7 +66,7 @@ def text_input(text='', commands_text=''):
     logger.info(f'Text:{text}')
     logger.info(f'Text commads:\n{commands_text}')
 
-    with open('static/quotes.txt', 'r') as fin:
+    with open(PYW_ROUTE + 'static/quotes.txt', 'r') as fin:
         quotes = fin.read()
 
     quotes = quotes.split('*')
@@ -89,7 +92,7 @@ def create():
 
             logger.info(f'Recieved geogebra commands: {commands}')
 
-            insert_commands(commands, input_file_name='templates/drawing_template.html', output_file_name='templates/geogebra_page.html')
+            insert_commands(commands, input_file_name=f'{PYW_ROUTE}templates/drawing_template.html', output_file_name=f'{PYW_ROUTE}templates/geogebra_page.html')
 
             return render_template('geogebra_page.html', commands_text=commands_text, type='commands')
 
@@ -144,7 +147,7 @@ def analyze_text():
         # print(commands_text)
         logger.info(f'Text of commands:\n{text}')
 
-        solving_template = 'templates/release_template.html'
+        solving_template = f'{PYW_ROUTE}templates/release_template.html'
 
         # logger.info(task_parser.angles)
         # logger.info(task_parser.segments)
@@ -172,12 +175,14 @@ def analyze_text():
 
             try:
                 fact_key = list(return_dict['facts'].keys())[0]
-            except IndexError:
-                return {}
 
-            question_fact = fact_key
-            solving_tree = return_dict['facts'][fact_key]['tree_levels']
+                question_fact = fact_key
+                solving_tree = return_dict['facts'][fact_key]['tree_levels']
 
+            except Exception as exc:
+                logger.info(f'ERROR: Question or fact tree not found\n{exc}')
+                question_fact = None
+                solving_tree = None
             # print(solving_tree)
 
             solving_finished = False
@@ -227,7 +232,7 @@ def analyze_text():
                                        )
             else:
                 logger.info('Question not found')
-                return_dict = text_splitter(commands_text, input_file_name='templates/drawing_template.html')
+                return_dict = text_splitter(commands_text, input_file_name=f'{PYW_ROUTE}templates/drawing_template.html')
 
                 if type(return_dict) == str:
                     logger.info(return_dict)
@@ -237,7 +242,13 @@ def analyze_text():
 
                 if return_dict['errors'] == [] and commands_text:
                     logger.info('Text commands splitted and inserted in geogebra')
-                    return render_template('geogebra_page.html', text=text, commands_text=commands_text, type='text')
+                    return render_template('geogebra_page.html',
+                                           text=text,
+                                           commands_text=commands_text,
+                                           type='text',
+
+                                           necessary_coords_size = get_necessary_coords_size(return_dict['data'].points) # TODO: можно заменить на taskp.solver_data.points
+                                           )
                 else:
                     flash('\n'.join(return_dict['errors']))
                     return render_template('input.html', text=text, commands_text=commands_text, type='text')
@@ -254,7 +265,7 @@ def analyze_text():
 
 @app.route('/instruction_edit2508', methods=('GET', 'POST'))
 def instruction():
-    with open('templates/instruction.html', 'r') as file:
+    with open(f'{PYW_ROUTE}templates/instruction.html', 'r') as file:
         text = file.read()
 
     logger.info('Instruction requested')
@@ -262,7 +273,7 @@ def instruction():
     if request.method == 'POST':
         logger.info('Instruction rewrite')
         text = request.form['instruction']
-        with open('templates/instruction.html', 'w') as file:
+        with open(f'{PYW_ROUTE}templates/instruction.html', 'w') as file:
             file.write(text)
 
     return render_template('instruction_input.html', text=text)

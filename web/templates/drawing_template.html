@@ -10,21 +10,88 @@
 </head>
 <body>
 <!--<div id="ggb-element" style="pointer-events: none"></div>-->
-<div id="ggb-element"></div>
+<div id="ggb_cell">
+    <div id="ggb-element"></div>
+</div>
 <!--<input value="Press this button to show construction" onclick="ggbOnInit()" type="button">-->
 <!--<h4>{{ text }}</h4>-->
 <form method="post" action="{{ url_for('index', commands_text=commands_text) if type == 'commands' else url_for('text_input', text=text, commands_text=commands_text)}}">
     <br>
     <div class="form-group col">
-        <button type="submit" class="btn btn-primary">Press this button to go back</button>
+        <button type="submit" class="btn btn-primary">Вернуться к вводу условия</button>
     </div>
 </form>
 <script src="https://geogebra.org/apps/deployggb.js"></script>
 
 <script type="text/javascript">
+    function Zoom_drawing() {
+        // alert('test');
+
+        let necessary_coords_size = {{ necessary_coords_size }};
+        // console.log(necessary_coords_size);
+
+        let drawing_size = [Math.abs(necessary_coords_size[0] - necessary_coords_size[2]), Math.abs(necessary_coords_size[1] - necessary_coords_size[3])];
+        let drawing_size_w_to_h = (drawing_size[0] / drawing_size[1]);
+        // console.log(drawing_size);
+        let ggb_applet_width = parseInt(document.getElementById('ggb_cell').offsetWidth, 10);
+        // ggb_applet_width = 604;
+        console.log(ggb_applet_width);
+        let ggb_applet_height = parseInt(document.getElementById('ggb_cell').offsetHeight, 10);
+        // ggb_applet_height = 200;
+        console.log(ggb_applet_height);
+
+        let ggb_applet_w_to_h = (ggb_applet_width / ggb_applet_height);
+
+        // if (drawing_size[1] > drawing_size[0]) {
+        if (drawing_size_w_to_h < ggb_applet_w_to_h) {
+            // console.log('vertical');
+            let w_to_h = (ggb_applet_width / ggb_applet_height);
+            // console.log(w_to_h);
+
+            let new_drawing_width = (drawing_size[1] * w_to_h);
+            // console.log(new_drawing_width);
+
+            x_mid_point = ((necessary_coords_size[0] + necessary_coords_size[2]) / 2);
+            // console.log(x_mid_point);
+
+            necessary_coords_size[2] = (x_mid_point + (new_drawing_width / 2));
+            necessary_coords_size[0] = (x_mid_point - (new_drawing_width / 2));
+        }
+        else {
+            // console.log('horizontal');
+            let h_to_w = (ggb_applet_height / ggb_applet_width );
+            // console.log(h_to_w);
+
+            let new_drawing_height = (drawing_size[0] * h_to_w);
+            // console.log(new_drawing_height);
+
+            y_mid_point = ((necessary_coords_size[1] + necessary_coords_size[3]) / 2);
+            // console.log(y_mid_point);
+
+            necessary_coords_size[3] = (y_mid_point + (new_drawing_height / 2));
+            necessary_coords_size[1] = (y_mid_point - (new_drawing_height / 2));
+        }
+
+
+
+        let str_coords = necessary_coords_size.toString();
+        // alert(ggb_applet_width + ' ' + ggb_applet_height);
+        // console.log(str_coords);
+        // console.log(`ZoomIn(${str_coords})`);
+        // console.log(ggbApplet.evalCommand(`ZoomIn(${str_coords})`));
+        ggbApplet.evalCommand(`ZoomIn(${str_coords})`);
+        // console.log('Zoomed');
+    }
+
+
+
     function ggbOnInit() {
 
 //////
+
+    ggbApplet.setGridVisible(true);
+
+    Zoom_drawing();
     }
     let width = 1400
     let height = 700
@@ -37,7 +104,8 @@
         "showToolBar": false,
         "showAlgebraInput": false,
         "showMenuBar": false,
-        "enableUndoRedo": true
+        "enableUndoRedo": true,
+        "filename": '../static/empty-geogebra.ggb'
     };
 
     var applet = new GGBApplet('5.0', params);
@@ -62,9 +130,9 @@
             for (let i = 0; i < mutation.addedNodes.length; i++) {
                 // do things to your newly added nodes here
                 let node = mutation.addedNodes[i];
-                // console.log(node)
+                // console.log(node.className)
 
-                if (node.textContent === '  GeoGebra Geometry ' || node.textContent === 'GeoGebra Geometry' && flag === 0){
+                if (node.className === 'DockGlassPane' && flag === 0){
 
                     flag = 1;
                     // console.log(flag);
