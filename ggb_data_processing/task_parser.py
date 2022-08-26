@@ -131,6 +131,7 @@ class Polygon:
         self.name = f"polygon_{''.join(get_points_names_from_list(vertices))}"
         self.sides = list()
         self.angles = list()
+        self.points_in = list()
         
         for i in range(len(self.points)):
             self.sides.append(find_segment_with_points(self.points[i].name, self.points[i - 1].name))
@@ -447,8 +448,11 @@ def points_in_polygon_create(text):
         for data in [task_data, solver_data]:
             points, polygon = text.split('in')
             points = points.split()
+            polygon = find_polygon_with_points(list(polygon.replace(' ', '')), data)
             for point in points:
-                find_point_with_name(point, data).in_polygon = find_polygon_with_points(list(polygon.replace(' ', '')), data)
+                point = find_point_with_name(point, data)
+                polygon.points_in.append(point)
+                point.in_polygon = polygon
 
 
 def questions_create(text):

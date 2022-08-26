@@ -1,4 +1,5 @@
 from math import tan, pi
+from random import uniform, choice
 from ggb_data_processing.objects_types import sqrt
 
 
@@ -51,6 +52,16 @@ def IsLineParallel(L1, L2):
 			else:
 				return 0
 	return 1
+
+
+def PointOnCircle(O, r):
+	if type(O) != tuple:
+		O = (O.x, O.y)
+
+	x = O[0] + uniform(-r, r)
+	y = sqrt(r**2 - (x - O[0])**2)
+
+	return x, choice((y + O[1], - y + O[1]))
 
 
 # перпендикулярная прямая через точку

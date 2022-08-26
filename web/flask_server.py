@@ -187,18 +187,18 @@ def analyze_text():
         # print(taskp.task_data)
         return_dict = {}
 
-        try:
-            return_dict = text_splitter(commands_text, input_file_name=solving_template)
-            if type(return_dict) == str:
-                logger.info(return_dict)
-                return_dict = {'errors': [return_dict]}
-            else:
-                return_dict['errors'] = []
+        # try:
+        return_dict = text_splitter(commands_text, input_file_name=solving_template)
+        if type(return_dict) == str:
+            logger.info(return_dict)
+            return_dict = {'errors': [return_dict]}
+        else:
+            return_dict['errors'] = []
 
-        except Exception as exc:
-            logger.info(exc)
-            logger.info('ERROR: Solver internal error')
-            return_dict['errors'] = ['Solver internal error']
+        # except Exception as exc:
+        #     logger.info(exc)
+        #     logger.info('ERROR: Solver internal error')
+        #     return_dict['errors'] = ['Solver internal error']
 
         # print(return_dict)
 

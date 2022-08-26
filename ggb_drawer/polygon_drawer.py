@@ -4,31 +4,48 @@ import ggb_drawer.triangle_drawer as td
 from ggb_data_processing import task_parser as tp
 import ggb_solver.normal_solver as ns
 from math import *
-from itertools import combinations, permutations
+from itertools import combinations
 from ggb_data_processing.objects_types import Objects
 from random import uniform
 from ggb_drawer.check_is_triangle_correct import check_triangle
 from ggb_data_processing.objects_types import Size
+from ggb_drawer.useful_geometry_functions import PointOnCircle
 
 
-def get_random_point_in_polygon(point_name, polygon):
+def check_is_point_in_polygon(find_point, polygon):
     new_polygon = list()
+
     for point in polygon.points:
         new_polygon.append((point.x, point.y))
+
+    poly = shapely.geometry.Polygon(new_polygon)
+
+    if find_point.x:
+        return poly.contains(shapely.geometry.Point(find_point.x, find_point.y))
+    return False
+
+
+def get_random_point_in_polygon(find_point, polygon):
+    new_polygon = list()
+
+    for point in polygon.points:
+        new_polygon.append((point.x, point.y))
+
     poly = shapely.geometry.Polygon(new_polygon)
     minx, miny, maxx, maxy = poly.bounds
+
+    if (not find_point.x and check_is_point_in_polygon(find_point, polygon)) or find_point.x:
+        return find_point
 
     while True:
         generated_point = shapely.geometry.Point(uniform(minx, maxx), uniform(miny, maxy))
         if poly.contains(generated_point):
-            find_point = tp.find_point_with_name(point_name)
             find_point.x, find_point.y = Size(generated_point.x), Size(generated_point.y)
 
             return find_point
 
 
 def get_triangle_parameter(A, B, C):
-
     AB = tp.find_segment_with_points(A, B).size
     BC = tp.find_segment_with_points(B, C).size
     CA = tp.find_segment_with_points(C, A).size
@@ -45,14 +62,15 @@ def get_triangle_parameter(A, B, C):
 
 
 def draw_polygon(points, realize_data):
-    ans_polygon = f'{tp.find_polygon_with_points(tp.get_points_names_from_list(points)).name}=Polygon('
+    ans_polygon = f'{tp.find_polygon_with_points(points).name}=Polygon('
     for point in points:
+        point = tp.find_point_with_name(point)
         realize_data.append(f"{point.name}({float(point.x.value)}, {float(point.y.value)})")
         ans_polygon += f"{point.name}, "
     ans_polygon = ans_polygon[:-2] + ')'
     realize_data.append(ans_polygon)
     for i in range(len(points)):
-        seg = tp.find_segment_with_points(points[i].name, points[i-1].name)
+        seg = tp.find_segment_with_points(points[i], points[i-1])
         A, B = seg.points
         realize_data.append(f"{seg.name}=Segment({A.name}, {B.name})")
         realize_data.append(f"SetVisibleInView({seg.name}, 1, false)")
@@ -102,7 +120,29 @@ def draw_lines_intersections(intersections, realize_data):
 
 def create_polygon(vertices):
     if len(vertices) == 2:
-        A, B = vertices
+        AB = tp.find_segment_with_points(vertices[0], vertices[1])
+        A, B = AB.points
+
+        if not AB.size:
+            AB.size = uniform(3, 6)
+
+        if A.x and not B.x:
+            B.x, B.y = PointOnCircle(A, AB.size)
+            if B.in_polygon:
+                for t in range(2000):
+                    if not check_is_point_in_polygon(B, B.in_polygon):
+                        B.x, B.y = PointOnCircle(A, AB.size)
+                    else:
+                        break
+
+        if B.x and not A.x:
+            A.x, A.y = PointOnCircle(B, AB.size)
+            if A.in_polygon:
+                for t in range(2000):
+                    if not check_is_point_in_polygon(A, A.in_polygon):
+                        A.x, A.y = PointOnCircle(B, AB.size)
+                    else:
+                        break
 
     if len(vertices) == 3:
         A, B, C = vertices
@@ -112,9 +152,7 @@ def create_polygon(vertices):
         if check.__class__.__name__ == 'str':
             return check
 
-        for points_with_cords in permutations(td.CreateTriangle(*get_triangle_parameter(A, B, C)), 3):
-            if (A, B, C) == (points_with_cords[0].name, points_with_cords[1].name, points_with_cords[2].name):
-                return points_with_cords
+        td.CreateTriangle(*get_triangle_parameter(A, B, C))
 
     if len(vertices) == 4:
         perspective_triangle = None
@@ -154,14 +192,15 @@ def text_splitter(text, input_file_name):
     solution = ns.solving_process()
 
     for polygon in text[0].split(','):
-        ret = create_polygon(tp.get_points_names_from_list(tp.find_polygon_with_points(list(polygon.replace(' ', ''))).points))
-        if type(ret) == str:
-            return ret
-        draw_polygon(ret, realize_data)
+        err = create_polygon(tp.get_points_names_from_list(tp.find_polygon_with_points(list(polygon.replace(' ', ''))).points))
+        if type(err) == str:
+            return err
+
+        draw_polygon(list(polygon.replace(' ', '')), realize_data)
 
     for point in tp.solver_data.points:
         if point.in_polygon:
-            get_random_point_in_polygon(point.name, point.in_polygon)
+            get_random_point_in_polygon(point, point.in_polygon)
             realize_data.append(f'{point.name}({point.x}, {point.y})')
 
     # draw_specific_points(realize_data)
