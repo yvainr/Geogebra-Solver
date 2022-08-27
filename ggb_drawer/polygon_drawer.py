@@ -50,15 +50,11 @@ def get_triangle_parameter(A, B, C):
     BC = tp.find_segment_with_points(B, C)
     CA = tp.find_segment_with_points(C, A)
 
-    sides, sides_names = [BC.size, CA.size, AB.size], [f"{B}{C}", f"{C}{A}", f"{A}{B}"]
-
     CBA = tp.find_angle_with_points(C, B, A)
     ACB = tp.find_angle_with_points(A, C, B)
     BAC = tp.find_angle_with_points(B, A, C)
 
-    angles, angles_names = [BAC.size, CBA.size, ACB.size], [f"{B}{A}{C}", f"{C}{B}{A}", f"{A}{C}{B}"]
-
-    return sides, angles, [BC, CA, AB], [BAC, CBA, ACB], angles_names, sides_names
+    return [BC, CA, AB], [BAC, CBA, ACB], [f"{B}{C}", f"{C}{A}", f"{A}{B}"], [f"{B}{A}{C}", f"{C}{B}{A}", f"{A}{C}{B}"]
 
 
 def draw_polygon(points, realize_data):
@@ -147,10 +143,14 @@ def create_polygon(vertices):
     if len(vertices) == 3:
         A, B, C = vertices
 
-        # проверка треугольников
-        check = check_triangle(*get_triangle_parameter(A, B, C)[:2])
-        if check.__class__.__name__ == 'str':
-            return check
+        # # проверка треугольников
+        # s = get_triangle_parameter(A, B, C)[:2]
+        # check = check_triangle(s[0], s[1])
+        # print(*s[0])
+        # print(*s[1])
+        # print(A, B, C)
+        # if check.__class__.__name__ == 'str':
+        #     return check
 
         td.CreateTriangle(*get_triangle_parameter(A, B, C))
 
