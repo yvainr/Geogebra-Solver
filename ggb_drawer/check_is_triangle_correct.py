@@ -109,7 +109,12 @@ def try_create_triangle_with_two_sides_and_angle_not_between_them(a, c, gamma):
         return False
 
 
-def check_triangle(sides, angles):
+def check_triangle(triangle_data):
+    sides, angles = triangle_data
+
+    sides = [sides[0].size, sides[1].size, sides[2].size]
+    angles = [angles[0].size, angles[1].size, angles[2].size]
+
     if check_if_positive(sides, angles):
         if check_angle_not_between_sides(sides, angles):
             if check_angles_of_triangle(angles):
