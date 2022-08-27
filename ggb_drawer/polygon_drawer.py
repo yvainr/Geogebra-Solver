@@ -143,10 +143,10 @@ def create_polygon(vertices):
     if len(vertices) == 3:
         A, B, C = vertices
 
-        # проверка треугольников
-        check = check_triangle(get_triangle_parameter(A, B, C)[:2])
-        if check.__class__.__name__ == 'str':
-            return check
+        # # проверка треугольников
+        # check = check_triangle(get_triangle_parameter(A, B, C)[:2])
+        # if check.__class__.__name__ == 'str':
+        #     return check
 
         td.CreateTriangle(*get_triangle_parameter(A, B, C))
 
@@ -211,7 +211,5 @@ def text_splitter(text):  # def text_splitter(text, input_file_name):
     # insert_commands(realize_data, input_file_name=input_file_name)
 
     solution['ggb_commands'] = realize_data
-
-
 
     return solution
