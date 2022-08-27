@@ -212,4 +212,6 @@ def text_splitter(text):  # def text_splitter(text, input_file_name):
 
     solution['ggb_commands'] = realize_data
 
+
+
     return solution

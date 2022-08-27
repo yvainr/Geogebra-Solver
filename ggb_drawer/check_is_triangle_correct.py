@@ -115,8 +115,8 @@ def check_triangle(triangle_data):
     sides = [sides[0].size, sides[1].size, sides[2].size]
     angles = [angles[0].size, angles[1].size, angles[2].size]
 
-    print(*sides)
-    print(*angles)
+    # print(*sides)
+    # print(*angles)
 
     if check_if_positive(sides, angles):
         if check_angle_not_between_sides(sides, angles):

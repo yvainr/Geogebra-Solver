@@ -181,17 +181,34 @@ def analyze_text():
         # logger.info(task_parser.angles)
         # logger.info(task_parser.segments)
         # logger.info(task_parser.polygons)
-        # logger.info(resp)
-        # print(taskp.task_data)
+
         return_dict = {}
 
-        # try:
-        return_dict = text_splitter(commands_text, input_file_name=solving_template)
+        return_dict = text_splitter(commands_text)
+
+        # TODO: раскомментировать перед заливом на продакшн
+        """
+        try:
+            return_dict = text_splitter(commands_text)
+        except Exception as exc:
+            logger.info(exc)
+            logger.info('ERROR: Solver internal error')
+            return_dict['errors'] = ['Solver internal error']
+        """
+
+
+
         if type(return_dict) == str:
             logger.info(return_dict)
             return_dict = {'errors': [return_dict]}
         else:
             return_dict['errors'] = []
+
+        try:
+            list_of_ggb_commands = return_dict['ggb_commands']
+        except Exception as exc:
+            logger.info(f'ERROR: GGB commands not found\n{exc}')
+            list_of_ggb_commands = []
 
         # except Exception as exc:
         #     logger.info(exc)
@@ -236,6 +253,8 @@ def analyze_text():
                 answer_fact = solving_tree_list[-1]
 
                 solving_facts = solving_tree_list
+
+                insert_commands(input_file_name=solving_template, list_of_commands=list_of_ggb_commands)
                 # print(solving_facts)
 
                 # for fact in [question_fact] + solving_facts:
@@ -261,7 +280,8 @@ def analyze_text():
                                        )
             else:
                 logger.info('Question not found')
-                return_dict = text_splitter(commands_text, input_file_name=f'{PYW_ROUTE}templates/drawing_template.html')
+                # return_dict = text_splitter(commands_text, input_file_name=f'{PYW_ROUTE}templates/drawing_template.html')
+                insert_commands(input_file_name=f'{PYW_ROUTE}templates/drawing_template.html', list_of_commands=list_of_ggb_commands)
 
                 if type(return_dict) == str:
                     logger.info(return_dict)
