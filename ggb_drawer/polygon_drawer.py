@@ -163,7 +163,7 @@ def create_polygon(vertices):
         A, B, C = td.CreateTriangle(*get_triangle_parameter(perspective_triangle[0], perspective_triangle[1], perspective_triangle[2]))
 
 
-def text_splitter(text, input_file_name):
+def text_splitter(text):  # def text_splitter(text, input_file_name):
     realize_data = list()
 
     tp.task_data = Objects()
@@ -208,6 +208,8 @@ def text_splitter(text, input_file_name):
 
     # set_screen_size(realize_data)
 
-    insert_commands(realize_data, input_file_name=input_file_name)
+    # insert_commands(realize_data, input_file_name=input_file_name)
+
+    solution['ggb_commands'] = realize_data
 
     return solution

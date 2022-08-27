@@ -115,6 +115,9 @@ def check_triangle(triangle_data):
     sides = [sides[0].size, sides[1].size, sides[2].size]
     angles = [angles[0].size, angles[1].size, angles[2].size]
 
+    print(*sides)
+    print(*angles)
+
     if check_if_positive(sides, angles):
         if check_angle_not_between_sides(sides, angles):
             if check_angles_of_triangle(angles):
@@ -126,7 +129,8 @@ def check_triangle(triangle_data):
                             return True
                             # return 'Error: Incorrect triangle (The angles do not correspond to the sides of the triangle).'
                     else:
-                        return 'Error: Incorrect triangle (The greater side must be opposite to the greater angle).'
+                        return True
+                        # return 'Error: Incorrect triangle (The greater side must be opposite to the greater angle).'
                 else:
                     return 'Error: Incorrect triangle (The triangle inequality is violated).'
             else:
