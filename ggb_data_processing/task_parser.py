@@ -412,6 +412,47 @@ def polygons_relations_create(text):
                 polygon_1.relations[polygon_2] = Size(rel)
                 polygon_2.relations[polygon_1] = 1 / Size(rel)
 
+                simmilar_fact_index = len(solver_data.facts)
+
+                solver_data.facts.append(Fact(
+                    len(solver_data.facts),
+                    0,
+                    'relation',
+                    [polygon_1, polygon_2],
+                    Size(rel)
+                ))
+                solver_data.facts.append(Fact(
+                    len(solver_data.facts),
+                    0,
+                    'relation',
+                    [polygon_2, polygon_1],
+                    1 / Size(rel)
+                ))
+
+                for i in range(len(relation.split()[0])):
+                    side_1 = find_segment_with_points(relation.split()[0][i], relation.split()[0][i - 1], data)
+                    side_2 = find_segment_with_points(relation.split()[0][i], relation.split()[0][i - 1], data)
+
+                    sides_first_relation_fact = Fact(
+                        len(solver_data.facts),
+                        1,
+                        'relation',
+                        [side_1, side_2],
+                        Size(rel)
+                    )
+                    solver_data.facts.append(sides_first_relation_fact)
+                    sides_first_relation_fact.root_facts.add(simmilar_fact_index)
+
+                    sides_second_relation_fact = Fact(
+                        len(solver_data.facts),
+                        1,
+                        'relation',
+                        [side_2, side_1],
+                        1 / Size(rel)
+                    )
+                    solver_data.facts.append(sides_second_relation_fact)
+                    sides_second_relation_fact.root_facts.add(simmilar_fact_index + 1)
+
 
 def line_intersection_create(text):
     if len(text.split()) > 0:

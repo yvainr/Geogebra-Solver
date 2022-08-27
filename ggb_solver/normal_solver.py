@@ -714,15 +714,16 @@ def create_null_facts_generation():
                 ang.addition[add_ang]
             ))
 
-    for pol in tp.solver_data.polygons:
-        for rel_pol in pol.relations:
-            tp.solver_data.facts.append(tp.Fact(
-                len(tp.solver_data.facts),
-                0,
-                'relation',
-                [pol, rel_pol],
-                pol.relations[rel_pol]
-            ))
+    # обрабатывается в task_parser
+    # for pol in tp.solver_data.polygons:
+    #     for rel_pol in pol.relations:
+    #         tp.solver_data.facts.append(tp.Fact(
+    #             len(tp.solver_data.facts),
+    #             0,
+    #             'relation',
+    #             [pol, rel_pol],
+    #             pol.relations[rel_pol]
+    #         ))
 
 
 def create_answer_tree(fact, tree, tree_levels, level=0):

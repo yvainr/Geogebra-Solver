@@ -7,12 +7,10 @@ from ggb_html_generator.geogebra_html_generator import insert_commands
 from ggb_drawer.polygon_drawer import text_splitter
 from ggb_text_processing.language_interpreter import text_analyze
 from web_facts_tools import get_dict_of_facts, get_necessary_coords_size
-# from Solver_alpha import to_str
 from fact_description.short_fact_description import fact_output
 from random import choice
 from ggb_solver.normal_solver import tree_levels_proccesing
 from fact_description.detailed_fact_description import pretty_detailed_description
-# from normal_solver import solving_process
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
