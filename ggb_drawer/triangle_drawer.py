@@ -341,6 +341,7 @@ def CreateTriangle(sides, angles, sides_names, angles_names):
 					pass
 
 			if [sides[0].size, sides[1].size, sides[2].size].count(None) == 2:
+
 				for side in sides:
 					if side.size:
 						i = sides.index(side)
@@ -351,6 +352,7 @@ def CreateTriangle(sides, angles, sides_names, angles_names):
 					sides[i - 2].size = sides[i - 1].size / sides[i - 1].relations[sides[i - 2]]
 
 			if [sides[0].size, sides[1].size, sides[2].size].count(None) == 1:
+
 				i = [sides[0].size, sides[1].size, sides[2].size].index(None)
 				sides[i].size = uniform(abs(sides[i - 1].size - sides[i - 2].size), sides[i - 1].size + sides[i - 2].size)
 

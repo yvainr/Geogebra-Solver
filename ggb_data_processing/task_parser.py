@@ -223,14 +223,14 @@ class Fact:
             except ValueError:
                 rel1, rel2 = self.value, 1
             draw_data.append(
-                f'text1=Text("{rel1}X", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + Distance({A.name}, {B.name}) * 0.125), false, true)')
+                f'text1=Text("{rel1}X", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + Distance({A.name}, {B.name}) * 0.05), false, true)')
             draw_data.append(
-                f'text2=Text("{rel2}X", ((x({C.name}) + x({D.name})) / 2, ((y({C.name}) + y({D.name})) / 2) + Distance({C.name}, {D.name}) * 0.125), false, true)')
+                f'text2=Text("{rel2}X", ((x({C.name}) + x({D.name})) / 2, ((y({C.name}) + y({D.name})) / 2) + Distance({C.name}, {D.name}) * 0.05), false, true)')
 
         elif self.fact_type == 'size' and self.objects[0].__class__.__name__ == 'Segment' and self.value:
             A, B = self.objects[0].points
             draw_data.append(
-                f'text=Text("{self.value}", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + Distance({A.name}, {B.name}) * 0.125), true, true)')
+                f'text=Text("{self.value}", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + Distance({A.name}, {B.name}) * 0.05), true, true)')
 
         return draw_data
 
