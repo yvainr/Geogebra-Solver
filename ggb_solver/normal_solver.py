@@ -793,3 +793,4 @@ def solving_process():
             solutions[question] = {'tree': {}, 'tree_levels': []}
 
     return {'facts': solutions, 'data': tp.solver_data}
+
