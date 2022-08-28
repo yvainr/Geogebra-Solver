@@ -543,7 +543,7 @@ def questions_create(text):
 
 
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
-def find_segment_with_points(A, B, data=None):
+def find_segment_with_points(A, B, data=None, update_list=True):
     if not data:
         data = solver_data
 
@@ -554,9 +554,10 @@ def find_segment_with_points(A, B, data=None):
         if {a, b} == set(seg.points):
             return seg
 
-    new_segment = Segment(a, b)
-    data.segments.append(new_segment)
-    return new_segment
+    if update_list:
+        new_segment = Segment(a, b)
+        data.segments.append(new_segment)
+        return new_segment
 
 
 # вспомогательная функция для поиска прямой по точкам на ней, указываются имена точек

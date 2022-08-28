@@ -9,7 +9,7 @@ from ggb_text_processing.language_interpreter import text_analyze
 from web_facts_tools import get_dict_of_facts, get_necessary_coords_size
 from fact_description.short_fact_description import fact_output
 from random import choice
-from ggb_solver.normal_solver import tree_levels_proccesing
+from ggb_solver.normal_solver import tree_levels_processing
 from fact_description.detailed_fact_description import pretty_detailed_description
 
 logging.basicConfig(
@@ -243,7 +243,7 @@ def analyze_text():
             if solving_finished and question_fact:
                 logger.info('Question found')
 
-                solving_tree = tree_levels_proccesing(solving_tree)
+                solving_tree = tree_levels_processing(solving_tree)
                 fact_to_delete_duplicates = solving_tree
 
                 sorted_facts = [ii for n,ii in enumerate(fact_to_delete_duplicates) if ii not in fact_to_delete_duplicates[:n]]
