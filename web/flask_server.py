@@ -6,7 +6,7 @@ from ggb_data_processing import task_parser as taskp
 from ggb_html_generator.geogebra_html_generator import insert_commands
 from ggb_drawer.polygon_drawer import text_splitter
 from ggb_text_processing.language_interpreter import text_analyze
-from web_facts_tools import get_dict_of_facts, get_necessary_coords_size
+from web.web_facts_tools import get_dict_of_facts, get_necessary_coords_size
 from fact_description.short_fact_description import fact_output
 from random import choice
 from ggb_solver.normal_solver import tree_levels_processing

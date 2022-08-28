@@ -143,10 +143,10 @@ def create_polygon(vertices):
     if len(vertices) == 3:
         A, B, C = vertices
 
-        # # проверка треугольников
-        # check = check_triangle(get_triangle_parameter(A, B, C)[:2])
-        # if check.__class__.__name__ == 'str':
-        #     return check
+        # проверка треугольников
+        check = check_triangle(get_triangle_parameter(A, B, C)[:2])
+        if check.__class__.__name__ == 'str':
+            return check
 
         td.CreateTriangle(*get_triangle_parameter(A, B, C))
 
@@ -189,7 +189,7 @@ def text_splitter(text):  # def text_splitter(text, input_file_name):
 
     for polygon in text[0].split(','):
         err = create_polygon(list(polygon.replace(' ', '')))
-        if type(err) == str:
+        if err:
             return err
 
         draw_polygon(list(polygon.replace(' ', '')), realize_data)
