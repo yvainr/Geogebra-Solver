@@ -71,7 +71,8 @@
 
 
         <div class="col 2 col-15">
-            <div class="btn-toolbar" id="short_cuts"></div>
+            <div class="btn-toolbar" id="short_cut_letters"></div>
+            <div class="btn-toolbar" id="short_cut_symbols" style="margin-top: 1em;"></div>
         </div>
 
         <br><br>
@@ -140,16 +141,20 @@
             // window.onscroll = function () { window.scrollTo(0, 0)};
 
 
-            let short_cuts_symbols = 'ABCDEFHIM∠=△,'.split('');
+            let short_cuts_letters = 'ABCDEFHIM'.split('');
+            let short_cuts_symbols = '∠=△,'.split('');
+
+            for (s in short_cuts_letters) {
+
+                sym = short_cuts_letters[s];
+                document.getElementById('short_cut_letters').innerHTML += `<button style="touch-action: manipulation;" class="btn btn-light btn-sm mr-2 md-2 active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
+            }
 
             for (s in short_cuts_symbols) {
 
-
-                
                 sym = short_cuts_symbols[s];
-                document.getElementById('short_cuts').innerHTML += `<button style="touch-action: manipulation;" class="btn btn-light btn-md mr-2 active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
+                document.getElementById('short_cut_symbols').innerHTML += `<button style="touch-action: manipulation;" class="btn btn-light btn-md mr-2 md-2 active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
             }
-
 
 
             document.getElementById("loading").hidden = true;
@@ -157,7 +162,8 @@
             document.getElementById("solve-button").onclick = function () {
                 document.getElementById("text-input-block").hidden = true;
                 document.getElementById("parse-result-block").hidden = true;
-                document.getElementById("short_cuts").hidden = true;
+                document.getElementById("short_cut_letters").hidden = true;
+                document.getElementById("short_cut_symbols").hidden = true;
                 document.getElementById("loading").hidden = false;
 
             }

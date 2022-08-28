@@ -14,8 +14,17 @@ def text_analyze(inp_str, output_num=7):
     ret = new_assign_to_classes(statement)
     ret = list(ret)
 
+    # TODO: Kate must rewrite this part to her own idea of the ideal
+
+    """
     if question_existence:  # analyze question if exist
-        ret.append(question_processing(question))
+        ret.append(question)
+    """
+
+    if question_existence:  # analyze question if exist
+        question_line = question_processing(question)
+        ret = ret + ['\n'] * (9 - len(ret)) + [question_line]
+        # ret.append()
 
     for i in range(output_num):
         ret[i] = str(ret[i])

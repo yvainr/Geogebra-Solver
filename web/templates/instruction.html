@@ -1,28 +1,200 @@
-<html>
-<font size="4" color="black" face="geneva">
- <body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-<h4>Правила ввода:</h4>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-<p> Условие задачи записывается по типу «дано»: факты пишутся в одной строке и отделяются друг от друга <u>запятой</u>, в каждом блоке не более одного. </p>
+    <title>Geogebra solver insturction</title>
+  </head>
+  <body>
+<!--  <div class="container">-->
+<!--        {% for message in get_flashed_messages() %}-->
+<!--            <div class="alert alert-danger">{{ message }}</div>-->
+<!--        {% endfor %}-->
+<!--  </div>-->
 
-<p> Каждый объект должен быть назван, причем <u>заглавными латинскими буквами</u>. Числовые значения заданы арабскими цифрами, <u>отделены</u> от других символов пробелами. Нецелые числа записываются с точкой, обыкновенные дроби и отрицательные значения не обрабатываются. </p>
+  <div class="col 3" style="font-size: 18px">
+      <h2>Правила ввода:</h2>
+      <p>
+          1. Условие задачи записывается по типу «дано»: факты пишутся в одной строке и отделяются друг от друга запятой или союзом "и", в каждом блоке не более одного.
+          <br>
+          Пример:
+          <textarea class="form-control"
+                    rows="1">Треугольник ABC, угол BAC равен 40, угол BAC относится к ABC как 4/5</textarea>
+      </p>
 
-<p> Прямые обозначаются двумя точками. Углы задаются тремя точками или двумя прямыми. Равенство объектов в условии и вопросе отмечается знаком "=", отделённым от названий элементов пробелами.</p>
+      <p>
+          2. Каждый объект должен быть назван, причем заглавными латинскими буквами. Числовые значения заданы арабскими цифрами, отделены от других символов пробелами. Нецелые числа записываются с точкой, отрицательные значения не обрабатываются, а отношение объектов вносится через обыкновенные дроби.
+          <br>
+          Пример:
+          <textarea class="form-control"
+                    rows="1">Треугольник ABC, сторона AB = 4.5, угол BAC относится к ABC как 4/5</textarea>
+      </p>
+      <p>
+          3. Прямые обозначаются двумя точками. Углы задаются тремя точками. Многоугольники, прямые и лучи вводятся вместе с типом элемента (треугольник, прямая, луч).
+          <br>
+          Пример:
+          <textarea class="form-control"
+                    rows="1">Прямая AB, луч BC, угол BAC</textarea>
+      </p>
+      <br>
 
-<p> Введеный текст не должен содержать заглавных латинских букв, за исключением названий объектов. Точка для сокращения слов и в конце текста не ставится. </p>
+      <p>
+          4. Вопрос задачи вводится второй строкой.
+          <br>
+          Пример:
+          <textarea class="form-control"
+                    rows="2">Треугольник ABC, угол BAC равен 40, угол BAC относится к ABC как 4/5&#13;Найти угол ABC</textarea>
+      </p>
 
-<p> Вопрос задачи вводится второй строкой.</p>
+      <br>
 
-<h4> Пример: </h4>
-<p> Треугольник ABC, AB = 10, угол BAC равен 40, AC относится к AB как 3/5, I - точка пересечения биссектрис ABC <br> Найти угол ABC </p>
+      <p>
+          5. Введеный текст не должен содержать заглавных латинских букв, за исключением названий объектов. Точка для сокращения слов и в конце текста не ставится.
+      </p>
 
-<h4> Информация о временной версии для тестировщиков: </h4>
+      <br>
 
-<p> Для ввода равенства многоугольников необходимо писать тип фигуры, для записи подобия и отношений других элементов это не требуется. <br> Появилась возможность вводить алгебраическую сумму углов и отрезков, пока её нужно писать словами, используя "больше"/"меньше" или "сумма". </p>
+      <h2>Примеры:</h2>
+      <p>
+          <textarea class="form-control"
+                    rows="2">Треугольник ABC, угол BAC равен 40, угол BAC относится к ABC как 4/5&#13;Найти угол ABC</textarea>
+          <br>
 
-<p> Сейчас поддерживается: ввод названий и величин, равенство, отношение и подобие, сумма и разность углов и отрезков, замечательные точки, пересечение прямых, указание невыпуклости многоугольника, точки внутри многоугольника, а также вопросы на эти темы.</p>
+         <button class="btn btn-sm btn-primary" onclick="location.href='http://geogebra0drawer.pythonanywhere.com/?text=Треугольник+ABC%2C+угол+BAC+равен+40%2C+угол+BAC+относится+к+ABC+как+4%2F5+%0D%0AНайти+угол+ABC&commands_text=ABC%0D%0A%0D%0ABAC+40%0D%0A%0D%0ABAC+ABC+4%2F5%0D%0A%0D%0A%0D%0A%0D%0A%0D%0AABC++%3F'" >Посмотреть</button>
 
-</body>
-</font>
+      </p>
+      <br>
+      <p>
+          <textarea class="form-control"
+                    rows="2">Треугольник ABC, треугольник DEF, AB = 10, треугольник ABC относится к DEF как 1/2&#13;Найти DE</textarea>
+
+          <br>
+          <button class="btn btn-sm btn-primary" onclick="location.href='http://geogebra0drawer.pythonanywhere.com/?text=Треугольник+ABC%2C+треугольник+DEF%2C+AB+%3D+10%2C+треугольник+ABC+относится+к+DEF+как+1%2F2+%0D%0AНайти+DE&commands_text=ABC%2C+DEF%0D%0AAB+10%0D%0A%0D%0A%0D%0A%0D%0AABC+DEF+1%2F2%0D%0A%0D%0A%0D%0A%0D%0ADE++%3F'" >Посмотреть</button>
+      </p>
+      <br>
+      <p>
+          <textarea class="form-control"
+                    rows="2">Треугольник ABC, угол ABC равен 20, сумма углов BAC с ABC равна 100&#13;Найти угол BAC</textarea>
+
+          <br>
+          <button class="btn btn-sm btn-primary" onclick="location.href='http://geogebra0drawer.pythonanywhere.com/?text=Треугольник+ABC%2C+угол+ABC+равен+20+%2C+сумма+углов+BAC+с+ABC+равна+100+%0D%0AНайти+угол+BAC%0D%0A&commands_text=ABC%0D%0A%0D%0AABC+20%0D%0A%0D%0ABAC%2B+ABC+100%0D%0A%0D%0A%0D%0A%0D%0A%0D%0ABAC++%3F'" >Посмотреть</button>
+      </p>
+
+      <br>
+
+      <h2>Кнопки быстрого ввода:</h2>
+
+      <p>
+          Кнопки быстрого ввода можно использовать вместо стандартного ввода текста с клавиатуры, при их использовании действуют те же правила, что и при обычном вводе.
+      </p>
+      <textarea class="form-control"
+                rows="1"
+                placeholder="Попробуйте ввод здесь"
+                id="task_area"></textarea>
+
+      <br>
+
+      <div class="col 2 col-15">
+            <div class="btn-toolbar" id="short_cuts"></div>
+      </div>
+
+      <br><br>
+
+      <i>
+      <h2>Информация о временной версии для тестировщиков:</h2>
+      <p>
+          Для ввода равенства многоугольников необходимо писать тип фигуры, для записи подобия и отношений других элементов это не требуется.
+          <br>
+          Появилась возможность вводить алгебраическую сумму углов и отрезков, пока её нужно писать словами, используя "больше"/"меньше" или "сумма".
+      </p>
+      <p>
+          Сейчас поддерживается: ввод названий и величин, равенство, отношение и подобие, сумма и разность углов и отрезков, замечательные точки, пересечение прямых, указание невыпуклости многоугольника, точки внутри многоугольника, а также вопросы на эти темы.
+      </p>
+      </i>
+  </div>
+<!--  <h3> {{ commands_text }} </h3>-->
+
+
+<!--    <div class="container">-->
+<!--        {% for message in get_flashed_messages() %}-->
+<!--            <div class="alert alert-danger">{{ message }}</div>-->
+<!--        {% endfor %}-->
+<!--        {% block content %} {% endblock %}-->
+<!--    </div>-->
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script type="text/javascript">
+        let short_cuts_symbols = 'ABCDEFHIM∠=△,'.split('');
+
+            for (s in short_cuts_symbols) {
+
+
+
+                sym = short_cuts_symbols[s];
+                document.getElementById('short_cuts').innerHTML += `<button style="touch-action: manipulation;" class="btn btn-light btn-md mr-2 active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
+            }
+
+
+
+            document.getElementById("loading").hidden = true;
+
+            document.getElementById("solve-button").onclick = function () {
+                document.getElementById("text-input-block").hidden = true;
+                document.getElementById("parse-result-block").hidden = true;
+                document.getElementById("short_cuts").hidden = true;
+                document.getElementById("loading").hidden = false;
+
+            }
+
+            function Get_screen_size() {
+                document.getElementById("screen-width-container").value = document.documentElement.clientWidth;
+                document.getElementById("screen-height-container").value = document.documentElement.clientHeight;
+            }
+
+            window.addEventListener('orientationchange', Get_screen_size);
+            window.addEventListener('resize', Get_screen_size);
+
+            Get_screen_size();
+
+            function Add_text_to_task(text, sep=false) {
+                let area = document.getElementById('task_area');
+
+                if (sep) {
+                    text = ' ' + text + ' ';
+                }
+
+                if (text === '=') {
+                    text = ' = ';
+                }
+
+                if (text === ',') {
+                    text = ', ';
+                }
+
+                if (text === '△' && area.value.slice(-1) !== ' ' && area.value.length > 0) {
+                    text = ' △';
+                }
+
+                area.value += text;
+
+                let end = area.value.length;
+
+                area.setSelectionRange(end, end);
+
+                // area.setFocusAt(area.value.length);
+            }
+        $('body').bind('touchmove', function(event) { event.preventDefault() }); // turns off
+    </script>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
 </html>

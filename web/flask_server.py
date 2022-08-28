@@ -6,7 +6,7 @@ from ggb_data_processing import task_parser as taskp
 from ggb_html_generator.geogebra_html_generator import insert_commands
 from ggb_drawer.polygon_drawer import text_splitter
 from ggb_text_processing.language_interpreter import text_analyze
-from web_facts_tools import get_dict_of_facts, get_necessary_coords_size
+from web.web_facts_tools import get_dict_of_facts, get_necessary_coords_size
 from fact_description.short_fact_description import fact_output
 from random import choice
 from ggb_solver.normal_solver import tree_levels_proccesing
@@ -24,7 +24,8 @@ app.config['SECRET_KEY'] = 'abcdef12345678'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 PYW_ROUTE = ''
-# PYW_ROUTE = 'geogebra_app_release_version/Geogebra-Solver/web/' #comment if not pythonanywhere
+# PYW_ROUTE = 'geogebra_app_dev/Geogebra-Solver/web/' #comment if not pythonanywhere DEV
+# PYW_ROUTE = 'geogebra_app_release_version/Geogebra-Solver/web/' #comment if not pythonanywhere MAIN
 
 SOLVING_TIME_LIMIT = 20 #seconds
 
@@ -66,12 +67,14 @@ def text_input(text='', commands_text=''):
     logger.info(f'Text:{text}')
     logger.info(f'Text commads:\n{commands_text}')
 
-    with open(PYW_ROUTE + 'static/quotes.txt', 'r') as fin:
+    with open(f'{PYW_ROUTE}static/quotes.txt', 'r') as fin:
         quotes = fin.read()
 
     quotes = quotes.split('*')
 
     quote = choice(quotes)
+    # print('QUOTE')
+    # print(quote)
 
     # print(repr(commands_text))
     return render_template('input.html', text=text, commands_text=commands_text, quote=quote)
@@ -221,6 +224,8 @@ def analyze_text():
 
             try:
                 fact_key = list(return_dict['facts'].keys())[0]
+                # print(return_dict['facts'])
+                # print(list(return_dict['facts'].keys()))
 
                 question_fact = fact_key
                 solving_tree = return_dict['facts'][fact_key]['tree_levels']
