@@ -189,7 +189,7 @@ def text_splitter(text):  # def text_splitter(text, input_file_name):
 
     for polygon in text[0].split(','):
         err = create_polygon(list(polygon.replace(' ', '')))
-        if type(err) == str:
+        if err:
             return err
 
         draw_polygon(list(polygon.replace(' ', '')), realize_data)
@@ -211,7 +211,5 @@ def text_splitter(text):  # def text_splitter(text, input_file_name):
     # insert_commands(realize_data, input_file_name=input_file_name)
 
     solution['ggb_commands'] = realize_data
-
-
 
     return solution

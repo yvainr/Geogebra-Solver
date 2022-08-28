@@ -310,9 +310,8 @@ def CreateTriangle(sides, angles, sides_names, angles_names):
 				else:
 					sides[i - 1].size = Size(uniform(3, 6))
 
-					for rel in sides[i - 1].relations:
-						if rel == sides[i - 2]:
-							sides[i - 2].size = sides[i - 1].size / sides[i - 1].relations[rel]
+					if sides[i - 2] in sides[i - 1].relations:
+						sides[i - 2].size = sides[i - 1].size / sides[i - 1].relations[sides[i - 2]]
 					else:
 						sides[i - 2].size = Size(uniform(3, 6))
 
@@ -346,10 +345,16 @@ def CreateTriangle(sides, angles, sides_names, angles_names):
 					if side.size:
 						i = sides.index(side)
 
-				sides[i - 1].size = sides[i].size * uniform(0.5, 1.5)
-
 				if sides[i - 2] in sides[i - 1].relations:
+					sides[i - 1].size = uniform(sides[i].size * 1.25, sides[i].size * 3) / (1 + 1 / sides[i - 1].relations[sides[i - 2]])
 					sides[i - 2].size = sides[i - 1].size / sides[i - 1].relations[sides[i - 2]]
+
+					while min(sides[i - 1].size, sides[i - 2].size) + sides[i].size <= max(sides[i - 1].size, sides[i - 2].size):
+						sides[i - 1].size *= 0.8
+						sides[i - 2].size *= 0.8
+
+				else:
+					sides[i - 1].size = sides[i].size * uniform(0.5, 1.5)
 
 			if [sides[0].size, sides[1].size, sides[2].size].count(None) == 1:
 
