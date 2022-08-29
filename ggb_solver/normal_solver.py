@@ -3,7 +3,7 @@ import ggb_data_processing.task_parser as tp
 from time import time
 from itertools import combinations, permutations
 from ggb_data_processing.objects_types import Size, sqrt
-from pprint import pprint
+# from pprint import pprint
 # from fact_description.detailed_fact_description import pretty_detailed_description
 
 # sys.setrecursionlimit(2000)
@@ -126,51 +126,50 @@ def count_sizes_of_angles_and_segments(facts_generation, actual_question, iterat
                         if check_is_fact_answer(size_fact, actual_question, facts_generation):
                             return True
 
-                else:
-                    real_sum = fact.value
-                    none_value_list = list()
-                    continue_find = True
+                real_sum = fact.value
+                none_value_list = list()
+                continue_find = True
 
-                    for obj in fact.objects:
-                        if obj.size:
-                            real_sum -= obj.size
-                        else:
-                            none_value_list.append(obj)
+                for obj in fact.objects:
+                    if obj.size:
+                        real_sum -= obj.size
+                    else:
+                        none_value_list.append(obj)
 
-                    for n_obj in none_value_list:
-                        n_obj_relations = [1]
+                for n_obj in none_value_list:
+                    n_obj_relations = [1]
 
-                        for obj in none_value_list:
-                            if n_obj in obj.relations:
-                                n_obj_relations.append(obj.relations[n_obj])
+                    for obj in none_value_list:
+                        if n_obj in obj.relations:
+                            n_obj_relations.append(obj.relations[n_obj])
 
-                        if len(n_obj_relations) == len(none_value_list):
-                            n_obj.size = real_sum / sum(n_obj_relations)
-                            size_fact = tp.Fact(
-                                len(tp.solver_data.facts),
-                                facts_generation,
-                                'size',
-                                [n_obj],
-                                n_obj.size
-                            )
-                            tp.solver_data.facts.append(size_fact)
-                            size_fact.root_facts.add(i)
+                    if len(n_obj_relations) == len(none_value_list):
+                        n_obj.size = real_sum / sum(n_obj_relations)
+                        size_fact = tp.Fact(
+                            len(tp.solver_data.facts),
+                            facts_generation,
+                            'size',
+                            [n_obj],
+                            n_obj.size
+                        )
+                        tp.solver_data.facts.append(size_fact)
+                        size_fact.root_facts.add(i)
 
-                            for root_fact in fact.objects:
-                                if root_fact != n_obj:
-                                    if root_fact.size:
-                                        size_fact.root_facts.add(find_fact_id_with_objects([root_fact], 'size'))
-                                    else:
-                                        size_fact.root_facts.add(find_fact_id_with_objects([n_obj, root_fact], 'relation'))
+                        for root_fact in fact.objects:
+                            if root_fact != n_obj:
+                                if root_fact.size:
+                                    size_fact.root_facts.add(find_fact_id_with_objects([root_fact], 'size'))
+                                else:
+                                    size_fact.root_facts.add(find_fact_id_with_objects([n_obj, root_fact], 'relation'))
 
-                            if check_is_fact_answer(size_fact, actual_question, facts_generation):
-                                return True
+                        if check_is_fact_answer(size_fact, actual_question, facts_generation):
+                            return True
 
-                            continue_find = False
-                            break
-
-                    if not continue_find:
+                        continue_find = False
                         break
+
+                if not continue_find:
+                    break
 
 
 def find_simmilar_triangles(facts_generation, actual_question):

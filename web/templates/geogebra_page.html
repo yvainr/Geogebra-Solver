@@ -1,29 +1,443 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script type="text/javascript" id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <title>Test geogebra</title>
 </head>
 <body>
-<!--<div id="ggb-element" style="pointer-events: none"></div>-->
-<div id="ggb_cell">
-    <div id="ggb-element"></div>
-</div>
-<!--<input value="Press this button to show construction" onclick="ggbOnInit()" type="button">-->
-<!--<h4>{{ text }}</h4>-->
-<form method="post" action="{{ url_for('index', commands_text=commands_text) if type == 'commands' else url_for('text_input', text=text, commands_text=commands_text)}}">
-    <br>
-    <div class="form-group col">
-        <button type="submit" class="btn btn-primary">Вернуться к вводу условия</button>
-    </div>
-</form>
-<script src="https://geogebra.org/apps/deployggb.js"></script>
+
+<script src="https://cdn.geogebra.org/apps/deployggb.js"></script>
 
 <script type="text/javascript">
+    var current_shown_id = -1;
+    var current_highlighted_ids = [];
+
+    function ClearHighlight(){
+        if (current_highlighted_ids !== []){
+            // console.log(current_highlighted_ids);
+            for (var i in current_highlighted_ids){
+                document.getElementById((current_highlighted_ids[i]).toString() + "_fact").style.background = "white";
+            }
+
+
+            current_highlighted_ids = [];
+
+        }
+    }
+
+    function HighlightList(facts_to_highlight){
+        for (var j in facts_to_highlight){
+            // console.log(facts_to_highlight[j])
+            document.getElementById(facts_to_highlight[j].toString() + "_fact").style.background = "#A0F2FD";
+            current_highlighted_ids = facts_to_highlight;
+        }
+    }
+
+    function Convert_all_highlight_buttons_to_show() {
+        {% for fact in facts %}
+            if (document.getElementById(({{fact.id}}).toString() + "_hide_highlight_button").hidden !== true) {
+                document.getElementById(({{fact.id}}).toString() + "_hide_highlight_button").click();
+            }
+        {% endfor %}
+
+        ClearHighlight();
+    }
+
+    function Convert_all_show_hide_buttons_to_show() {
+        {% for fact in facts %}
+            if (document.getElementById(({{fact.id}}).toString() + "_hide_button").hidden !== true) {
+                document.getElementById(({{fact.id}}).toString() + "_hide_button").click();
+            }
+        {% endfor %}
+    }
+
+    function Highlight(fact_id, list_of_reason_facts) {
+
+        // ClearHighlight();
+        Convert_all_highlight_buttons_to_show();
+        HighlightList(list_of_reason_facts);
+
+        document.getElementById((fact_id).toString() + "_hide_highlight_button").hidden = false;
+        document.getElementById((fact_id).toString() + "_show_highlight_button").hidden = true;
+        document.getElementById((fact_id).toString() + "_description_block").hidden = false;
+
+    }
+
+    function Remove_highlight(fact_id) {
+        Convert_all_highlight_buttons_to_show();
+        document.getElementById((fact_id).toString() + "_hide_highlight_button").hidden = true;
+        document.getElementById((fact_id).toString() + "_show_highlight_button").hidden = false;
+        document.getElementById((fact_id).toString() + "_description_block").hidden = true;
+
+    }
+
+    function Show_fact(fact_id, list_of_ggb_commands) {
+        Convert_all_show_hide_buttons_to_show();
+        document.getElementById((fact_id).toString() + "_hide_button").hidden = false;
+        document.getElementById((fact_id).toString() + "_show_button").hidden = true;
+
+
+        for (var c in list_of_ggb_commands) {
+            // console.log(list_of_ggb_commands[c]);
+            ggbApplet.evalCommand(list_of_ggb_commands[c]);
+        }
+
+
+    }
+
+    function Hide_fact(fact_id, list_of_ggb_commands) {
+        Convert_all_show_hide_buttons_to_show();
+        document.getElementById((fact_id).toString() + "_hide_button").hidden = true;
+        document.getElementById((fact_id).toString() + "_show_button").hidden = false;
+
+        for (var c in list_of_ggb_commands) {
+            ggbApplet.evalCommand(list_of_ggb_commands[c]);
+        }
+    }
+
+    function ggbOnInit() {
+
+            ggbApplet.evalCommand('A(2.8237041021201463, 3.5320838022413863)'); 
+            ggbApplet.evalCommand('B(4.130044907620831, -2.2555516603107977)'); 
+            ggbApplet.evalCommand('C(0.922998182041497, 2.736251806118814)'); 
+            ggbApplet.evalCommand('polygon_ABC=Polygon(A, B, C)'); 
+            ggbApplet.evalCommand('segment_AC=Segment(A, C)'); 
+            ggbApplet.evalCommand('SetVisibleInView(segment_AC, 1, false)'); 
+            ggbApplet.evalCommand('segment_BA=Segment(B, A)'); 
+            ggbApplet.evalCommand('SetVisibleInView(segment_BA, 1, false)'); 
+            ggbApplet.evalCommand('segment_CB=Segment(C, B)'); 
+            ggbApplet.evalCommand('SetVisibleInView(segment_CB, 1, false)'); 
+
+
+        // Zoom_drawing();
+    // Scale_window();
+
+
+    }
+
+
+    var flag = 0;
+
+    var params = {
+        "appName": "geometry",
+        "width": document.documentElement.clientWidth - 440,
+        "height": document.documentElement.clientHeight - 100,
+        "showToolBar": false,
+        "showAlgebraInput": false,
+        "showLogging": false,
+        "showToolBarHelp":false,
+        // "framePossible": false,
+        // "showAlgebraView": false,
+        "showMenuBar": false,
+        "filename": '../static/empty-geogebra.ggb'
+
+        // "showToolBar":false,
+        // "borderColor":null,
+        // "showMenuBar":false,
+        // "showAlgebraInput":false,
+        // "showResetIcon":true,
+        // "enableLabelDrags":false,
+        // "enableShiftDragZoom":true,
+        // "enableRightClick":false,
+        // "capturingThreshold":null,
+        // "showToolBarHelp":false,
+        // "errorDialogsActive":true,
+        // "useBrowserForJS": true
+    };
+
+    var applet = new GGBApplet('5.0', params);
+    window.addEventListener("load", function () {
+            applet.inject('ggb-element');
+
+        }
+    );
+    let observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (!mutation.addedNodes) return
+
+            // console.log(mutation.addedNodes);
+
+            if (mutation.addedNodes.length === 0 && flag === 1){
+
+                    ggbOnInit();
+                    // ggbApplet.setAxesVisible(true, true);
+                    ggbApplet.setGridVisible(true);
+
+                    Scale_window();
+
+                    setTimeout(Zoom_drawing, 0);
+
+                    flag = 2;
+                }
+
+            for (let i = 0; i < mutation.addedNodes.length; i++) {
+                // do things to your newly added nodes here
+                let node = mutation.addedNodes[i];
+                // console.log(node.className)
+
+                if (node.className === 'DockGlassPane' && flag === 0){
+
+                    flag = 1;
+                    // console.log(flag);
+
+                }
+
+            }
+        })
+    })
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: false,
+        characterData: false
+    })
+
+
+
+    // stop watching using:
+    // observer.disconnect()
+</script>
+
+<table border="0" cellpadding="10" cellspacing="0" width="100%" id="main_table">
+<!--    <col style="width:60%">-->
+<!--    <col style="width:40%">-->
+    <tr>
+        <td valign="top" colspan="2">
+<!--geogebra window-->
+            <div id="ggb_cell">
+                <div id="ggb-element"></div>
+            </div>
+        </td>
+<!--        vertical facts-->
+        <td valign="top" rowspan="2">
+            <div style="width: 100%; overflow: auto;" id="vertical-fact-block">
+                <h3 class="col 2">
+                    Question
+                </h3>
+
+                <h7 class="col 2">
+                    {{ fact_output(question) }}
+                </h7>
+
+                <br><hr>
+
+                 <h3 class="col 2">
+                    Answer
+                </h3>
+                <table width="100%">
+                    <tr>
+                        <td width="80%">
+                            <h7 class="col 2">
+                                {{ fact_output(answer) }}
+                            </h7>
+                        </td>
+                    </tr>
+                </table>
+                <hr>
+
+                <h3 class="col 2">
+                    Facts
+                </h3>
+
+
+                {% for fact in facts %}
+                    <table width="95%" id="{{ fact.id }}_fact" style="border-radius: 8px">
+                        <tr>
+                            <td align="left">
+
+                                <h7 class="col 2" align="left">
+                                    {{ fact_output(fact) }}
+                                </h7>
+<!--                                <button type="button" class="btn btn-sm btn-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>-->
+<!--                                <div class="dropdown-menu">-->
+<!--                                    <a class="dropdown-item">{{ solution_interpreter(fact) }}</a>-->
+<!--                                </div>-->
+                                <br>
+                                <span style="font-size: smaller" id="{{ fact.id }}_description_block" hidden><i>
+                                    {{ solution_interpreter(fact) }}
+                                </i></span>
+
+                            </td>
+                            <td align="right" valign="down">
+                                <div style="width: 110px" id="{{ fact.id }}_buttons_block">
+                                    <div>
+                                        <button style="padding: 5px 8px" id='{{ fact.id }}_show_button' type="submit" class="btn btn-success btn-sm" onclick="Show_fact({{fact.id}}, {{fact.show_fact()}})">show</button>
+                                        <button style="padding: 5px 10px" id='{{ fact.id }}_hide_button' type="submit" class="btn btn-danger btn-sm" onclick="Hide_fact({{fact.id}}, {{fact.hide_fact()}})" hidden>hide</button>
+
+                                    </div><br><div>
+
+                                        <button style="padding: 5px 12px" id='{{ fact.id }}_show_highlight_button' type="submit"  class="btn btn-info btn-sm" onclick="Highlight({{fact.id}}, {{list(fact.root_facts)}})">why</button>
+                                        <button style="padding: 5px 10px" id='{{ fact.id }}_hide_highlight_button' type="submit"  class="btn btn-secondary btn-sm" onclick="Remove_highlight({{fact.id}})" hidden>hide</button>
+                                    </div>
+                                </div>
+
+                                {% if fact.root_facts == set() %}
+                                    <script type="text/javascript">
+                                        document.getElementById('{{ fact.id }}_show_highlight_button').disabled = true;
+                                        document.getElementById('{{ fact.id }}_show_highlight_button').innerHTML = 'task';
+                                        // console.log({{fact.root_facts}});
+                                    </script>
+                                {% endif %}
+
+                            </td>
+                        </tr>
+                    </table>
+                    <hr>
+                {% endfor %}
+
+                <h3 class="col 2">
+                    Solution
+                </h3>
+                <table width="95%">
+                    <tr>
+                        <td>
+                            <h7 class="col 2">
+                                {{ solution_interpreter(answer) }}
+                            </h7>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+        </td>
+    </tr>
+    <tr>
+        <td valign="top">
+            <form method="post" action="{{ url_for('index', commands_text=commands_text) if type == 'commands' else url_for('text_input', text=text, commands_text=commands_text)}}">
+                <button type="submit" class="btn btn-primary">Вернуться к вводу условия</button>
+            </form>
+        </td>
+        <td align="centre" valign="top">
+            <div style="width: 85%">
+                <button class="btn btn-secondary" id="increase_ggb_button">Увеличить чертёж</button>
+                <button class="btn btn-info" id="decrease_ggb_button" hidden>Уменьшить чертёж</button>
+            </div>
+
+        </td>
+    </tr>
+</table>
+
+
+
+<script type="text/javascript">
+    let current_interface_orientation = 'hor';
+
+    function Scale_window(){
+            // PC
+        document.getElementsByClassName('applet_scaler')[0].style.height = '100px';
+        document.getElementsByClassName('applet_scaler')[0].style.width = '100px';
+        // document.getElementsByClassName('dockPanelParent')[0].hidden = true;
+        // document.getElementsByClassName('draggerParentHorizontal')[0].hidden = true;
+        // document.getElementsByClassName('EuclidianPanel')[0].style.width = (document.documentElement.clientWidth - 340).toString() + 'px'
+        if (document.documentElement.clientWidth > document.documentElement.clientHeight) {
+
+            if (current_interface_orientation !== 'hor'){
+
+                let table = document.getElementById('main_table');
+                let facts = table.rows[1].cells[0].innerHTML;
+                table.rows[1].cells[0].innerHTML = '';
+                table.rows[0].cells[1].innerHTML = facts;
+
+                 {% for fact in facts %}
+                    document.getElementById('{{ fact.id }}_buttons_block').innerHTML =  document.getElementById('{{ fact.id }}_buttons_block').innerHTML.replace('<!---->', '</div><br><div>');
+                 {% endfor %}
+
+                }
+            //
+            ggbApplet.setWidth(document.documentElement.clientWidth - 440);
+            ggbApplet.setHeight((document.documentElement.clientHeight - 100));
+            document.getElementById('vertical-fact-block').style.width = '400px';
+            document.getElementById('vertical-fact-block').style.height = (document.documentElement.clientHeight - 100).toString() + 'px';
+            document.getElementById('ggb_cell').style.height = (document.documentElement.clientHeight - 100).toString() + 'px';
+
+            current_interface_orientation = 'hor';
+
+            document.getElementById('increase_ggb_button').hidden = true;
+            document.getElementById('decrease_ggb_button').hidden = true;
+            }
+
+            // Phone
+        else {
+            if (current_interface_orientation !== 'ver'){
+
+                    let table = document.getElementById('main_table');
+                    let facts = table.rows[0].cells[1].innerHTML;
+                    table.rows[0].cells[1].innerHTML = '';
+                    table.rows[1].cells[0].innerHTML = facts;
+
+                    {% for fact in facts %}
+                        // console.log(document.getElementById('{{ fact.id }}_buttons_block').innerHTML);
+                        document.getElementById('{{ fact.id }}_buttons_block').innerHTML = document.getElementById('{{ fact.id }}_buttons_block').innerHTML.replace('</div><br><div>', '<!---->  ');
+                        // console.log(document.getElementById('{{ fact.id }}_buttons_block').innerHTML);
+                    {% endfor %}
+
+                    }
+
+            ggbApplet.setWidth(document.documentElement.clientWidth);
+            ggbApplet.setHeight(200);
+            document.getElementById('vertical-fact-block').style.width = document.documentElement.clientWidth.toString() + 'px';
+            document.getElementById('vertical-fact-block').style.height = (document.documentElement.clientHeight - 330).toString() + 'px';
+            document.getElementById('ggb_cell').style.height = '200px';
+            document.getElementsByClassName('applet_scaler')[0].style.height = '200px';
+
+            current_interface_orientation = 'ver';
+
+            document.getElementById('increase_ggb_button').hidden = false;
+            document.getElementById('decrease_ggb_button').hidden = true;
+
+            // Zoom_drawing();
+        }
+
+        Zoom_drawing();
+    }
+
+    document.getElementById('increase_ggb_button').onclick = function () {
+        document.getElementById('increase_ggb_button').hidden = true;
+        document.getElementById('decrease_ggb_button').hidden = false;
+
+        document.getElementById('ggb_cell').style.height = (document.documentElement.clientHeight - 230).toString() + 'px';
+        ggbApplet.setHeight(document.documentElement.clientHeight - 230);
+
+        document.getElementById('vertical-fact-block').style.height = '100px';
+
+        Zoom_drawing();
+
+    }
+
+    document.getElementById('decrease_ggb_button').onclick = function () {
+        document.getElementById('increase_ggb_button').hidden = false;
+        document.getElementById('decrease_ggb_button').hidden = true;
+
+        document.getElementById('ggb_cell').style.height = '200px';
+        ggbApplet.setHeight(200);
+        document.getElementsByClassName('applet_scaler')[0].style.height = '200px';
+
+        document.getElementById('vertical-fact-block').style.height = (document.documentElement.clientHeight - 330).toString() + 'px';
+
+        Zoom_drawing();
+    }
+
+    window.addEventListener('orientationchange', Scale_window);
+    window.addEventListener('resize', Scale_window);
+
+
+    // window.onscroll = Change_orient;
+    window.onscroll = function () { window.scrollTo(0, 0); Zoom_drawing();};
+
+
     function Zoom_drawing() {
         // alert('test');
 
@@ -84,86 +498,16 @@
     }
 
 
-
-    function ggbOnInit() {
-
-            ggbApplet.evalCommand('A(2.288366007774478, 4.016232536563751)'); 
-            ggbApplet.evalCommand('B(1.744149441598849, -0.6235891585812964)'); 
-            ggbApplet.evalCommand('C(-0.6015051042875004, 2.6087716697201406)'); 
-            ggbApplet.evalCommand('polygon_ABC=Polygon(A, B, C)'); 
-            ggbApplet.evalCommand('segment_AC=Segment(A, C)'); 
-            ggbApplet.evalCommand('SetVisibleInView(segment_AC, 1, false)'); 
-            ggbApplet.evalCommand('segment_BA=Segment(B, A)'); 
-            ggbApplet.evalCommand('SetVisibleInView(segment_BA, 1, false)'); 
-            ggbApplet.evalCommand('segment_CB=Segment(C, B)'); 
-            ggbApplet.evalCommand('SetVisibleInView(segment_CB, 1, false)'); 
-
-
-    ggbApplet.setGridVisible(true);
-
-    Zoom_drawing();
-    }
-    let width = 1400
-    let height = 700
-    var flag = 0;
-
-    var params = {
-        "appName": "geometry",
-        "width": document.documentElement.clientWidth,
-        "height": document.documentElement.clientHeight - 100,
-        "showToolBar": false,
-        "showAlgebraInput": false,
-        "showMenuBar": false,
-        "enableUndoRedo": true,
-        "filename": '../static/empty-geogebra.ggb'
-    };
-
-    var applet = new GGBApplet('5.0', params);
-    window.addEventListener("load", function () {
-            applet.inject('ggb-element');
-
-        }
-    );
-    let observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (!mutation.addedNodes) return
-
-            // console.log(mutation.addedNodes);
-
-            if (mutation.addedNodes.length === 0 && flag === 1){
-
-                    ggbOnInit();
-
-                    flag = 2;
-                }
-
-            for (let i = 0; i < mutation.addedNodes.length; i++) {
-                // do things to your newly added nodes here
-                let node = mutation.addedNodes[i];
-                // console.log(node.className)
-
-                if (node.className === 'DockGlassPane' && flag === 0){
-
-                    flag = 1;
-                    // console.log(flag);
-
-                }
-
-            }
-        })
-    })
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: false,
-        characterData: false
-    })
-
-    // stop watching using:
-    // observer.disconnect()
 </script>
+
+<script type="text/javascript">
+/*\/*/
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
 
 
 </body>
+
 </html>
