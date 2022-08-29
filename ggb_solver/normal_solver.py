@@ -107,25 +107,11 @@ def count_sizes_of_angles_and_segments(facts_generation, actual_question, iterat
                         return True
 
             elif fact.fact_type == 'addition':
-                real_sum = fact.value
-                none_value_list = list()
-                continue_find = True
-
-                for obj in fact.objects:
-                    if obj.size:
-                        real_sum -= obj.size
-                    else:
-                        none_value_list.append(obj)
-
-                for n_obj in none_value_list:
-                    n_obj_relations = [1]
-
-                    for obj in none_value_list:
-                        if n_obj in obj.relations:
-                            n_obj_relations.append(obj.relations[n_obj])
-
-                    if len(n_obj_relations) == len(none_value_list):
-                        n_obj.size = real_sum / sum(n_obj_relations)
+                for check_sum in combinations(fact.objects, len(fact.objects) - 1):
+                    check_sum_ind = find_fact_id_with_objects(set(check_sum), 'addition')
+                    if check_sum_ind.__class__.__name__ == 'int':
+                        n_obj = list(fact.objects - tp.solver_data.facts[check_sum_ind].objects)[0]
+                        n_obj.size = fact.value - tp.solver_data.facts[check_sum_ind].value
                         size_fact = tp.Fact(
                             len(tp.solver_data.facts),
                             facts_generation,
@@ -135,22 +121,56 @@ def count_sizes_of_angles_and_segments(facts_generation, actual_question, iterat
                         )
                         tp.solver_data.facts.append(size_fact)
                         size_fact.root_facts.add(i)
-
-                        for root_fact in fact.objects:
-                            if root_fact != n_obj:
-                                if root_fact.size:
-                                    size_fact.root_facts.add(find_fact_id_with_objects([root_fact], 'size'))
-                                else:
-                                    size_fact.root_facts.add(find_fact_id_with_objects([n_obj, root_fact], 'relation'))
+                        size_fact.root_facts.add(check_sum_ind)
 
                         if check_is_fact_answer(size_fact, actual_question, facts_generation):
                             return True
 
-                        continue_find = False
-                        break
+                else:
+                    real_sum = fact.value
+                    none_value_list = list()
+                    continue_find = True
 
-                if not continue_find:
-                    break
+                    for obj in fact.objects:
+                        if obj.size:
+                            real_sum -= obj.size
+                        else:
+                            none_value_list.append(obj)
+
+                    for n_obj in none_value_list:
+                        n_obj_relations = [1]
+
+                        for obj in none_value_list:
+                            if n_obj in obj.relations:
+                                n_obj_relations.append(obj.relations[n_obj])
+
+                        if len(n_obj_relations) == len(none_value_list):
+                            n_obj.size = real_sum / sum(n_obj_relations)
+                            size_fact = tp.Fact(
+                                len(tp.solver_data.facts),
+                                facts_generation,
+                                'size',
+                                [n_obj],
+                                n_obj.size
+                            )
+                            tp.solver_data.facts.append(size_fact)
+                            size_fact.root_facts.add(i)
+
+                            for root_fact in fact.objects:
+                                if root_fact != n_obj:
+                                    if root_fact.size:
+                                        size_fact.root_facts.add(find_fact_id_with_objects([root_fact], 'size'))
+                                    else:
+                                        size_fact.root_facts.add(find_fact_id_with_objects([n_obj, root_fact], 'relation'))
+
+                            if check_is_fact_answer(size_fact, actual_question, facts_generation):
+                                return True
+
+                            continue_find = False
+                            break
+
+                    if not continue_find:
+                        break
 
 
 def find_simmilar_triangles(facts_generation, actual_question):
