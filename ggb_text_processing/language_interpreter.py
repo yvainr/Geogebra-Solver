@@ -59,7 +59,7 @@ def spaces_normalize(part) -> str:
 def segment_rel_formatting(part) -> str:
     """putting segment relation in correct order"""
     part = distillation(part)
-    part = sub(r"(^[A-Z]\s)([A-Z][A-Z]$)", r'\2 \1', part)
+    part = sub(r"(^[A-Z]\s)([A-Z][A-Z])(\s)", r'\2 \1', part)
     return part
 
 
@@ -100,7 +100,7 @@ def ang_distillation(part) -> str:
 
 
 def eq_distillation(part):
-    """highlithing the parts for equality function"""
+    """highlighting the parts for equality function"""
     part = sub(r' [-]+ ', ' ', part)
     new_part = ""
     for i in range(len(part)):
@@ -311,7 +311,7 @@ def class_analyze(part) -> str:
     elif points_parts == 0 and segments_parts == 0 and ray_parts == 0 and line_parts == 0 and angle_parts == 2 and polygons_parts == 0 and num_parts == 1:
         ret = "angle_rel"
     elif points_parts == 1 and segments_parts == 1 and ray_parts == 0 and line_parts == 0 and angle_parts == 0 and polygons_parts == 0 and num_parts == 1:
-        ret = "segment_rel"
+        ret = "point_segment_rel"
     elif points_parts == 0 and segments_parts == 2 and ray_parts == 0 and line_parts == 0 and angle_parts == 0 and polygons_parts == 0 and num_parts == 1:
         ret = "segment_rel"
     elif points_parts == 1 and segments_parts == 0 and ray_parts == 0 and line_parts == 2 and angle_parts == 0 and polygons_parts == 0 and num_parts == 0:
@@ -352,6 +352,7 @@ def fresh_assign_to_classes(inp_str):
     rem_lines = []
     points_on_straight = []
     points_in_polygon = []
+    point_segment_relation = []
 
     polygon_num = 0
 
@@ -366,8 +367,10 @@ def fresh_assign_to_classes(inp_str):
             polygon_num += 1
         elif cla == "segment_rel":
             part = summ_formatting(part)
-            part = segment_rel_formatting(part)
             segments_relations.append(distillation(part))
+        elif cla == "point_segment_rel":
+            part = segment_rel_formatting(part)
+            point_segment_relation.append(part)
         elif cla == "angle_rel":
             part = summ_formatting(part)
             angles_relations.append(distillation(part))
@@ -429,7 +432,7 @@ def fresh_assign_to_classes(inp_str):
             part = remarkable_lines(part, triangle)
             rem_lines.append(distillation(part))
 
-    return polygons, segments, angles, segments_relations, angles_relations, polygon_relation, lines_intersection, points_on_straight, points_in_polygon  # angle_in_angle, rays_in_angle, rem_lines
+    return polygons, segments, angles, segments_relations, angles_relations, polygon_relation, lines_intersection, points_on_straight, points_in_polygon, point_segment_relation  # angle_in_angle, rays_in_angle, rem_lines
 
 
 def question_processing(question) -> str:
