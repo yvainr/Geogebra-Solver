@@ -3,15 +3,16 @@ import ggb_data_processing.task_parser as tp
 from time import time
 from itertools import combinations, permutations
 from ggb_data_processing.objects_types import Size, sqrt
+# from pprint import pprint
 # from fact_description.detailed_fact_description import pretty_detailed_description
 
 # sys.setrecursionlimit(2000)
 
 
 # на случай реорганизации набора фактов
-def update_facts(fact_type, new_fact, actual_question):
+def update_facts(fact_type, new_fact, actual_question, facts_generation):
     tp.solver_data.facts[fact_type].append(new_fact)
-    if actual_question and new_fact.objects == actual_question.objects and fact_type == actual_question.fact_type:
+    if check_is_fact_answer(new_fact, actual_question, facts_generation):
         return True
 
 
@@ -33,7 +34,7 @@ def count_sizes_of_angles_and_segments(facts_generation, actual_question, iterat
                         double_simmilar_fact.root_facts.add(find_fact_id_with_objects([obj1, obj2], 'relation'))
                         double_simmilar_fact.root_facts.add(find_fact_id_with_objects([obj2, obj3], 'relation'))
 
-                        if actual_question and double_simmilar_fact.objects == actual_question.objects and double_simmilar_fact.fact_type == actual_question.fact_type:
+                        if check_is_fact_answer(double_simmilar_fact, actual_question, facts_generation):
                             return True
 
     for n in range(iterations):
@@ -53,7 +54,7 @@ def count_sizes_of_angles_and_segments(facts_generation, actual_question, iterat
                     size_fact.root_facts.add(i)
                     size_fact.root_facts.add(find_fact_id_with_objects([fact.objects[0]], 'size'))
 
-                    if actual_question and size_fact.objects == actual_question.objects and size_fact.fact_type == actual_question.fact_type:
+                    if check_is_fact_answer(size_fact, actual_question, facts_generation):
                         return True
 
                 elif fact.objects[1].size and not fact.objects[0].size:
@@ -69,7 +70,7 @@ def count_sizes_of_angles_and_segments(facts_generation, actual_question, iterat
                     size_fact.root_facts.add(i)
                     size_fact.root_facts.add(find_fact_id_with_objects([fact.objects[1]], 'size'))
 
-                    if actual_question and size_fact.objects == actual_question.objects and size_fact.fact_type == actual_question.fact_type:
+                    if check_is_fact_answer(size_fact, actual_question, facts_generation):
                         return True
 
             elif fact.fact_type == 'difference':
@@ -86,7 +87,7 @@ def count_sizes_of_angles_and_segments(facts_generation, actual_question, iterat
                     size_fact.root_facts.add(i)
                     size_fact.root_facts.add(find_fact_id_with_objects([fact.objects[0]], 'size'))
 
-                    if actual_question and size_fact.objects == actual_question.objects and size_fact.fact_type == actual_question.fact_type:
+                    if check_is_fact_answer(size_fact, actual_question, facts_generation):
                         return True
 
                 elif fact.objects[1].size and not fact.objects[0].size:
@@ -102,10 +103,29 @@ def count_sizes_of_angles_and_segments(facts_generation, actual_question, iterat
                     size_fact.root_facts.add(i)
                     size_fact.root_facts.add(find_fact_id_with_objects([fact.objects[1]], 'size'))
 
-                    if actual_question and size_fact.objects == actual_question.objects and size_fact.fact_type == actual_question.fact_type:
+                    if check_is_fact_answer(size_fact, actual_question, facts_generation):
                         return True
 
             elif fact.fact_type == 'addition':
+                for check_sum in combinations(fact.objects, len(fact.objects) - 1):
+                    check_sum_ind = find_fact_id_with_objects(set(check_sum), 'addition')
+                    if check_sum_ind.__class__.__name__ == 'int':
+                        n_obj = list(fact.objects - tp.solver_data.facts[check_sum_ind].objects)[0]
+                        n_obj.size = fact.value - tp.solver_data.facts[check_sum_ind].value
+                        size_fact = tp.Fact(
+                            len(tp.solver_data.facts),
+                            facts_generation,
+                            'size',
+                            [n_obj],
+                            n_obj.size
+                        )
+                        tp.solver_data.facts.append(size_fact)
+                        size_fact.root_facts.add(i)
+                        size_fact.root_facts.add(check_sum_ind)
+
+                        if check_is_fact_answer(size_fact, actual_question, facts_generation):
+                            return True
+
                 real_sum = fact.value
                 none_value_list = list()
                 continue_find = True
@@ -142,7 +162,7 @@ def count_sizes_of_angles_and_segments(facts_generation, actual_question, iterat
                                 else:
                                     size_fact.root_facts.add(find_fact_id_with_objects([n_obj, root_fact], 'relation'))
 
-                        if actual_question and size_fact.objects == actual_question.objects and size_fact.fact_type == actual_question.fact_type:
+                        if check_is_fact_answer(size_fact, actual_question, facts_generation):
                             return True
 
                         continue_find = False
@@ -227,7 +247,7 @@ def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
                             simmilar_fact.id = len(tp.solver_data.facts)
                             tp.solver_data.facts.append(simmilar_fact)
 
-                            if actual_question and simmilar_fact.objects == actual_question.objects and simmilar_fact.fact_type == actual_question.fact_type:
+                            if check_is_fact_answer(simmilar_fact, actual_question, facts_generation):
                                 return True
 
                             if count_sides_and_angles_of_similar_triangles(facts_generation, actual_question, tr1, tr2,
@@ -285,7 +305,7 @@ def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
                             simmilar_fact.id = len(tp.solver_data.facts)
                             tp.solver_data.facts.append(simmilar_fact)
 
-                            if actual_question and simmilar_fact.objects == actual_question.objects and simmilar_fact.fact_type == actual_question.fact_type:
+                            if check_is_fact_answer(simmilar_fact, actual_question, facts_generation):
                                 return True
 
                             if count_sides_and_angles_of_similar_triangles(facts_generation, actual_question, tr1, tr2,
@@ -334,7 +354,7 @@ def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
                 simmilar_fact.id = len(tp.solver_data.facts)
                 tp.solver_data.facts.append(simmilar_fact)
 
-                if actual_question and simmilar_fact.objects == actual_question.objects and simmilar_fact.fact_type == actual_question.fact_type:
+                if check_is_fact_answer(simmilar_fact, actual_question, facts_generation):
                     return True
 
                 if count_sides_and_angles_of_similar_triangles(facts_generation, actual_question, tr1, tr2,
@@ -379,7 +399,7 @@ def count_sides_and_angles_of_similar_triangles(facts_generation, actual_questio
                 new_fact.root_facts.add(find_fact_id_with_objects([polygon_1, polygon_2], 'relation'))
                 new_fact.description = 'из подобия многоугольников'
 
-                if actual_question and new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
+                if check_is_fact_answer(new_fact, actual_question, facts_generation):
                     return True
 
         for k in range(3):
@@ -403,7 +423,7 @@ def count_sides_and_angles_of_similar_triangles(facts_generation, actual_questio
                 new_fact.root_facts.add(find_fact_id_with_objects([polygon_1, polygon_2], 'relation'))
                 new_fact.description = 'из подобия многоугольников'
 
-                if actual_question and new_fact.objects == actual_question.objects and new_fact.fact_type == actual_question.fact_type:
+                if check_is_fact_answer(new_fact, actual_question, facts_generation):
                     return True
 
 
@@ -486,7 +506,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                     pythagoras_fact.root_facts.add(find_fact_id_with_objects([angles[i]], 'size'))
                     pythagoras_fact.description = 'по теореме Пифагора'
 
-                    if actual_question and pythagoras_fact.objects == actual_question.objects and pythagoras_fact.fact_type == actual_question.fact_type:
+                    if check_is_fact_answer(pythagoras_fact, actual_question, facts_generation):
                         return True
 
                 if not segments[i - 1].size and segments[i].size and segments[i - 2].size:
@@ -504,7 +524,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                     pythagoras_fact.root_facts.add(find_fact_id_with_objects([angles[i]], 'size'))
                     pythagoras_fact.description = 'по теореме Пифагора'
 
-                    if actual_question and pythagoras_fact.objects == actual_question.objects and pythagoras_fact.fact_type == actual_question.fact_type:
+                    if check_is_fact_answer(pythagoras_fact, actual_question, facts_generation):
                         return True
 
                 if not segments[i - 2].size and segments[i].size and segments[i - 1].size:
@@ -522,7 +542,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                     pythagoras_fact.root_facts.add(find_fact_id_with_objects([angles[i]], 'size'))
                     pythagoras_fact.description = 'по теореме Пифагора'
 
-                    if actual_question and pythagoras_fact.objects == actual_question.objects and pythagoras_fact.fact_type == actual_question.fact_type:
+                    if check_is_fact_answer(pythagoras_fact, actual_question, facts_generation):
                         return True
 
                 break
@@ -545,7 +565,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                         back_pythagoras_fact.root_facts.add(find_fact_id_with_objects([segments[i - 2]], 'size'))
                         back_pythagoras_fact.description = 'по обратной теореме Пифагора'
 
-                        if actual_question and back_pythagoras_fact.objects == actual_question.objects and back_pythagoras_fact.fact_type == actual_question.fact_type:
+                        if check_is_fact_answer(back_pythagoras_fact, actual_question, facts_generation):
                             return True
 
                         break
@@ -569,7 +589,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                     angles_equal_fact_1.root_facts.add(create_fact_about_objects_relations([segments[i], segments[i - 1]], facts_generation))
                     angles_equal_fact_1.description = 'из равенства сторон в равнобедренном треугольнике'
 
-                    if actual_question and angles_equal_fact_1.objects == actual_question.objects and angles_equal_fact_1.fact_type == actual_question.fact_type:
+                    if check_is_fact_answer(angles_equal_fact_1, actual_question, facts_generation):
                         return True
 
                 try:
@@ -587,7 +607,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                     angles_equal_fact_2.root_facts.add(create_fact_about_objects_relations([segments[i - 1], segments[i]], facts_generation))
                     angles_equal_fact_2.description = 'из равенства сторон в равнобедренном треугольнике'
 
-                    if actual_question and angles_equal_fact_2.objects == actual_question.objects and angles_equal_fact_2.fact_type == actual_question.fact_type:
+                    if check_is_fact_answer(angles_equal_fact_2, actual_question, facts_generation):
                         return True
 
         for i in range(3):
@@ -611,7 +631,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                         create_fact_about_objects_relations([angles[i], angles[i - 1]], facts_generation))
                     sides_equal_fact_1.description = 'из равенства углов в равнобедренном треугольнике'
 
-                    if actual_question and sides_equal_fact_1.objects == actual_question.objects and sides_equal_fact_1.fact_type == actual_question.fact_type:
+                    if check_is_fact_answer(sides_equal_fact_1, actual_question, facts_generation):
                         return True
 
                 try:
@@ -630,7 +650,7 @@ def find_new_angles_in_triangles(facts_generation, actual_question):
                         create_fact_about_objects_relations([angles[i - 1], angles[i]], facts_generation))
                     sides_equal_fact_2.description = 'из равенства углов в равнобедренном треугольнике'
 
-                    if actual_question and sides_equal_fact_2.objects == actual_question.objects and sides_equal_fact_2.fact_type == actual_question.fact_type:
+                    if check_is_fact_answer(sides_equal_fact_2, actual_question, facts_generation):
                         return True
 
 
@@ -739,6 +759,15 @@ def tree_levels_processing(tree_levels):
     return ret
 
 
+def check_is_fact_answer(fact, question, facts_generation):
+    if question:
+        if fact.objects == question.objects and fact.fact_type == question.fact_type:
+            return True
+        if fact.fact_type == 'size' and question.fact_type == 'relation' and fact.objects[0] in question.objects:
+            if create_fact_about_objects_relations(question.objects, facts_generation):
+                return True
+
+
 def check_time(start_time, dead_time=10):
     return dead_time > (start_time - time())
 
@@ -761,18 +790,25 @@ def run_solve_functions(facts_generation, question, start_time):
 
 
 def solving_process():
-    facts_generation = 1
     solutions = dict()
     start_time = time()
 
+    facts_generation = 0
     create_null_facts_generation()
-    run_solve_functions(facts_generation, None, start_time)
 
     for question in tp.solver_data.questions:
         while True:
             facts_list_length = len(tp.solver_data.facts)
             facts_generation += 1
+            first_check_stop = False
 
+            for fact in tp.solver_data.facts:
+                if check_is_fact_answer(fact, question, facts_generation):
+                    first_check_stop = True
+                    break
+
+            if first_check_stop:
+                break
             if run_solve_functions(facts_generation, question, start_time):
                 break
             if facts_list_length == len(tp.solver_data.facts):
@@ -791,5 +827,8 @@ def solving_process():
 
         except TypeError:
             solutions[question] = {'tree': {}, 'tree_levels': []}
+
+    if not len(tp.solver_data.questions):
+        run_solve_functions(facts_generation, None, start_time)
 
     return {'facts': solutions, 'data': tp.solver_data}
