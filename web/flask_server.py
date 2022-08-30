@@ -1,18 +1,17 @@
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, redirect, url_for
 import logging
 import multiprocessing
 
-from ggb_data_processing import task_parser, task_parser as taskp
+from ggb_data_processing import task_parser as taskp
 from ggb_html_generator.geogebra_html_generator import insert_commands
 from ggb_drawer.polygon_drawer import text_splitter
 from ggb_text_processing.language_interpreter import text_analyze
-from web_facts_tools import get_dict_of_facts, get_necessary_coords_size
-# from Solver_alpha import to_str
+from web.web_facts_tools import get_dict_of_facts, get_necessary_coords_size
 from fact_description.short_fact_description import fact_output
 from random import choice
 from ggb_solver.normal_solver import tree_levels_processing
 from fact_description.detailed_fact_description import pretty_detailed_description
-# from normal_solver import solving_process
+# from pprint import pprint
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -25,7 +24,13 @@ app = Flask(__name__, template_folder='./templates',static_folder='./static')
 app.config['SECRET_KEY'] = 'abcdef12345678'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
+PYW_ROUTE = ''
+# PYW_ROUTE = 'geogebra_app_dev/Geogebra-Solver/web/' #comment if not pythonanywhere DEV
+# PYW_ROUTE = 'geogebra_app_release_version/Geogebra-Solver/web/' #comment if not pythonanywhere MAIN
+
 SOLVING_TIME_LIMIT = 20 #seconds
+
+SKIP_INTERNAL_LANGUAGE_INPUT = False
 
 # app.jinja_env.globals.update(to_str=to_str)
 app.jinja_env.globals.update(fact_output=fact_output)
@@ -63,12 +68,14 @@ def text_input(text='', commands_text=''):
     logger.info(f'Text:{text}')
     logger.info(f'Text commads:\n{commands_text}')
 
-    with open('static/quotes.txt', 'r') as fin:
+    with open(f'{PYW_ROUTE}static/quotes.txt', 'r') as fin:
         quotes = fin.read()
 
     quotes = quotes.split('*')
 
     quote = choice(quotes)
+    # print('QUOTE')
+    # print(quote)
 
     # print(repr(commands_text))
     return render_template('input.html', text=text, commands_text=commands_text, quote=quote)
@@ -89,7 +96,7 @@ def create():
 
             logger.info(f'Recieved geogebra commands: {commands}')
 
-            insert_commands(commands, input_file_name='templates/drawing_template.html', output_file_name='templates/geogebra_page.html')
+            insert_commands(commands, input_file_name=f'{PYW_ROUTE}templates/drawing_template.html', output_file_name=f'{PYW_ROUTE}templates/geogebra_page.html')
 
             return render_template('geogebra_page.html', commands_text=commands_text, type='commands')
 
@@ -119,15 +126,20 @@ def parse_text():
             # logger.info(f'Formated lines: {objects}')
 
             # parsed_text = '\n'.join(objects)
+            # pprint(resp)
             parsed_text = resp.replace('\n', '')
             parsed_text = resp.replace('\r', '\n')
+            # pprint(resp)
             logger.info('Result of parsing:')
             for line in parsed_text.split('\n'):
                 logger.info(line)
 
             # logger.info(f'Result of parsing:\n{parsed_text}')
 
-            return render_template("input.html", text=text, commands_text=parsed_text)
+            if not SKIP_INTERNAL_LANGUAGE_INPUT:
+                return render_template("input.html", text=text, commands_text=parsed_text)
+            else:
+                return redirect(url_for('analyze_text', text=text, text_commands=parsed_text))
 
     return render_template("input.html", text='', commands_text='')
 
@@ -135,71 +147,120 @@ def parse_text():
 @app.route('/analysis_commands', methods=('GET', 'POST'))
 def analyze_text():
     logger.info('Text commands analysis requested')
-    if request.method == 'POST':
+
+    text = ''
+    commands_text = ''
+
+    try:
         commands_text = request.form['text_commands']
+    except Exception as exc:
+        pass
+
+    try:
+        if not commands_text:
+            commands_text = request.args['text_commands']
+    except Exception as exc:
+        pass
+
+    try:
         text = request.form['text']
-        screen_width = int(request.form['screen-width'])
-        screen_height = int(request.form['screen-height'])
-        logger.info(f'SCREEN SIZE: WIDTH: {screen_width}, HEIGHT: {screen_height}')
+    except Exception as exc:
+        pass
+
+    try:
+        if not text:
+            text = request.args['text']
+    except Exception as exc:
+        pass
+
+    if request.method == 'POST' or commands_text:
+
+        # screen_width = int(request.form['screen-width'])
+        # screen_height = int(request.form['screen-height'])
+        # logger.info(f'SCREEN SIZE: WIDTH: {screen_width}, HEIGHT: {screen_height}')
         # print(commands_text)
         logger.info(f'Text of commands:\n{text}')
 
-        solving_template = 'templates/release_template.html'
+        solving_template = f'{PYW_ROUTE}templates/release_template.html'
 
-        resp = text_splitter(commands_text, input_file_name=solving_template)
         # logger.info(task_parser.angles)
         # logger.info(task_parser.segments)
         # logger.info(task_parser.polygons)
-        # logger.info(resp)
-        # print(taskp.task_data)
 
-        if resp == 200 and commands_text:
+        return_dict = {}
 
-            return_dict = {}
+        return_dict = text_splitter(commands_text)
 
-            manager = multiprocessing.Manager()
-            resp_dict = manager.dict()
-            solving_process = multiprocessing.Process(target=get_dict_of_facts, args=(resp_dict, taskp.solver_data))
-            solving_process.start()
-            solving_process.join(SOLVING_TIME_LIMIT)
+        # TODO: раскомментировать перед заливом на продакшн
+        """
+        try:
+            return_dict = text_splitter(commands_text)
+        except Exception as exc:
+            logger.info(exc)
+            logger.info('ERROR: Solver internal error')
+            return_dict['errors'] = ['Solver internal error']
+        """
 
+        if type(return_dict) == str:
+            logger.info(return_dict)
+            return_dict = {'errors': [return_dict]}
+        else:
+            return_dict['errors'] = []
 
-            solving_process.terminate()
-            for key in resp_dict.keys():
-                return_dict[key] = resp_dict[key]
+        try:
+            list_of_ggb_commands = return_dict['ggb_commands']
+        except Exception as exc:
+            logger.info(f'ERROR: GGB commands not found\n{exc}')
+            list_of_ggb_commands = []
 
-            solving_process.is_alive()
+        # except Exception as exc:
+        #     logger.info(exc)
+        #     logger.info('ERROR: Solver internal error')
+        #     return_dict['errors'] = ['Solver internal error']
 
-            manager.shutdown()
+        # print(return_dict)
 
+        if return_dict['errors'] == [] and commands_text:
+
+            try:
+                fact_key = list(return_dict['facts'].keys())[0]
+                # print(return_dict['facts'])
+                # print(list(return_dict['facts'].keys()))
+
+                question_fact = fact_key
+                solving_tree = return_dict['facts'][fact_key]['tree_levels']
+
+            except Exception as exc:
+                logger.info(f'ERROR: Question or fact tree not found\n{exc}')
+                question_fact = None
+                solving_tree = None
+            # print(solving_tree)
 
             solving_finished = False
 
             try:
-                task_parser.solver_data = return_dict['data']
-                if return_dict['list of reason facts']['tree_levels']:
+                if solving_tree:
                     solving_finished = True
 
             except Exception as exc:
-                logging.info(f'Error {exc}')
+                logging.info(f'ERROR: Error after solving: {exc}')
 
-            facts = return_dict
-
-            if solving_finished:
+            if solving_finished and question_fact:
                 logger.info('Question found')
 
-                facts['list of reason facts'] = tree_levels_processing(facts['list of reason facts']['tree_levels'])
-                fact_to_delete_duplicates = facts['list of reason facts']
+                solving_tree = tree_levels_processing(solving_tree)
+                fact_to_delete_duplicates = solving_tree
 
-                sorted_facts = [ii for n,ii in enumerate(fact_to_delete_duplicates) if ii not in fact_to_delete_duplicates[:n]]
+                sorted_facts = [ii for n, ii in enumerate(fact_to_delete_duplicates) if ii not in fact_to_delete_duplicates[:n]]
 
-                facts['list of reason facts'] = sorted_facts
-                facts['question fact'] = sorted_facts[-1]
+                solving_tree_list = sorted_facts
 
-                solving_facts = facts['list of reason facts']
+                answer_fact = solving_tree_list[-1]
 
-                answer_fact = facts['question fact']
-                question_fact = taskp.task_data.questions[0]
+                solving_facts = solving_tree_list
+
+                insert_commands(input_file_name=solving_template, list_of_commands=list_of_ggb_commands)
+                # print(solving_facts)
 
                 # for fact in [question_fact] + solving_facts:
                 #     print(fact)
@@ -208,8 +269,6 @@ def analyze_text():
                 #     print(fact.value)
 
                 logger.info('Text commands splitted and inserted in geogebra')
-
-                # print(get_extreme_points(return_dict['data'].points))
 
                 return render_template('geogebra_page.html',
                                        text=text,
@@ -222,21 +281,37 @@ def analyze_text():
 
                                        answer=answer_fact,
 
-                                       necessary_coords_size = get_necessary_coords_size(return_dict['data'].points)
+                                       necessary_coords_size=get_necessary_coords_size(return_dict['data'].points)  # TODO: можно заменить на taskp.solver_data.points
                                        )
             else:
                 logger.info('Question not found')
-                resp = text_splitter(commands_text, input_file_name='templates/drawing_template.html')
+                # return_dict = text_splitter(commands_text, input_file_name=f'{PYW_ROUTE}templates/drawing_template.html')
+                insert_commands(input_file_name=f'{PYW_ROUTE}templates/drawing_template.html', list_of_commands=list_of_ggb_commands)
 
-                if resp == 200 and commands_text:
+                if type(return_dict) == str:
+                    logger.info(return_dict)
+                    return_dict = {'errors': [return_dict]}
+                else:
+                    return_dict['errors'] = []
+
+                if return_dict['errors'] == [] and commands_text:
                     logger.info('Text commands splitted and inserted in geogebra')
-                    return render_template('geogebra_page.html', text=text, commands_text=commands_text, type='text')
+                    return render_template('geogebra_page.html',
+                                           text=text,
+                                           commands_text=commands_text,
+                                           type='text',
+
+                                           necessary_coords_size=get_necessary_coords_size(return_dict['data'].points)  # TODO: можно заменить на taskp.solver_data.points
+                                           )
+                else:
+                    flash('\n'.join(return_dict['errors']))
+                    return render_template('input.html', text=text, commands_text=commands_text, type='text')
 
         else:
             if not commands_text:
                 flash('Commands are required!')
             else:
-                flash(resp)
+                flash('\n'.join(return_dict['errors']))
             return render_template('input.html', text=text, commands_text=commands_text, type='text')
 
     return render_template("input.html", commands_text='')
@@ -244,7 +319,7 @@ def analyze_text():
 
 @app.route('/instruction_edit2508', methods=('GET', 'POST'))
 def instruction():
-    with open('templates/instruction.html', 'r') as file:
+    with open(f'{PYW_ROUTE}templates/instruction.html', 'r') as file:
         text = file.read()
 
     logger.info('Instruction requested')
@@ -252,7 +327,7 @@ def instruction():
     if request.method == 'POST':
         logger.info('Instruction rewrite')
         text = request.form['instruction']
-        with open('templates/instruction.html', 'w') as file:
+        with open(f'{PYW_ROUTE}templates/instruction.html', 'w') as file:
             file.write(text)
 
     return render_template('instruction_input.html', text=text)

@@ -131,6 +131,7 @@ class Polygon:
         self.name = f"polygon_{''.join(get_points_names_from_list(vertices))}"
         self.sides = list()
         self.angles = list()
+        self.points_in = list()
         
         for i in range(len(self.points)):
             self.sides.append(find_segment_with_points(self.points[i].name, self.points[i - 1].name))
@@ -222,14 +223,14 @@ class Fact:
             except ValueError:
                 rel1, rel2 = self.value, 1
             draw_data.append(
-                f'text1=Text("{rel1}X", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + {float(self.objects[0].size * 0.125)}), false, true)')
+                f'text1=Text("{rel1}X", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + Distance({A.name}, {B.name}) * 0.05), false, true)')
             draw_data.append(
-                f'text2=Text("{rel2}X", ((x({C.name}) + x({D.name})) / 2, ((y({C.name}) + y({D.name})) / 2) + {float(self.objects[1].size * 0.125)}), false, true)')
+                f'text2=Text("{rel2}X", ((x({C.name}) + x({D.name})) / 2, ((y({C.name}) + y({D.name})) / 2) + Distance({C.name}, {D.name}) * 0.05), false, true)')
 
         elif self.fact_type == 'size' and self.objects[0].__class__.__name__ == 'Segment' and self.value:
             A, B = self.objects[0].points
             draw_data.append(
-                f'text=Text("{self.value}", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + {float(self.objects[0].size * 0.125)}), true, true)')
+                f'text=Text("{self.value}", ((x({A.name}) + x({B.name})) / 2, ((y({A.name}) + y({B.name})) / 2) + Distance({A.name}, {B.name}) * 0.05), true, true)')
 
         return draw_data
 
@@ -411,6 +412,47 @@ def polygons_relations_create(text):
                 polygon_1.relations[polygon_2] = Size(rel)
                 polygon_2.relations[polygon_1] = 1 / Size(rel)
 
+                simmilar_fact_index = len(solver_data.facts)
+
+                solver_data.facts.append(Fact(
+                    len(solver_data.facts),
+                    0,
+                    'relation',
+                    [polygon_1, polygon_2],
+                    Size(rel)
+                ))
+                solver_data.facts.append(Fact(
+                    len(solver_data.facts),
+                    0,
+                    'relation',
+                    [polygon_2, polygon_1],
+                    1 / Size(rel)
+                ))
+
+                for i in range(len(relation.split()[0])):
+                    side_1 = find_segment_with_points(relation.split()[0][i], relation.split()[0][i - 1], data)
+                    side_2 = find_segment_with_points(relation.split()[0][i], relation.split()[0][i - 1], data)
+
+                    sides_first_relation_fact = Fact(
+                        len(solver_data.facts),
+                        1,
+                        'relation',
+                        [side_1, side_2],
+                        Size(rel)
+                    )
+                    solver_data.facts.append(sides_first_relation_fact)
+                    sides_first_relation_fact.root_facts.add(simmilar_fact_index)
+
+                    sides_second_relation_fact = Fact(
+                        len(solver_data.facts),
+                        1,
+                        'relation',
+                        [side_2, side_1],
+                        1 / Size(rel)
+                    )
+                    solver_data.facts.append(sides_second_relation_fact)
+                    sides_second_relation_fact.root_facts.add(simmilar_fact_index + 1)
+
 
 def line_intersection_create(text):
     if len(text.split()) > 0:
@@ -447,8 +489,11 @@ def points_in_polygon_create(text):
         for data in [task_data, solver_data]:
             points, polygon = text.split('in')
             points = points.split()
+            polygon = find_polygon_with_points(list(polygon.replace(' ', '')), data)
             for point in points:
-                find_point_with_name(point, data).in_polygon = find_polygon_with_points(list(polygon.replace(' ', '')), data)
+                point = find_point_with_name(point, data)
+                polygon.points_in.append(point)
+                point.in_polygon = polygon
 
 
 def questions_create(text):
@@ -498,7 +543,7 @@ def questions_create(text):
 
 
 # вспомогательная функция для поиска отрезка по вершинам, указываются имена точек
-def find_segment_with_points(A, B, data=None):
+def find_segment_with_points(A, B, data=None, update_list=True):
     if not data:
         data = solver_data
 
@@ -509,9 +554,10 @@ def find_segment_with_points(A, B, data=None):
         if {a, b} == set(seg.points):
             return seg
 
-    new_segment = Segment(a, b)
-    data.segments.append(new_segment)
-    return new_segment
+    if update_list:
+        new_segment = Segment(a, b)
+        data.segments.append(new_segment)
+        return new_segment
 
 
 # вспомогательная функция для поиска прямой по точкам на ней, указываются имена точек

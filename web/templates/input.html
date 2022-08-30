@@ -15,6 +15,7 @@
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+
         <title>Geogebra text input</title>
     </head>
     <body>
@@ -69,7 +70,10 @@
         </form>
 
 
-        <div class="col 2 col-15" id="short_cuts"></div>
+        <div class="col 2 col-15">
+            <div class="btn-toolbar" id="short_cut_letters"></div>
+            <div class="btn-toolbar" id="short_cut_symbols" style="margin-top: 1em;"></div>
+        </div>
 
         <br><br>
 
@@ -92,10 +96,36 @@
                 <input type="hidden" name="type" value="text">
                 <input type="hidden" name="screen-width" id="screen-width-container">
                 <input type="hidden" name="screen-height" id="screen-height-container">
-                <textarea name="text_commands"
-                          placeholder="Дорогой тестировщик, вводи команды правильно"
-                          class="form-control"
-                          rows="12">{{ commands_text if commands_text != None else '' }}</textarea>
+
+
+                <table>
+                    <tr>
+                    <td valign="top" style="font-size: 17px; font-style: italic">
+                        <span>
+                            1
+                            2
+                            3
+                            4
+                            5
+                            6
+                            7
+                            8
+                            9
+                            10
+                            11
+                            12
+                        </span>
+                    </td>
+                    <td width="100%">
+<!--                        <div></div>-->
+                        <textarea name="text_commands"
+                                  placeholder="Дорогой тестировщик, вводи команды правильно"
+                                  class="form-control"
+                                  rows="12"
+                                  cols="12">{{ commands_text if commands_text != None else '' }}</textarea>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </form>
         <div id="loading">
@@ -107,20 +137,25 @@
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<!--    <img src="loading.gif" alt="this slowpoke moves"/>-->
         <script type="text/javascript">
             // window.onscroll = function () { window.scrollTo(0, 0)};
 
 
-            let short_cuts_symbols = 'ABCDEFHIM∠=△,'.split('');
+            let short_cuts_letters = 'ABCDEFHIM'.split('');
+            let short_cuts_symbols = '∠=△,'.split('');
+
+            for (s in short_cuts_letters) {
+
+                sym = short_cuts_letters[s];
+                document.getElementById('short_cut_letters').innerHTML += `<button style="touch-action: manipulation;" class="btn btn-light btn-sm mr-2 md-2 active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
+            }
 
             for (s in short_cuts_symbols) {
 
-
-                
                 sym = short_cuts_symbols[s];
-                document.getElementById('short_cuts').innerHTML += `<button  class="btn btn-light btn-md active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
+                document.getElementById('short_cut_symbols').innerHTML += `<button style="touch-action: manipulation;" class="btn btn-light btn-sm mr-2 md-2 active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
             }
-
 
 
             document.getElementById("loading").hidden = true;
@@ -128,7 +163,8 @@
             document.getElementById("solve-button").onclick = function () {
                 document.getElementById("text-input-block").hidden = true;
                 document.getElementById("parse-result-block").hidden = true;
-                document.getElementById("short_cuts").hidden = true;
+                document.getElementById("short_cut_letters").hidden = true;
+                document.getElementById("short_cut_symbols").hidden = true;
                 document.getElementById("loading").hidden = false;
 
             }
@@ -162,18 +198,25 @@
                     text = ' △';
                 }
 
-                area.value += text;
+
 
                 let end = area.value.length;
 
-                area.setSelectionRange(end, end);
+                let cursor = area.selectionStart;
+                // console.log(cursor)
+                area.setSelectionRange(cursor, cursor);
+
+                area.value = area.value.slice(0, cursor) + text + area.value.slice(cursor, end);
+
+                cursor += text.length;
+                area.setSelectionRange(cursor, cursor);
 
                 // area.setFocusAt(area.value.length);
             }
+            $('body').bind('touchmove', function(event) { event.preventDefault() }); // turns off
 
         </script>
-<!--    <img src="loading.gif" alt="this slowpoke moves"/>-->
-<!--        <h1 align="center">Как поймать льва?</h1>-->
+        <!--        <h1 align="center">Как поймать льва?</h1>-->
 
     </body>
 </html>

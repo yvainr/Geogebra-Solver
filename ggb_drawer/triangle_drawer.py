@@ -273,55 +273,92 @@ def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, a_name, gamma_
 	return Shift(A, B, C)
 
 
-def CreateTriangle(sides, angles, angles_names, sides_names):
-	if angles.count(None) <= 1:
+def CreateTriangle(sides, angles, sides_names, angles_names):
+	if [angles[0].size, angles[1].size, angles[2].size].count(None) <= 1:
 		test_angle = Size(180)
 
 		for angle in angles:
-			if angle:
-				test_angle -= angle
+			if angle.size:
+				test_angle -= angle.size
 
-		try:
-			angles[angles.index(None)] = test_angle
-		except Exception:
-			pass
+		for angle in angles:
+			if not angle.size:
+				angle.size = test_angle
 
 		for i in range(3):
-			if sides[i]:
-				return CreateTriangleWithOneSideAndTwoAngles(sides[i], angles[i-1], angles[(i+1)%3], angles_names[i-1], angles_names[(i+1)%3])
+			if sides[i].size:
+				return CreateTriangleWithOneSideAndTwoAngles(sides[i].size, angles[i - 1].size, angles[i - 2].size, angles_names[i - 1], angles_names[i - 2])
 		else:
-			random_index = randint(0,2)
-			return CreateTriangleWithOneSideAndTwoAngles(uniform(3, 6), angles[random_index-1], angles[(random_index+1)%3], angles_names[random_index-1], angles_names[(random_index+1)%3])
+			random_index = randint(0, 2)
+			return CreateTriangleWithOneSideAndTwoAngles(uniform(3, 6), angles[random_index - 1].size, angles[random_index - 2].size, angles_names[random_index - 1], angles_names[random_index - 2])
 
 	else:
 		for i in range(3):
-			if angles[i]:
-				if sides[i - 1] and sides[i - 2]:
-					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[i - 1], sides[i - 2], angles[i], sides_names[i - 1], angles_names[i])
-				if sides[i] and sides[i - 1]:
-					return CreateTriangleWithTwoSidesAndAngleNotBetweenThem(sides[i - 1], sides[i], angles[i], sides_names[i - 1], angles_names[i])
-				if sides[i] and sides[i - 2]:
-					return CreateTriangleWithTwoSidesAndAngleNotBetweenThem(sides[i - 2], sides[i], angles[i], sides_names[i - 2], angles_names[i])
-				if sides[i]:
-					return CreateTriangleWithSideAndContraAngle(sides[i], angles[i], angles_names[i])
-				if sides[i - 1]:
-					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[i - 1], sides[i - 1] * uniform(0.5, 1.5), angles[i], sides_names[i - 1], angles_names[i])
-				if sides[i - 2]:
-					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[i - 2], sides[i - 2] * uniform(0.5, 1.5), angles[i], sides_names[i - 2], angles_names[i])
+			if angles[i].size:
+				if sides[i - 1].size and sides[i - 2].size:
+					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[i - 1].size, sides[i - 2].size, angles[i].size, sides_names[i - 1], angles_names[i])
+				if sides[i].size and sides[i - 1].size:
+					return CreateTriangleWithTwoSidesAndAngleNotBetweenThem(sides[i - 1].size, sides[i].size, angles[i].size, sides_names[i - 1], angles_names[i])
+				if sides[i].size and sides[i - 2].size:
+					return CreateTriangleWithTwoSidesAndAngleNotBetweenThem(sides[i - 2].size, sides[i].size, angles[i].size, sides_names[i - 2], angles_names[i])
+				if sides[i].size:
+					return CreateTriangleWithSideAndContraAngle(sides[i].size, angles[i].size, angles_names[i])
+				if sides[i - 1].size:
+					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[i - 1].size, sides[i - 1].size * uniform(0.5, 1.5), angles[i].size, sides_names[i - 1], angles_names[i])
+				if sides[i - 2].size:
+					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[i - 2].size, sides[i - 2].size * uniform(0.5, 1.5), angles[i].size, sides_names[i - 2], angles_names[i])
 				else:
-					return CreateTriangleWithTwoSidesAndAngleBetweenThem(uniform(3, 6), uniform(3, 6), angles[i], sides_names[i - 1], angles_names[i])
+					sides[i - 1].size = Size(uniform(3, 6))
+
+					if sides[i - 2] in sides[i - 1].relations:
+						sides[i - 2].size = sides[i - 1].size / sides[i - 1].relations[sides[i - 2]]
+					else:
+						sides[i - 2].size = Size(uniform(3, 6))
+
+					return CreateTriangleWithTwoSidesAndAngleBetweenThem(sides[i - 1].size, sides[i - 2].size, angles[i].size, sides_names[i - 1], angles_names[i])
 		else:
-			if sides.count(None) == 3:
-				sides[0] = uniform(3, 5)
+			if [sides[0].size, sides[1].size, sides[2].size].count(None) == 3:
+				ind = 0
 
-			if sides.count(None) == 2:
+				for i in range(3):
+					if sides[i - 1] in sides[i].relations and sides[i - 2] in sides[i].relations:
+						ind = i
+						break
+					elif sides[i - 1] in sides[i].relations or sides[i - 2] in sides[i].relations:
+						ind = i
+
+				sides[ind].size = Size(uniform(3, 6))
+
+				try:
+					sides[ind - 1].size = sides[ind].size / sides[ind].relations[sides[ind - 1]]
+				except KeyError:
+					pass
+
+				try:
+					sides[ind - 2].size = sides[ind].size / sides[ind].relations[sides[ind - 2]]
+				except KeyError:
+					pass
+
+			if [sides[0].size, sides[1].size, sides[2].size].count(None) == 2:
+
 				for side in sides:
-					if side:
+					if side.size:
 						i = sides.index(side)
-				sides[i - 1] = sides[i] * uniform(0.5, 1.5)
 
-			if sides.count(None) == 1:
-				i = sides.index(None)
-				sides[i] = uniform(abs(sides[i - 1] - sides[i - 2]), sides[i - 1] + sides[i - 2])
+				if sides[i - 2] in sides[i - 1].relations:
+					sides[i - 1].size = uniform(sides[i].size * 1.25, sides[i].size * 3) / (1 + 1 / sides[i - 1].relations[sides[i - 2]])
+					sides[i - 2].size = sides[i - 1].size / sides[i - 1].relations[sides[i - 2]]
 
-			return CreateTriangleWithThreeSides(sides[0], sides[1], sides[2], angles_names[1])
+					while min(sides[i - 1].size, sides[i - 2].size) + sides[i].size <= max(sides[i - 1].size, sides[i - 2].size):
+						sides[i - 1].size *= 0.8
+						sides[i - 2].size *= 0.8
+
+				else:
+					sides[i - 1].size = sides[i].size * uniform(0.5, 1.5)
+
+			if [sides[0].size, sides[1].size, sides[2].size].count(None) == 1:
+
+				i = [sides[0].size, sides[1].size, sides[2].size].index(None)
+				sides[i].size = uniform(abs(sides[i - 1].size - sides[i - 2].size), sides[i - 1].size + sides[i - 2].size)
+
+			return CreateTriangleWithThreeSides(sides[0].size, sides[1].size, sides[2].size, angles_names[1])
