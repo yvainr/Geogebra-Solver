@@ -35,11 +35,11 @@
                     rows="1">Треугольник ABC, сторона AB = 4.5, угол BAC относится к ABC как 4/5</textarea>
       </p>
       <p>
-          3. Прямые обозначаются двумя точками. Углы задаются тремя точками. Многоугольники, прямые и лучи вводятся вместе с типом элемента (треугольник, прямая, луч).
+          3. Прямые обозначаются двумя точками. Углы задаются тремя точками. Многоугольники и прямые вводятся вместе с типом элемента (треугольник, прямая).
           <br>
           Пример:
           <textarea class="form-control"
-                    rows="1">Прямая AB, луч BC, угол BAC</textarea>
+                    rows="1">Прямая AB, треугольник BAC</textarea>
       </p>
       <br>
 
@@ -71,7 +71,7 @@
       <br>
       <p>
           <textarea class="form-control"
-                    rows="2">Треугольник ABC, треугольник DEF, AB = 10, треугольник ABC относится к DEF как 1/2&#13;Найти DE</textarea>
+                    rows="2">Треугольник ABC, треугольник DEF, AB = 10, треугольник ABC подобен DEF с коэффициентом 1/2&#13;Найти DE</textarea>
 
           <br>
           <button class="btn btn-sm btn-primary" onclick="location.href='http://geogebra0drawer.pythonanywhere.com/?text=Треугольник+ABC%2C+треугольник+DEF%2C+AB+%3D+10%2C+треугольник+ABC+относится+к+DEF+как+1%2F2+%0D%0AНайти+DE&commands_text=ABC%2C+DEF%0D%0AAB+10%0D%0A%0D%0A%0D%0A%0D%0AABC+DEF+1%2F2%0D%0A%0D%0A%0D%0A%0D%0ADE++%3F'" >Посмотреть</button>
@@ -100,7 +100,8 @@
       <br>
 
       <div class="col 2 col-15">
-            <div class="btn-toolbar" id="short_cuts"></div>
+            <div class="btn-toolbar" id="short_cut_letters"></div>
+            <div class="btn-toolbar" id="short_cut_symbols" style="margin-top: 1em;"></div>
       </div>
 
       <br><br>
@@ -130,15 +131,20 @@
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script type="text/javascript">
-        let short_cuts_symbols = 'ABCDEFHIM∠=△,'.split('');
+        let short_cuts_letters = 'ABCDEFHIM'.split('');
+        let short_cuts_symbols = '∠=△,'.split('');
 
-            for (s in short_cuts_symbols) {
+        for (s in short_cuts_letters) {
 
+            sym = short_cuts_letters[s];
+            document.getElementById('short_cut_letters').innerHTML += `<button style="touch-action: manipulation;" class="btn btn-light btn-sm mr-2 md-2 active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
+        }
 
+        for (s in short_cuts_symbols) {
 
-                sym = short_cuts_symbols[s];
-                document.getElementById('short_cuts').innerHTML += `<button style="touch-action: manipulation;" class="btn btn-light btn-md mr-2 active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
-            }
+            sym = short_cuts_symbols[s];
+            document.getElementById('short_cut_symbols').innerHTML += `<button style="touch-action: manipulation;" class="btn btn-light btn-sm mr-2 md-2 active" type="button" onclick="Add_text_to_task('${sym}')">${sym}</button>`
+        }
 
 
 
@@ -181,11 +187,18 @@
                     text = ' △';
                 }
 
-                area.value += text;
+
 
                 let end = area.value.length;
 
-                area.setSelectionRange(end, end);
+                let cursor = area.selectionStart;
+                // console.log(cursor)
+                area.setSelectionRange(cursor, cursor);
+
+                area.value = area.value.slice(0, cursor) + text + area.value.slice(cursor, end);
+
+                cursor += text.length;
+                area.setSelectionRange(cursor, cursor);
 
                 // area.setFocusAt(area.value.length);
             }

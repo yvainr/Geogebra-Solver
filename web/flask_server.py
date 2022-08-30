@@ -11,6 +11,7 @@ from fact_description.short_fact_description import fact_output
 from random import choice
 from ggb_solver.normal_solver import tree_levels_processing
 from fact_description.detailed_fact_description import pretty_detailed_description
+# from pprint import pprint
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -125,8 +126,10 @@ def parse_text():
             # logger.info(f'Formated lines: {objects}')
 
             # parsed_text = '\n'.join(objects)
+            # pprint(resp)
             parsed_text = resp.replace('\n', '')
             parsed_text = resp.replace('\r', '\n')
+            # pprint(resp)
             logger.info('Result of parsing:')
             for line in parsed_text.split('\n'):
                 logger.info(line)
@@ -170,7 +173,6 @@ def analyze_text():
     except Exception as exc:
         pass
 
-
     if request.method == 'POST' or commands_text:
 
         # screen_width = int(request.form['screen-width'])
@@ -198,8 +200,6 @@ def analyze_text():
             logger.info('ERROR: Solver internal error')
             return_dict['errors'] = ['Solver internal error']
         """
-
-
 
         if type(return_dict) == str:
             logger.info(return_dict)
@@ -251,7 +251,7 @@ def analyze_text():
                 solving_tree = tree_levels_processing(solving_tree)
                 fact_to_delete_duplicates = solving_tree
 
-                sorted_facts = [ii for n,ii in enumerate(fact_to_delete_duplicates) if ii not in fact_to_delete_duplicates[:n]]
+                sorted_facts = [ii for n, ii in enumerate(fact_to_delete_duplicates) if ii not in fact_to_delete_duplicates[:n]]
 
                 solving_tree_list = sorted_facts
 
@@ -281,7 +281,7 @@ def analyze_text():
 
                                        answer=answer_fact,
 
-                                       necessary_coords_size = get_necessary_coords_size(return_dict['data'].points) # TODO: можно заменить на taskp.solver_data.points
+                                       necessary_coords_size=get_necessary_coords_size(return_dict['data'].points)  # TODO: можно заменить на taskp.solver_data.points
                                        )
             else:
                 logger.info('Question not found')
@@ -301,7 +301,7 @@ def analyze_text():
                                            commands_text=commands_text,
                                            type='text',
 
-                                           necessary_coords_size = get_necessary_coords_size(return_dict['data'].points) # TODO: можно заменить на taskp.solver_data.points
+                                           necessary_coords_size=get_necessary_coords_size(return_dict['data'].points)  # TODO: можно заменить на taskp.solver_data.points
                                            )
                 else:
                     flash('\n'.join(return_dict['errors']))
