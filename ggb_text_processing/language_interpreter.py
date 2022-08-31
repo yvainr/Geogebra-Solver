@@ -123,10 +123,11 @@ def equality_of_elem(part) -> str:
     if ("равн" in part or "равен" in part) and "сумм" not in part and "отношен" not in part:
         part = distillation(part)
         part = sub(r'([A-Z]{2,})(\s)([A-Z]{2,})', r'\1 = \3', part)
-    part = sub(r'(\s*)( = )(\s*)', r'\2', part)
-    part = eq_distillation(part)
-    part = sub(r"([A-Z][A-Z][A-Z])( = )([A-Z][A-Z][A-Z])", r'\1 \3 1/1', part)
-    part = sub(r"([A-Z][A-Z])( = )([A-Z][A-Z])", r'\1 \3 1/1', part)
+    if "=" in part:
+        part = sub(r'(\s*)( = )(\s*)', r'\2', part)
+        part = eq_distillation(part)
+        part = sub(r"([A-Z][A-Z][A-Z])( = )([A-Z][A-Z][A-Z])", r'\1 \3 1/1', part)
+        part = sub(r"([A-Z][A-Z])( = )([A-Z][A-Z])", r'\1 \3 1/1', part)
     return part
 
 
