@@ -1,5 +1,5 @@
 from re import *
-# number of output strings = 10
+# number of output strings = 2
 
 
 def text_analyze(inp_str):
@@ -13,22 +13,26 @@ def text_analyze(inp_str):
     statement = string_split(statement)
     ret = fresh_assign_to_classes(statement)
     ret = list(ret)
+    que_ret = list()
 
     if question_existence:  # analyze question if exist
         questions = questions.split(",")
         new_questions = list()
         for question in questions:
             new_questions.append(question_processing(question))
-        ret.append(new_questions)
+        que_ret.append(new_questions)
 
     output_text = ''
     for object_class in ret:
-        object_class = str(object_class)
-        if "[" in object_class:
-            output_text += (', '.join(list(eval(object_class))) + '\n')
+        output_text += object_class + ", "
+    output_text = output_text[:-2]
+    output_text += '\n'
+    for question_class in que_ret:
+        question_class = str(question_class)
+        if "[" in question_class:
+            output_text += (', '.join(list(eval(question_class))))
         else:
-            output_text += object_class
-
+            output_text += question_class
     return output_text
 
 
@@ -37,7 +41,7 @@ def string_split(inp_str):
     inp_str = sub(r"([A-Z])(\s*=\s*)([A-Z, 0-9])", r"\1 = \3", inp_str)
     inp_str = inp_str.split(",")
     for part in inp_str:
-        if " и " in part and not ("отношени" in part or "сумм" in part):
+        if " и " in part and not ("отношени" in part or "сумм" in part or "относ" in part):
             n_part = sub(" и ", ",", part)
             n_part = n_part.split(",")
             inp_str.remove(part)
@@ -151,6 +155,8 @@ def element_formatting(part, cla):
         part = sub(r'([A-Z][A-Z])', r'/\1', part)
     elif cla == "polygon":
         part = sub(r'([A-Z]{3,})', r'/\1', part)
+    elif cla == "polygon_rel":
+        part = sub(r'(^[A-Z])', r'/\1', part)
     return part
 
 
@@ -336,23 +342,24 @@ def class_analyze(part) -> str:
 
 def fresh_assign_to_classes(inp_str):
     polygons = []
-    segments = []
-    lines = []
-    rays = []
-    angles = []
-    segments_relations = []
-    angles_relations = []
-    polygon_relation = []
-    lines_intersection = []
+    # segments = []
+    # lines = []
+    # rays = []
+    # angles = []
+    # segments_relations = []
+    # angles_relations = []
+    # polygon_relation = []
+    # lines_intersection = []
     # points_on_segment = []
     # points_on_lines = []
-    points_on_ray = []
-    angle_in_angle = []
-    rays_in_angle = []
-    rem_lines = []
-    points_on_straight = []
-    points_in_polygon = []
-    point_segment_relation = []
+    # points_on_ray = []
+    # angle_in_angle = []
+    # rays_in_angle = []
+    # rem_lines = []
+    # points_on_straight = []
+    # points_in_polygon = []
+    # point_segment_relation = []
+    output = []
 
     polygon_num = 0
 
@@ -363,60 +370,81 @@ def fresh_assign_to_classes(inp_str):
         # part = element_formatting(part, cla)
         if cla == "polygon":
             part = sub("невыпукл", "*", part)
-            polygons.append(distillation(part))
+            part = distillation(part)
+            polygons.append(part)
+            part = "poly " + part[:]
+            output.append(part)
             polygon_num += 1
+        elif cla == "segment":
+            part = distillation(part)
+            part = "seg " + part[:]
+            output.append(part)
+        elif cla == "angle":
+            part = distillation(part)
+            part = "ang " + part[:]
+            output.append(part)
         elif cla == "segment_rel":
             part = summ_formatting(part)
-            segments_relations.append(distillation(part))
-        elif cla == "point_segment_rel":
-            part = segment_rel_formatting(part)
-            point_segment_relation.append(part)
+            part = distillation(part)
+            part = "seg_rel " + part[:]
+            output.append(part)
         elif cla == "angle_rel":
             part = summ_formatting(part)
-            angles_relations.append(distillation(part))
+            part = distillation(part)
+            part = "ang_rel " + part[:]
+            output.append(part)
+        elif cla == "polygon_rel":
+            part = element_formatting(part, cla)
+            part = distillation(part)
+            part = "poly_rel " + part[:]
+            output.append(part)
+        elif cla == "lines_intersection":
+            part = distillation(part)
+            part = "lin_int " + part[:]
+            output.append(part)
+        elif cla == "point_on_seg":
+            part = points_on_element(part)
+            part = distillation(part)
+            part = sub("///", "in", part)
+            part = "p_str " + part[:]
+            output.append(part)
+        elif cla == "point_on_ray":
+            part = point_on_ray(part)
+            part = distillation(part)
+            part = sub("///", "in", part)
+            part = "p_str " + part[:]
+            output.append(part)
+        elif cla == "point_on_line":
+            part = point_on_line(part)
+            part = distillation(part)
+            part = sub("///", "in", part)
+            part = "p_str " + part[:]
+            output.append(part)
         elif cla == "rem_point":
             part = within_polygon(part)
             part = remarkable_point_processing(part)
             part = distillation(part)
             part = sub("///", "in", part)
-            points_in_polygon.append(part)
-        elif cla == "segment":
-            segments.append(distillation(part))
-        elif cla == "lines_intersection":
-            lines_intersection.append(distillation(part))
-        elif cla == "angle":
-            angles.append(distillation(part))
+            part = "p_poly " + part[:]
+            output.append(part)
+        elif cla == "point_segment_rel":
+            part = segment_rel_formatting(part)
+            part = "p_seg_rel " + part[:]
+            output.append(part)
         elif cla == "line":
-            lines.append(distillation(part))
+            output.append(distillation(part))
         elif cla == "ray":
-            rays.append(distillation(part))
-        elif cla == "polygon_rel":
-            polygon_relation.append(distillation(part))
-        elif cla == "point_on_seg":
-            part = points_on_element(part)
-            part = distillation(part)
-            part = sub("///", "in", part)
-            points_on_straight.append(part)
-        elif cla == "point_on_line":
-            part = point_on_line(part)
-            part = distillation(part)
-            part = sub("///", "in", part)
-            points_on_straight.append(part)
-        elif cla == "point_on_ray":
-            part = point_on_ray(part)
-            part = distillation(part)
-            part = sub("///", "in", part)
-            points_on_ray.append(part)
+            output.append(distillation(part))
         elif cla == "angle_in_angle":
             part = nested_angles(part)
             part = distillation(part)
             part = sub("///", "in", part)
-            angle_in_angle.append(part)
+            output.append(part)
         elif cla == "ray_in_angle":
             part = ray_within_angle(part)
             part = distillation(part)
             part = sub("///", "in", part)
-            rays_in_angle.append(part)
+            output.append(part)
         elif cla == "rem_lines":
             triangle = ""
             if polygon_num == 1:
@@ -430,9 +458,9 @@ def fresh_assign_to_classes(inp_str):
                         break
 
             part = remarkable_lines(part, triangle)
-            rem_lines.append(distillation(part))
-
-    return polygons, segments, angles, segments_relations, angles_relations, polygon_relation, lines_intersection, points_on_straight, points_in_polygon, point_segment_relation  # angle_in_angle, rays_in_angle, rem_lines
+            output.append(distillation(part))
+        # print(part)
+    return output  # polygons, segments, angles, segments_relations, angles_relations, polygon_relation, lines_intersection, points_on_straight, points_in_polygon, point_segment_relation -- angle_in_angle, rays_in_angle, rem_lines
 
 
 def question_processing(question) -> str:
