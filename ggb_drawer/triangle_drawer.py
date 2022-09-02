@@ -1,46 +1,45 @@
 from ggb_data_processing import task_parser as tp
 from math import tan, pi, cos, sin, acos
 from random import choice, uniform, randint
-from itertools import combinations
 from ggb_data_processing.objects_types import Size, sqrt
-from ggb_drawer.useful_geometry_functions import LineIntersectionPoint, TwoPointsLine, IsLineParallel,\
-	PerpendicularLineWithPoint, DistanceBetweenPoints, DividingPoint, MediansIntersection, CircumscribedCircleCenter, \
-	CirclesIntersectionPoint, LineWithTiltAngle, LineAndCircleIntersectionPoints, PointSymmetryAboutLine
+from ggb_drawer.useful_geometry_functions import LineIntersectionPoint, TwoPointsLine,\
+	PerpendicularLineWithPoint, DistanceBetweenPoints, DividingPoint, CircumscribedCircleCenter, \
+	CirclesIntersectionPoint, LineWithTiltAngle, LineAndCircleIntersectionPoints, PointSymmetryAboutLine, MyPoint
 
 
-def CheckSegmentsIntersection(side1, side2):
-	A1, B1 = side1
-	A2, B2 = side2
+# def CheckSegmentsIntersection(side1, side2):
+# 	A1, B1 = side1
+# 	A2, B2 = side2
+#
+# 	l1 = TwoPointsLine(A1, B1)
+# 	l2 = TwoPointsLine(A2, B2)
+#
+# 	try:
+# 		x, y = LineIntersectionPoint(l1, l2)
+# 		return min(A1.x, B1.x) <= x <= max(A1.x, B1.x) and min(A2.x, B2.x) <= x <= max(A2.x, B2.x) and min(A1.y, B1.y) <= y <= max(A1.y, B1.y) and min(A2.y, B2.y) <= y <= max(A2.y, B2.y)
+#
+# 	except Exception:
+# 		return IsLineParallel(l1, l2) == 2 and (min(A1.x, B1.x) <= max(A2.x, B2.x) or min(A2.x, B2.x) <= max(A1.x, B1.x))
 
-	l1 = TwoPointsLine(A1, B1)
-	l2 = TwoPointsLine(A2, B2)
 
-	try:
-		x, y = LineIntersectionPoint(l1, l2)
-		return min(A1.x, B1.x) <= x <= max(A1.x, B1.x) and min(A2.x, B2.x) <= x <= max(A2.x, B2.x) and min(A1.y, B1.y) <= y <= max(A1.y, B1.y) and min(A2.y, B2.y) <= y <= max(A2.y, B2.y)
-
-	except Exception:
-		return IsLineParallel(l1, l2) == 2 and (min(A1.x, B1.x) <= max(A2.x, B2.x) or min(A2.x, B2.x) <= max(A1.x, B1.x))
-
-
-def CheckTrianglesIntersection(tr1, tr2):
-	M1 = MediansIntersection(*tr1)
-	M2 = MediansIntersection(*tr2)
-
-	for point in tr1:
-		if DistanceBetweenPoints(M2, point) < (max(DistanceBetweenPoints(M2, tr2[0]), DistanceBetweenPoints(M2, tr2[1]), DistanceBetweenPoints(M2, tr2[2])) + 1):
-			return True
-
-	for point in tr2:
-		if DistanceBetweenPoints(M1, point) < (max(DistanceBetweenPoints(M1, tr1[0]), DistanceBetweenPoints(M1, tr1[1]), DistanceBetweenPoints(M1, tr1[2])) + 1):
-			return True
-
-	for side1 in combinations(tr1, 2):
-		for side2 in combinations(tr2, 2):
-			if CheckSegmentsIntersection(side1, side2):
-				return True
-
-	return False
+# def CheckTrianglesIntersection(tr1, tr2):
+# 	M1 = MediansIntersection(*tr1)
+# 	M2 = MediansIntersection(*tr2)
+#
+# 	for point in tr1:
+# 		if DistanceBetweenPoints(M2, point) < (max(DistanceBetweenPoints(M2, tr2[0]), DistanceBetweenPoints(M2, tr2[1]), DistanceBetweenPoints(M2, tr2[2])) + 1):
+# 			return True
+#
+# 	for point in tr2:
+# 		if DistanceBetweenPoints(M1, point) < (max(DistanceBetweenPoints(M1, tr1[0]), DistanceBetweenPoints(M1, tr1[1]), DistanceBetweenPoints(M1, tr1[2])) + 1):
+# 			return True
+#
+# 	for side1 in combinations(tr1, 2):
+# 		for side2 in combinations(tr2, 2):
+# 			if CheckSegmentsIntersection(side1, side2):
+# 				return True
+#
+# 	return False
 
 
 def RandomRotation(A, B, C):
@@ -69,37 +68,37 @@ def RandomRotation(A, B, C):
 	return A, B, C
 
 
-def Shift(A, B, C):
-	A, B, C = RandomRotation(A, B, C)
-
-	phi = uniform(-pi, pi)
-	vec = (cos(phi) * 2, sin(phi) * 2)
-
-	if set(tp.get_points_names_from_list(tp.solver_data.polygons[0].points)) != {A.name, B.name, C.name}:
-		while True:
-			stop = True
-
-			for polygon in tp.solver_data.polygons:
-				if set(tp.get_points_names_from_list(polygon.points)) != {A.name, B.name, C.name}:
-
-					if CheckTrianglesIntersection(polygon.points, (A, B, C)):
-						A.x += vec[0]
-						A.y += vec[1]
-						B.x += vec[0]
-						B.y += vec[1]
-						C.x += vec[0]
-						C.y += vec[1]
-
-						stop = False
-						break
-
-				else:
-					break
-
-			if stop:
-				break
-
-	return SaveTriangleData(A, B, C)
+# def Shift(A, B, C):
+# 	A, B, C = RandomRotation(A, B, C)
+#
+# 	phi = uniform(-pi, pi)
+# 	vec = (cos(phi) * 2, sin(phi) * 2)
+#
+# 	if set(tp.get_points_names_from_list(tp.solver_data.polygons[0].points)) != {A.name, B.name, C.name}:
+# 		while True:
+# 			stop = True
+#
+# 			for polygon in tp.solver_data.polygons:
+# 				if set(tp.get_points_names_from_list(polygon.points)) != {A.name, B.name, C.name}:
+#
+# 					if CheckTrianglesIntersection(polygon.points, (A, B, C)):
+# 						A.x += vec[0]
+# 						A.y += vec[1]
+# 						B.x += vec[0]
+# 						B.y += vec[1]
+# 						C.x += vec[0]
+# 						C.y += vec[1]
+#
+# 						stop = False
+# 						break
+#
+# 				else:
+# 					break
+#
+# 			if stop:
+# 				break
+#
+# 	return SaveTriangleData(A, B, C)
 
 
 def SaveTriangleData(A, B, C):
@@ -143,7 +142,7 @@ def SaveTriangleData(A, B, C):
 		if not rel.size:
 			rel.size = BAC.size / BAC.relations[rel]
 
-	return A, B, C
+	return RandomRotation(A, B, C)
 
 
 def CheckQuadrangleConvex(A, B, C, D):
@@ -156,65 +155,64 @@ def CheckQuadrangleConvex(A, B, C, D):
 
 
 def CreateTriangleWithThreeSides(a, b, c, angle):
-	C = tp.find_point_with_name(angle[0])
+	C = MyPoint(None, None, angle[0])
 	C.x, C.y = Size(0), Size(0)
-	B = tp.find_point_with_name(angle[1])
+	B = MyPoint(None, None, angle[1])
 	B.x, B.y = a, Size(0)
-	A = tp.find_point_with_name(angle[2])
+	A = MyPoint(None, None, angle[2])
 	A.x, A.y = CirclesIntersectionPoint(b, c, C, B)
 
-	return Shift(A, B, C)
+	return SaveTriangleData(A, B, C)
 
 
 def CreateTriangleWithSideAndContraAngle(a, alpha, alpha_name):
 	alph = alpha * pi / 180
-	C = tp.find_point_with_name(alpha_name[2])
+	C = MyPoint(None, None, alpha_name[2])
 	C.x, C.y = Size(0), Size(0)
-	B = tp.find_point_with_name(alpha_name[0])
+	B = MyPoint(None, None, alpha_name[0])
 	B.x, B.y = a, Size(0)
 	if alpha != 90:
-		O = (a/2, (1/tan(alph))*(a/2))
+		O = MyPoint(a/2, (1/tan(alph))*(a/2))
 	else:
-		O = (a/2, 0)
+		O = MyPoint(a/2, 0)
 
 	r = DistanceBetweenPoints(O, B)
 	x = uniform(-r + a/2, r + a/2)
-	y = sqrt(r**2 - (x - a/2)**2) + O[1]
+	y = sqrt(r**2 - (x - a/2)**2) + O.y
 
-	A = tp.find_point_with_name(alpha_name[1])
-	A.x, A.y = x, y
+	A = MyPoint(x, y, alpha_name[1])
 
-	return Shift(A, B, C)
+	return SaveTriangleData(A, B, C)
 
 
 def CreateTriangleWithOneSideAndTwoAngles(a, beta, gamma, beta_name, gamma_name):
-	B = tp.find_point_with_name(beta_name[1])
+	B = MyPoint(None, None, beta_name[1])
 	B.x, B.y = Size(0), Size(0)
-	C = tp.find_point_with_name(gamma_name[1])
+	C = MyPoint(None, None, gamma_name[1])
 	C.x, C.y = a, Size(0)
 
 	l1 = LineWithTiltAngle(C, Size(180) - gamma)
 	l2 = LineWithTiltAngle(B, beta)
 
 	if gamma_name[0] != beta_name[1]:
-		A = tp.find_point_with_name(gamma_name[0])
+		A = MyPoint(None, None, gamma_name[0])
 
 	else:
-		A = tp.find_point_with_name(gamma_name[2])
+		A = MyPoint(None, None, gamma_name[2])
 
 	A.x, A.y = LineIntersectionPoint(l1, l2)
 
-	return Shift(A, B, C)
+	return SaveTriangleData(A, B, C)
 
 
 def CreateTriangleWithTwoSidesAndAngleBetweenThem(a, b, gamma, a_name, gamma_name):
 	if a_name[0] != gamma_name[1]:
-		C = tp.find_point_with_name(a_name[0])
+		C = MyPoint(None, None, a_name[0])
 	else:
-		C = tp.find_point_with_name(a_name[1])
+		C = MyPoint(None, None, a_name[1])
 
 	C.x, C.y = Size(0), Size(0)
-	B = tp.find_point_with_name(gamma_name[1])
+	B = MyPoint(None, None, gamma_name[1])
 	B.x, B.y = a, Size(0)
 
 	l = LineWithTiltAngle(C, gamma)
@@ -228,34 +226,33 @@ def CreateTriangleWithTwoSidesAndAngleBetweenThem(a, b, gamma, a_name, gamma_nam
 	y = k*x + t
 
 	if gamma_name[0] not in a_name:
-		A = tp.find_point_with_name(gamma_name[0])
+		A = MyPoint(x, y, gamma_name[0])
 	else:
-		A = tp.find_point_with_name(gamma_name[2])
+		A = MyPoint(x, y, gamma_name[2])
 
-	A.x, A.y = x, y
 	A.x, A.y = PointSymmetryAboutLine(A, PerpendicularLineWithPoint(DividingPoint(B, C, 1), TwoPointsLine(B, C)))
 
-	return Shift(A, B, C)
+	return SaveTriangleData(A, B, C)
 
 
 def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, a_name, gamma_name):
 	if a_name[0] != gamma_name[1]:
-		C = tp.find_point_with_name(gamma_name[1])
+		C = MyPoint(None, None, gamma_name[1])
 		C.x, C.y = Size(0), Size(0)
-		B = tp.find_point_with_name(a_name[0])
+		B = MyPoint(None, None, a_name[0])
 		B.x, B.y = a, Size(0)
 		make_simmetry = False
 	else:
-		C = tp.find_point_with_name(a_name[1])
+		C = MyPoint(None, None, a_name[1])
 		C.x, C.y = Size(0), Size(0)
-		B = tp.find_point_with_name(gamma_name[1])
+		B = MyPoint(None, None, gamma_name[1])
 		B.x, B.y = a, Size(0)
 		make_simmetry = True
 
 	if gamma_name[0] not in a_name:
-		A = tp.find_point_with_name(gamma_name[0])
+		A = MyPoint(None, None, gamma_name[0])
 	else:
-		A = tp.find_point_with_name(gamma_name[2])
+		A = MyPoint(None, None, gamma_name[2])
 
 	A1, A2 = LineAndCircleIntersectionPoints(LineWithTiltAngle(C, gamma), B, c)
 
@@ -270,7 +267,7 @@ def CreateTriangleWithTwoSidesAndAngleNotBetweenThem(a, c, gamma, a_name, gamma_
 	if make_simmetry:
 		A.x, A.y = PointSymmetryAboutLine(A, PerpendicularLineWithPoint(DividingPoint(B, C, 1), TwoPointsLine(B, C)))
 
-	return Shift(A, B, C)
+	return SaveTriangleData(A, B, C)
 
 
 def CreateTriangle(sides, angles, sides_names, angles_names):
@@ -340,10 +337,10 @@ def CreateTriangle(sides, angles, sides_names, angles_names):
 					pass
 
 			if [sides[0].size, sides[1].size, sides[2].size].count(None) == 2:
-
 				for side in sides:
 					if side.size:
 						i = sides.index(side)
+						break
 
 				if sides[i - 2] in sides[i - 1].relations:
 					sides[i - 1].size = uniform(sides[i].size * 1.25, sides[i].size * 3) / (1 + 1 / sides[i - 1].relations[sides[i - 2]])
@@ -357,7 +354,6 @@ def CreateTriangle(sides, angles, sides_names, angles_names):
 					sides[i - 1].size = sides[i].size * uniform(0.5, 1.5)
 
 			if [sides[0].size, sides[1].size, sides[2].size].count(None) == 1:
-
 				i = [sides[0].size, sides[1].size, sides[2].size].index(None)
 				sides[i].size = uniform(abs(sides[i - 1].size - sides[i - 2].size), sides[i - 1].size + sides[i - 2].size)
 

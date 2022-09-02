@@ -105,16 +105,14 @@
 
     function ggbOnInit() {
 
-            ggbApplet.evalCommand('A(2.8237041021201463, 3.5320838022413863)'); 
-            ggbApplet.evalCommand('B(4.130044907620831, -2.2555516603107977)'); 
-            ggbApplet.evalCommand('C(0.922998182041497, 2.736251806118814)'); 
+            ggbApplet.evalCommand('A(3.038230766407678, -1.137157459440367)'); 
+            ggbApplet.evalCommand('B(0.19547379105141138, 1.3375015528742915)'); 
+            ggbApplet.evalCommand('C(3.8068140327275812, 0.2588792338871606)'); 
             ggbApplet.evalCommand('polygon_ABC=Polygon(A, B, C)'); 
-            ggbApplet.evalCommand('segment_AC=Segment(A, C)'); 
-            ggbApplet.evalCommand('SetVisibleInView(segment_AC, 1, false)'); 
-            ggbApplet.evalCommand('segment_BA=Segment(B, A)'); 
-            ggbApplet.evalCommand('SetVisibleInView(segment_BA, 1, false)'); 
-            ggbApplet.evalCommand('segment_CB=Segment(C, B)'); 
-            ggbApplet.evalCommand('SetVisibleInView(segment_CB, 1, false)'); 
+            ggbApplet.evalCommand('M((x(A) + 1 * x(C)) / (1 + 1), (y(A) + 1 * y(C)) / (1 + 1))'); 
+            ggbApplet.evalCommand('B(0.19547379105141138, 1.3375015528742915)'); 
+            ggbApplet.evalCommand('M(3.42252239956763, -0.4391391127766032)'); 
+            ggbApplet.evalCommand('polygon_BM=Polygon(B, M)'); 
 
 
         // Zoom_drawing();

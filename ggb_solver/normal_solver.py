@@ -4,7 +4,7 @@ from time import time
 from itertools import combinations, permutations
 from ggb_data_processing.objects_types import Size, sqrt
 # from pprint import pprint
-# from fact_description.detailed_fact_description import pretty_detailed_description
+from fact_description.detailed_fact_description import pretty_detailed_description
 
 # sys.setrecursionlimit(2000)
 
@@ -322,7 +322,10 @@ def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
                 try:
                     first_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([segments_list_1[0], segments_list_2[0]], 'relation')].value
                 except TypeError:
-                    first_segments_relation = None
+                    if segments_list_1[0] == segments_list_2[0]:
+                        first_segments_relation = Size(1)
+                    else:
+                        first_segments_relation = None
 
             try:
                 second_segments_relation = segments_list_1[1].size / segments_list_2[1].size
@@ -330,7 +333,10 @@ def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
                 try:
                     second_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([segments_list_1[1], segments_list_2[1]], 'relation')].value
                 except TypeError:
-                    second_segments_relation = None
+                    if segments_list_1[1] == segments_list_2[1]:
+                        second_segments_relation = Size(1)
+                    else:
+                        second_segments_relation = None
 
             try:
                 third_segments_relation = segments_list_1[2].size / segments_list_2[2].size
@@ -338,7 +344,10 @@ def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
                 try:
                     third_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([segments_list_1[2], segments_list_2[2]], 'relation')].value
                 except TypeError:
-                    third_segments_relation = None
+                    if segments_list_1[2] == segments_list_2[2]:
+                        third_segments_relation = Size(1)
+                    else:
+                        third_segments_relation = None
 
             if first_segments_relation and first_segments_relation == second_segments_relation == third_segments_relation:
                 tr1.relations[tr2] = first_segments_relation
@@ -432,17 +441,22 @@ def create_fact_about_objects_relations(objects, facts_generation):
     ans2 = find_fact_id_with_objects([objects[1], objects[0]], 'relation')
 
     if not ans1 and not ans2:
-        if objects[0].size and objects[1].size:
+        if (objects[0].size and objects[1].size) or objects[0] == objects[1]:
             simmilar_fact = tp.Fact(
                     len(tp.solver_data.facts),
                     facts_generation,
                     'relation',
                     [objects[0], objects[1]],
-                    objects[0].size / objects[1].size
+                    None
                 )
             tp.solver_data.facts.append(simmilar_fact)
-            simmilar_fact.root_facts.add(find_fact_id_with_objects([objects[0]], 'size'))
-            simmilar_fact.root_facts.add(find_fact_id_with_objects([objects[1]], 'size'))
+
+            if objects[0].size and objects[1].size:
+                simmilar_fact.value = objects[0].size / objects[1].size
+                simmilar_fact.root_facts.add(find_fact_id_with_objects([objects[0]], 'size'))
+                simmilar_fact.root_facts.add(find_fact_id_with_objects([objects[1]], 'size'))
+            elif objects[0] == objects[1]:
+                simmilar_fact.value = Size(1)
 
             return len(tp.solver_data.facts) - 1
 
@@ -815,7 +829,7 @@ def solving_process():
                 break
 
         # for fact in tp.solver_data.facts:
-        #     print(fact)
+        #     print(pretty_detailed_description(fact))
         # print()
 
         try:

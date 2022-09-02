@@ -1,4 +1,3 @@
-from ggb_html_generator.geogebra_html_generator import insert_commands
 import shapely.geometry
 import ggb_drawer.triangle_drawer as td
 from ggb_data_processing import task_parser as tp
@@ -9,7 +8,8 @@ from ggb_data_processing.objects_types import Objects
 from random import uniform
 from ggb_drawer.check_is_triangle_correct import check_triangle
 from ggb_data_processing.objects_types import Size
-from ggb_drawer.useful_geometry_functions import PointOnCircle
+from ggb_drawer.useful_geometry_functions import PointOnCircle, CheckTrianglesIntersection
+# from fact_description.detailed_fact_description import pretty_detailed_description
 
 
 def check_is_point_in_polygon(find_point, polygon):
@@ -58,18 +58,21 @@ def get_triangle_parameter(A, B, C):
 
 
 def draw_polygon(points, realize_data):
-    ans_polygon = f'{tp.find_polygon_with_points(points).name}=Polygon('
+    poly = tp.find_polygon_with_points(points)
+    poly.drawn = True
+    ans_polygon = f'{poly.name}=Polygon('
     for point in points:
         point = tp.find_point_with_name(point)
         realize_data.append(f"{point.name}({float(point.x.value)}, {float(point.y.value)})")
         ans_polygon += f"{point.name}, "
     ans_polygon = ans_polygon[:-2] + ')'
     realize_data.append(ans_polygon)
-    for i in range(len(points)):
-        seg = tp.find_segment_with_points(points[i], points[i-1])
-        A, B = seg.points
-        realize_data.append(f"{seg.name}=Segment({A.name}, {B.name})")
-        realize_data.append(f"SetVisibleInView({seg.name}, 1, false)")
+    # for i in range(len(points)):
+    #     seg = tp.find_segment_with_points(points[i], points[i-1])
+    #     A, B = seg.points
+    #     realize_data.append(f"{seg.name}=Segment({A.name}, {B.name})")
+    #     realize_data.append(f'SetColor({seg.name}, "#1565C0")')
+    #     realize_data.append(f"SetVisibleInView({seg.name}, 1, false)")
 
 
 # def draw_specific_points(realize_data):
@@ -81,6 +84,16 @@ def draw_polygon(points, realize_data):
 #
 #             for draw_data in td.SpecificPointGeneration(point.name, point.specific_properties_point, A, B, C):
 #                 realize_data.append(draw_data)
+
+
+def triangle_with_point_synchronization(P, tr):
+    x, y = P.x, P.y
+    for point in tr:
+        if point != P:
+            point.x += P.x - x
+            point.y += P.y - y
+
+    return tr
 
 
 def triangle_with_segment_synchronization(A, B, C, P1, P2):
@@ -103,6 +116,37 @@ def triangle_with_segment_synchronization(A, B, C, P1, P2):
     P3[1] += P1.y
 
     return P3
+
+
+def triangle_shift(A, B, C):
+    phi = uniform(-pi, pi)
+    vec = (cos(phi) * 2, sin(phi) * 2)
+
+    if set(tp.get_points_names_from_list(tp.solver_data.polygons[0].points)) != {A.name, B.name, C.name}:
+        while True:
+            stop = True
+
+            for polygon in tp.solver_data.polygons:
+                if set(tp.get_points_names_from_list(polygon.points)) != {A.name, B.name, C.name}:
+
+                    if CheckTrianglesIntersection(polygon.points, (A, B, C)):
+                        A.x += vec[0]
+                        A.y += vec[1]
+                        B.x += vec[0]
+                        B.y += vec[1]
+                        C.x += vec[0]
+                        C.y += vec[1]
+
+                        stop = False
+                        break
+
+                else:
+                    break
+
+            if stop:
+                break
+
+    return A, B, C
 
 
 def draw_lines_intersections(intersections, realize_data):
@@ -148,7 +192,21 @@ def create_polygon(vertices):
         if check.__class__.__name__ == 'str':
             return check
 
-        td.CreateTriangle(*get_triangle_parameter(A, B, C))
+        if [tp.find_point_with_name(A).x, tp.find_point_with_name(B).x, tp.find_point_with_name(C).x].count(None) == 3:
+            A, B, C = triangle_shift(*td.CreateTriangle(*get_triangle_parameter(A, B, C)))
+
+        # elif [tp.find_point_with_name(A).x, tp.find_point_with_name(B).x, tp.find_point_with_name(C).x].count(None) == 2:
+        #     for point in [tp.find_point_with_name(A), tp.find_point_with_name(B), tp.find_point_with_name(C)]:
+        #         if point.x:
+        #             tr = td.CreateTriangle(*get_triangle_parameter(A, B, C))
+        #             A, B, C = triangle_with_point_synchronization(point, tr)
+        #             break
+
+        else:
+            return 'Solver error'
+
+        for point in [A, B, C]:
+            tp.find_point_with_name(point.name).save_cords(point.x, point.y)
 
     if len(vertices) == 4:
         perspective_triangle = None
@@ -163,52 +221,76 @@ def create_polygon(vertices):
         A, B, C = td.CreateTriangle(*get_triangle_parameter(perspective_triangle[0], perspective_triangle[1], perspective_triangle[2]))
 
 
-def text_splitter(text):  # def text_splitter(text, input_file_name):
+def text_splitter(text):
     realize_data = list()
 
     tp.task_data = Objects()
     tp.solver_data = Objects()
 
-    text = text.replace('\r', '').split('\n')
-
     try:
-        tp.polygons_create(text[0])
-        tp.segments_create(text[1])
-        tp.angles_create(text[2])
-        tp.segments_relations_create(text[3])
-        tp.angles_relations_create(text[4])
-        tp.polygons_relations_create(text[5])
-        tp.line_intersection_create(text[6])
-        tp.points_on_line_or_segment_create(text[7])
-        tp.points_in_polygon_create(text[8])
-        tp.questions_create(text[9])
-    except IndexError:
-        pass
+        tasks, questions = text.replace('\r', '').split('\n')[:2]
+    except ValueError:
+        tasks, questions = text.replace('\r', '').split('\n')[0], ''
+
+    for task in tasks.split(', '):
+        ind = task.find(' ')
+        task_type, task = task[:ind], task[ind + 1:]
+
+        if task_type == 'poly':
+            tp.polygons_create(task)
+        elif task_type == 'seg':
+            tp.segments_create(task)
+        elif task_type == 'ang':
+            tp.angles_create(task)
+        elif task_type == 'seg_rel':
+            tp.segments_relations_create(task)
+        elif task_type == 'ang_rel':
+            tp.angles_relations_create(task)
+        elif task_type == 'poly_rel':
+            tp.polygons_relations_create(task)
+        elif task_type == 'lin_int':
+            tp.line_intersection_create(task)
+        elif task_type == 'p_str':
+            tp.points_on_line_or_segment_create(task)
+        elif task_type == 'p_poly':
+            tp.points_in_polygon_create(task)
+        elif task_type == 'p_seg_rel':
+            tp.point_with_relation_on_segment_create(task)
+
+    tp.questions_create(questions)
 
     solution = ns.solving_process()
 
-    for polygon in text[0].split(','):
-        err = create_polygon(list(polygon.replace(' ', '')))
-        if err:
-            return err
+    for task in tasks.split(', '):
+        ind = task.find(' ')
+        task_type, task = task[:ind], task[ind + 1:]
 
-        draw_polygon(list(polygon.replace(' ', '')), realize_data)
+        if task_type == 'poly':
+            err = create_polygon(list(task.replace(' ', '')))
+            if err:
+                return err
+            draw_polygon(list(task.replace(' ', '')), realize_data)
 
-    for point in tp.solver_data.points:
-        if point.in_polygon:
-            get_random_point_in_polygon(point, point.in_polygon)
-            realize_data.append(f'{point.name}({point.x}, {point.y})')
+        elif task_type == 'lin_int':
+            draw_lines_intersections(task, realize_data)
 
-    # draw_specific_points(realize_data)
+        elif task_type == 'p_poly':
+            for point in task.split('in')[0].split():
+                point = tp.find_point_with_name(point)
+                if point.in_polygon:
+                    get_random_point_in_polygon(point, point.in_polygon)
+                    realize_data.append(f'{point.name}({point.x}, {point.y})')
 
-    try:
-        draw_lines_intersections(text[6], realize_data)
-    except IndexError:
-        pass
-
-    # set_screen_size(realize_data)
-
-    # insert_commands(realize_data, input_file_name=input_file_name)
+        elif task_type == 'p_seg_rel':
+            segment = tp.find_segment_with_points(task[0], task[1])
+            for point in segment.interior_points:
+                point.x, point.y = (segment.points[0].x + segment.interior_points[point] * segment.points[1].x) / (
+                        1 + segment.interior_points[point]), (
+                                           segment.points[0].y + segment.interior_points[point] * segment.points[
+                                       1].y) / (1 + segment.interior_points[point])
+                realize_data.append(
+                    f'{point.name}((x({segment.points[0].name}) + {segment.interior_points[point]} * x({segment.points[1].name})) / (1 + {segment.interior_points[point]}), (y({segment.points[0].name}) + {segment.interior_points[point]} * y({segment.points[1].name})) / (1 + {segment.interior_points[point]}))'
+                )
 
     solution['ggb_commands'] = realize_data
 
