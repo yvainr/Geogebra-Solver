@@ -87,11 +87,16 @@ def draw_polygon(points, realize_data):
 
 
 def triangle_with_point_synchronization(P, tr):
-    x, y = P.x, P.y
     for point in tr:
-        if point != P:
-            point.x += P.x - x
-            point.y += P.y - y
+        if point.name == P.name:
+            x, y = point.x, point.y
+            break
+    else:
+        return None
+
+    for point in tr:
+        point.x += P.x - x
+        point.y += P.y - y
 
     return tr
 
@@ -195,12 +200,12 @@ def create_polygon(vertices):
         if [tp.find_point_with_name(A).x, tp.find_point_with_name(B).x, tp.find_point_with_name(C).x].count(None) == 3:
             A, B, C = triangle_shift(*td.CreateTriangle(*get_triangle_parameter(A, B, C)))
 
-        # elif [tp.find_point_with_name(A).x, tp.find_point_with_name(B).x, tp.find_point_with_name(C).x].count(None) == 2:
-        #     for point in [tp.find_point_with_name(A), tp.find_point_with_name(B), tp.find_point_with_name(C)]:
-        #         if point.x:
-        #             tr = td.CreateTriangle(*get_triangle_parameter(A, B, C))
-        #             A, B, C = triangle_with_point_synchronization(point, tr)
-        #             break
+        elif [tp.find_point_with_name(A).x, tp.find_point_with_name(B).x, tp.find_point_with_name(C).x].count(None) == 2:
+            for point in [tp.find_point_with_name(A), tp.find_point_with_name(B), tp.find_point_with_name(C)]:
+                if point.x:
+                    tr = td.CreateTriangle(*get_triangle_parameter(A, B, C))
+                    A, B, C = triangle_with_point_synchronization(point, tr)
+                    break
 
         else:
             return 'Solver error'

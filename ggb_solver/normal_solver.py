@@ -4,7 +4,7 @@ from time import time
 from itertools import combinations, permutations
 from ggb_data_processing.objects_types import Size, sqrt
 # from pprint import pprint
-from fact_description.detailed_fact_description import pretty_detailed_description
+# from fact_description.detailed_fact_description import pretty_detailed_description
 
 # sys.setrecursionlimit(2000)
 
@@ -174,15 +174,19 @@ def count_sizes_of_angles_and_segments(facts_generation, actual_question, iterat
 
 def find_simmilar_triangles(facts_generation, actual_question):
     for triangle_couple in list(permutations(combinations(tp.solver_data.points, 3), 2)):
-        tr1 = tp.find_polygon_with_points(tp.get_points_names_from_list(list(triangle_couple[0])))
-        tr2 = tp.find_polygon_with_points(tp.get_points_names_from_list(list(triangle_couple[1])))
+        if triangle_couple[0][2] not in tp.find_line_with_points(triangle_couple[0][0].name,
+                                                                 triangle_couple[0][1].name).points and \
+                triangle_couple[1][2] not in tp.find_line_with_points(triangle_couple[1][0].name,
+                                                                      triangle_couple[1][1].name).points:
+            tr1 = tp.find_polygon_with_points(tp.get_points_names_from_list(list(triangle_couple[0])))
+            tr2 = tp.find_polygon_with_points(tp.get_points_names_from_list(list(triangle_couple[1])))
 
-        try:
-            tr1.relations[tr2]
+            try:
+                tr1.relations[tr2]
 
-        except KeyError:
-            if check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
-                return True
+            except KeyError:
+                if check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
+                    return True
 
 
 def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
@@ -739,10 +743,7 @@ def create_null_facts_generation():
 
     for triangle in combinations(tp.solver_data.points, 3):
         A, B, C = triangle
-        if tp.find_segment_with_points(A.name, B.name, tp.solver_data, False) and tp.find_segment_with_points(B.name, C.name,
-                                                                                                    tp.solver_data,
-                                                                                                    False) and tp.find_segment_with_points(
-                C.name, A.name, tp.solver_data, False):
+        if C not in tp.find_line_with_points(A.name, B.name).points:
             tp.solver_data.facts.append(tp.Fact(
                 len(tp.solver_data.facts),
                 0,
@@ -828,9 +829,9 @@ def solving_process():
             if facts_list_length == len(tp.solver_data.facts):
                 break
 
-        # for fact in tp.solver_data.facts:
-        #     print(pretty_detailed_description(fact))
-        # print()
+            # for fact in tp.solver_data.facts:
+            #     print(pretty_detailed_description(fact))
+            # print()
 
         try:
             question_fact = tp.solver_data.facts[find_fact_id_with_objects(question.objects, question.fact_type)]

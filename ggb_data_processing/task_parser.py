@@ -162,18 +162,18 @@ class Fact:
         self.question = question
         self.description = None
         self.root_facts = set()  # список фактов-причин
-        self.following_facts = set()  # список фактов-следствий
+        # self.following_facts = set()  # список фактов-следствий
 
     def __str__(self):
         list_root_facts = list()
-        list_following_facts = list()
+        # list_following_facts = list()
         list_objects = list()
 
         for root_fact in self.root_facts:
             list_root_facts.append(root_fact)
 
-        for following_fact in self.following_facts:
-            list_root_facts.append(following_fact)
+        # for following_fact in self.following_facts:
+        #     list_root_facts.append(following_fact)
 
         for object in self.objects:
             list_objects.append(object.__str__())
@@ -181,10 +181,10 @@ class Fact:
         if not list_root_facts:
             list_root_facts = None
 
-        if not list_following_facts:
-            list_following_facts = None
+        # if not list_following_facts:
+        #     list_following_facts = None
 
-        return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {list_objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}, following_facts: {list_following_facts}'
+        return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {list_objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}'
 
     def show_fact(self):
         draw_data = list()
@@ -534,16 +534,21 @@ def point_with_relation_on_segment_create(text):
             first_segment = find_segment_with_points(str_segment[0], point.name, data)
             second_segment = find_segment_with_points(str_segment[1], point.name, data)
 
-            first_segment.relations[second_segment] = Size(rel)
-            second_segment.relations[first_segment] = 1 / Size(rel)
+            numerator, denominator = rel.split('/')
+            first_segment.relations[segment] = Size(f'{numerator}/{int(numerator) + int(denominator)}')
+            segment.relations[first_segment] = 1 / Size(f'{numerator}/{int(numerator) + int(denominator)}')
+            second_segment.relations[segment] = 1 - Size(f'{numerator}/{int(numerator) + int(denominator)}')
+            segment.relations[second_segment] = 1 / (1 - Size(f'{numerator}/{int(numerator) + int(denominator)}'))
 
             if str_segment[0] == segment.points[0].name:
                 segment.interior_points[point] = Size(rel)
             if str_segment[0] == segment.points[1].name:
                 segment.interior_points[point] = 1 / Size(rel)
 
-            find_ray_with_points(point.name, str_segment[0], data)
-            find_ray_with_points(point.name, str_segment[1], data)
+            find_ray_with_points(str_segment[1], str_segment[0], data).points.add(point)
+            find_ray_with_points(str_segment[0], str_segment[1], data).points.add(point)
+
+            find_line_with_points(str_segment[0], str_segment[1], data).points.add(point)
 
 
 def questions_create(text):
