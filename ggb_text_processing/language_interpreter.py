@@ -79,7 +79,7 @@ def distillation(part) -> str:
     new_part = ""
     for i in range(len(part)):
         try:
-            if ord(part[i]) == 42 or ord(part[i]) == 43 or (44 < ord(part[i]) < 58) or (64 < ord(part[i]) < 91) or ord(part[i]) == 32 or (1039 < ord(part[i]) < 1072) or ord(part[i]) == 124:  # with russian capitals
+            if ord(part[i]) == 42 or ord(part[i]) == 43 or (44 < ord(part[i]) < 58) or (64 < ord(part[i]) < 91) or ord(part[i]) == 32 or ord(part[i]) == 124:  # without russian capitals
                 new_part = new_part[:] + str(part[i])
         except:
             pass
@@ -94,7 +94,7 @@ def ang_distillation(part) -> str:
     for i in range(len(part)):
         try:
             if ord(part[i]) == 42 or ord(part[i]) == 43 or (44 < ord(part[i]) < 58) or (64 < ord(part[i]) < 91) or ord(
-                    part[i]) == 32 or (1039 < ord(part[i]) < 1072) or ord(part[i]) == 1074:  # with russian capitals
+                    part[i]) == 32 or ord(part[i]) == 1074:  # without russian capitals
                 new_part = new_part[:] + str(part[i])
         except:
             pass
@@ -305,8 +305,10 @@ def class_analyze(part) -> str:
 
     if points_parts == 0 and segments_parts == 0 and ray_parts == 0 and line_parts == 0 and angle_parts == 0 and polygons_parts == 1 and num_parts == 0:
         ret = "polygon"
-    elif points_parts == 0 and segments_parts == 1 and ray_parts == 0 and line_parts == 0 and angle_parts == 0 and polygons_parts == 0 and (num_parts == 1 or num_parts == 0):
+    elif points_parts == 0 and segments_parts == 1 and ray_parts == 0 and line_parts == 0 and angle_parts == 0 and polygons_parts == 0 and num_parts == 1:
         ret = "segment"
+    elif points_parts == 0 and segments_parts == 1 and ray_parts == 0 and line_parts == 0 and angle_parts == 0 and polygons_parts == 0 and num_parts == 0:
+        ret = "simple_segment"
     elif points_parts == 0 and segments_parts == 0 and ray_parts == 1 and line_parts == 0 and angle_parts == 0 and polygons_parts == 0 and num_parts == 0:
         ret = "ray"
     elif points_parts == 0 and segments_parts == 0 and ray_parts == 0 and line_parts == 1 and angle_parts == 0 and polygons_parts == 0 and num_parts == 0:
@@ -376,6 +378,10 @@ def fresh_assign_to_classes(inp_str):
             part = "poly " + part[:]
             output.append(part)
             polygon_num += 1
+        elif cla == "simple_segment":
+            part = distillation(part)
+            part = "poly " + part[:]
+            output.append(part)
         elif cla == "segment":
             part = distillation(part)
             part = "seg " + part[:]
