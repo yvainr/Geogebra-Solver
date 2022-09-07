@@ -2,13 +2,14 @@ import shapely.geometry
 import ggb_drawer.triangle_drawer as td
 from ggb_data_processing import task_parser as tp
 import ggb_solver.normal_solver as ns
-from math import *
+from math import cos, sin, acos, pi
 from itertools import combinations
 from ggb_data_processing.objects_types import Objects
 from random import uniform
 from ggb_drawer.check_is_triangle_correct import check_triangle
 from ggb_data_processing.objects_types import Size
 from ggb_drawer.useful_geometry_functions import PointOnCircle, CheckTrianglesIntersection
+from ggb_drawer.useful_geometry_functions import MyPoint
 # from fact_description.detailed_fact_description import pretty_detailed_description
 
 
@@ -101,26 +102,45 @@ def triangle_with_point_synchronization(P, tr):
     return tr
 
 
-def triangle_with_segment_synchronization(A, B, C, P1, P2):
-    r = td.DistanceBetweenPoints(P1, P2)
+def triangle_with_side_synchronization(P1, P2, tr):
+    side_length = td.DistanceBetweenPoints(P1, P2)
 
-    for P in [A, B, C]:
+    for P in tr:
         if P.name == P1.name:
-            x, y = P.x, P.y
-            P2.x -= P1.x; P2.y -= P1.y; A.x -= x; A.y -= y; B.x -= x; B.y -= y; C.x -= x; C.y -= y
+            shift_x, shift_y = P.x, P.y
+            P2.x -= P1.x
+            P2.y -= P1.y
+            for nP in tr:
+                nP.x -= shift_x
+                nP.y -= shift_y
+            break
 
-    for P in [A, B, C]:
+    for P in tr:
         if P.name == P2.name:
-            phi = acos(P.x/r) - acos(P2.x/r)
+            P_angle = acos(float(P.x / side_length))
+            if P.y < 0:
+                P_angle = 2 * pi - P_angle
 
-    for P in [A, B, C]:
+            P2_angle = acos(float(P2.x / side_length))
+            if P2.y < 0:
+                P2_angle = 2 * pi - P2_angle
+
+            phi = P2_angle - P_angle
+            break
+    else:
+        phi = None
+
+    for P in tr:
         if P1.name != P.name != P2.name:
-            P3 = (P.x * cos(phi) - P.y * sin(phi), P.y * cos(phi) + P.x * sin(phi), P.name)
+            P.x, P.y = P.x * cos(phi) - P.y * sin(phi) + P1.x, P.y * cos(phi) + P.x * sin(phi) + P1.y
 
-    P3[0] += P1.x
-    P3[1] += P1.y
+            P2.x += P1.x
+            P2.y += P1.y
 
-    return P3
+            P1 = MyPoint(P1.x, P1.y, P1.name)
+            P2 = MyPoint(P2.x, P2.y, P2.name)
+
+            return P1, P2, P
 
 
 def triangle_shift(A, B, C):
@@ -205,6 +225,13 @@ def create_polygon(vertices):
                 if point.x:
                     tr = td.CreateTriangle(*get_triangle_parameter(A, B, C))
                     A, B, C = triangle_with_point_synchronization(point, tr)
+                    break
+
+        elif [tp.find_point_with_name(A).x, tp.find_point_with_name(B).x, tp.find_point_with_name(C).x].count(None) == 1:
+            for side in combinations([tp.find_point_with_name(A), tp.find_point_with_name(B), tp.find_point_with_name(C)], 2):
+                if side[0].x and side[1].x:
+                    tr = td.CreateTriangle(*get_triangle_parameter(A, B, C))
+                    A, B, C = triangle_with_side_synchronization(side[0], side[1], tr)
                     break
 
         else:
