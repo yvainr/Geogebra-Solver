@@ -38,30 +38,28 @@ def check_triangle_inequality(sides):
 
 
 def check_correspondence(sides, angles):
-    answer = True
-
-    if ((sides[0] != None) and (sides[1] != None) and (angles[0] != None) and (angles[1] != None)):
-        if (((sides[0] > sides[1]) and (angles[0] <= angles[1])) or ((sides[0] == sides[1]) and (angles[0] != angles[1])) or ((sides[0] < sides[1]) and (angles[0] >= angles[1]))):
-            answer = False
-        if (sides[2] != None):
+    if sides[0] and sides[1] and angles[0] and angles[1]:
+        if ((sides[0] > sides[1]) and (angles[0] <= angles[1])) or ((sides[0] == sides[1]) and (angles[0] != angles[1])) or ((sides[0] < sides[1]) and (angles[0] >= angles[1])):
+            return False
+        if sides[2]:
             a = 180 - angles[0] - angles[1]
-            if (((sides[2] > sides[0]) and (a <= angles[0])) or ((sides[2] < sides[0]) and (a >= angles[0])) or ((sides[2] == sides[0]) and (a != angles[0])) or ((sides[2] > sides[1]) and (a <= angles[1])) or ((sides[2] < sides[1]) and (a >= angles[1])) or ((sides[2] == sides[1]) and (a != angles[1]))):
-                answer = False
-    if ((sides[0] != None) and (sides[2] != None) and (angles[0] != None) and (angles[2] != None)):
-        if (((sides[0] > sides[2]) and (angles[0] <= angles[2])) or ((sides[0] == sides[2]) and (angles[0] != angles[2])) or ((sides[0] < sides[2]) and (angles[0] >= angles[2]))):
-            answer = False
-        if (sides[1] != None):
+            if ((sides[2] > sides[0]) and (a <= angles[0])) or ((sides[2] < sides[0]) and (a >= angles[0])) or ((sides[2] == sides[0]) and (a != angles[0])) or ((sides[2] > sides[1]) and (a <= angles[1])) or ((sides[2] < sides[1]) and (a >= angles[1])) or ((sides[2] == sides[1]) and (a != angles[1])):
+                return False
+    if sides[0] and sides[2] and angles[0] and angles[2]:
+        if ((sides[0] > sides[2]) and (angles[0] <= angles[2])) or ((sides[0] == sides[2]) and (angles[0] != angles[2])) or ((sides[0] < sides[2]) and (angles[0] >= angles[2])):
+            return False
+        if sides[1]:
             a = 180 - angles[0] - angles[2]
-            if (((sides[1] > sides[0]) and (a <= angles[0])) or ((sides[1] < sides[0]) and (a >= angles[0])) or ((sides[1] == sides[0]) and (a != angles[0])) or ((sides[1] > sides[2]) and (a <= angles[2])) or ((sides[1] < sides[2]) and (a >= angles[2])) or ((sides[1] == sides[2]) and (a != angles[2]))):
-                answer = False
-    if ((sides[1] != None) and (sides[2] != None) and (angles[1] != None) and (angles[2] != None)):
-        if (((sides[1] > sides[2]) and (angles[1] <= angles[2])) or ((sides[1] == sides[2]) and (angles[1] != angles[2])) or ((sides[1] < sides[2])and(angles[1] >= angles[2]))):
-            answer = False
-        if (sides[0] != None):
+            if ((sides[1] > sides[0]) and (a <= angles[0])) or ((sides[1] < sides[0]) and (a >= angles[0])) or ((sides[1] == sides[0]) and (a != angles[0])) or ((sides[1] > sides[2]) and (a <= angles[2])) or ((sides[1] < sides[2]) and (a >= angles[2])) or ((sides[1] == sides[2]) and (a != angles[2])):
+                return False
+    if sides[1] and sides[2] and angles[1] and angles[2]:
+        if ((sides[1] > sides[2]) and (angles[1] <= angles[2])) or ((sides[1] == sides[2]) and (angles[1] != angles[2])) or ((sides[1] < sides[2])and(angles[1] >= angles[2])):
+            return False
+        if sides[0]:
             a = 180 - angles[1] - angles[2]
-            if (((sides[0] > sides[1]) and (a <= angles[1])) or ((sides[0] < sides[1]) and (a >= angles[1])) or ((sides[0] == sides[1]) and (a != angles[1])) or ((sides[0] > sides[2]) and (a <= angles[2])) or ((sides[0] < sides[2]) and (a >= angles[2])) or ((sides[0] == sides[2]) and (a != angles[2]))):
-                answer = False
-    return answer
+            if ((sides[0] > sides[1]) and (a <= angles[1])) or ((sides[0] < sides[1]) and (a >= angles[1])) or ((sides[0] == sides[1]) and (a != angles[1])) or ((sides[0] > sides[2]) and (a <= angles[2])) or ((sides[0] < sides[2]) and (a >= angles[2])) or ((sides[0] == sides[2]) and (a != angles[2])):
+                return False
+    return True
 
 
 def check_law_of_cos(sides, angles):

@@ -15,6 +15,9 @@ class Point:
         self.y = cord_y
         self.in_polygon = None
 
+    def save_cords(self, x, y):
+        self.x, self.y = x, y
+
     def __str__(self):
         return f'name: {self.name}, specific_properties_point: {self.specific_properties_point}, specific_properties_triangle: {self.specific_properties_triangle}, x: {self.x}, y: {self.y}'
 
@@ -132,6 +135,7 @@ class Polygon:
         self.sides = list()
         self.angles = list()
         self.points_in = list()
+        self.drawn = False
         
         for i in range(len(self.points)):
             self.sides.append(find_segment_with_points(self.points[i].name, self.points[i - 1].name))
@@ -158,18 +162,18 @@ class Fact:
         self.question = question
         self.description = None
         self.root_facts = set()  # список фактов-причин
-        self.following_facts = set()  # список фактов-следствий
+        # self.following_facts = set()  # список фактов-следствий
 
     def __str__(self):
         list_root_facts = list()
-        list_following_facts = list()
+        # list_following_facts = list()
         list_objects = list()
 
         for root_fact in self.root_facts:
             list_root_facts.append(root_fact)
 
-        for following_fact in self.following_facts:
-            list_root_facts.append(following_fact)
+        # for following_fact in self.following_facts:
+        #     list_root_facts.append(following_fact)
 
         for object in self.objects:
             list_objects.append(object.__str__())
@@ -177,10 +181,10 @@ class Fact:
         if not list_root_facts:
             list_root_facts = None
 
-        if not list_following_facts:
-            list_following_facts = None
+        # if not list_following_facts:
+        #     list_following_facts = None
 
-        return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {list_objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}, following_facts: {list_following_facts}'
+        return f'id: {self.id}, generation: {self.generation}, fact_type: {self.fact_type}, objects: {list_objects}, value: {self.value}, question: {self.question}, description: {self.description}, root_facts: {list_root_facts}'
 
     def show_fact(self):
         draw_data = list()
@@ -188,12 +192,28 @@ class Fact:
 
         for obj in self.objects:
             if obj.__class__.__name__ == 'Segment':
-                draw_data.append(f'SetVisibleInView({obj.name}, 1, true)')
-                draw_data.append(f'SetColor({obj.name}, "{mark_color}")')
+                # draw_data.append(f'SetVisibleInView({obj.name}, 1, true)')
+                draw_data.append(f'{obj.name}_show=Segment({obj.points[0].name}, {obj.points[1].name})')
+                draw_data.append(f'SetColor({obj.name}_show, "{mark_color}")')
+
             if obj.__class__.__name__ == 'Angle':
                 draw_data.append(f'{obj.name}=Angle(Line({obj.rays[0].main_point.name}, {list(obj.rays[0].points)[0].name}), Line({obj.rays[1].main_point.name}, {list(obj.rays[1].points)[0].name}))')
+
             if obj.__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({obj.name}, "{mark_color}")')
+                polygon_command = ''
+
+                for point in obj.points:
+                    polygon_command += f'({point.name}), '
+
+                if obj.drawn:
+                    draw_data.append(f'SetColor({obj.name}, "{mark_color}")')
+                else:
+                    draw_data.append(f'{obj.name}_show=Polygon({polygon_command[:-2]})')
+                    draw_data.append(f'SetColor({obj.name}_show, "{mark_color}")')
+
+                for side_index in range(len(obj.sides)):
+                    draw_data.append(f'{obj.name}_side_{side_index + 1}=Segment({obj.sides[side_index].points[0].name}, {obj.sides[side_index].points[1].name})')
+                    draw_data.append(f'SetColor({obj.name}_side_{side_index + 1}, "{mark_color}")')
 
         if self.fact_type == 'relation' and self.objects[0].__class__.__name__ == 'Polygon' and self.value:
             try:
@@ -240,12 +260,20 @@ class Fact:
 
         for obj in self.objects:
             if obj.__class__.__name__ == 'Segment':
-                draw_data.append(f'SetVisibleInView({obj.name}, 1, false)')
-                draw_data.append(f'SetColor({obj.name}, "{standart_color}")')
+                # draw_data.append(f'SetVisibleInView({obj.name}, 1, false)')
+                draw_data.append(f'Delete({obj.name}_show)')
+
             if obj.__class__.__name__ == 'Angle':
                 draw_data.append(f'Delete({obj.name})')
+
             if obj.__class__.__name__ == 'Polygon':
-                draw_data.append(f'SetColor({obj.name}, "{standart_color}")')
+                if obj.drawn:
+                    draw_data.append(f'SetColor({obj.name}, "{standart_color}")')
+                else:
+                    draw_data.append(f'Delete({obj.name}_show)')
+
+                for side_index in range(len(obj.sides)):
+                    draw_data.append(f'Delete({obj.name}_side_{side_index + 1})')
 
         if self.fact_type == 'relation' and self.value and (self.objects[0].__class__.__name__ == 'Segment' or self.objects[0].__class__.__name__ == 'Polygon'):
             draw_data.append(f'Delete(text1)')
@@ -494,6 +522,33 @@ def points_in_polygon_create(text):
                 point = find_point_with_name(point, data)
                 polygon.points_in.append(point)
                 point.in_polygon = polygon
+
+
+def point_with_relation_on_segment_create(text):
+    if len(text.split()) > 0:
+        for data in [task_data, solver_data]:
+            str_segment, point, rel = text.split()
+            segment = find_segment_with_points(str_segment[0], str_segment[1], data)
+            point = find_point_with_name(point, data)
+
+            first_segment = find_segment_with_points(str_segment[0], point.name, data)
+            second_segment = find_segment_with_points(str_segment[1], point.name, data)
+
+            numerator, denominator = rel.split('/')
+            first_segment.relations[segment] = Size(f'{numerator}/{int(numerator) + int(denominator)}')
+            segment.relations[first_segment] = 1 / Size(f'{numerator}/{int(numerator) + int(denominator)}')
+            second_segment.relations[segment] = 1 - Size(f'{numerator}/{int(numerator) + int(denominator)}')
+            segment.relations[second_segment] = 1 / (1 - Size(f'{numerator}/{int(numerator) + int(denominator)}'))
+
+            if str_segment[0] == segment.points[0].name:
+                segment.interior_points[point] = Size(rel)
+            if str_segment[0] == segment.points[1].name:
+                segment.interior_points[point] = 1 / Size(rel)
+
+            find_ray_with_points(str_segment[1], str_segment[0], data).points.add(point)
+            find_ray_with_points(str_segment[0], str_segment[1], data).points.add(point)
+
+            find_line_with_points(str_segment[0], str_segment[1], data).points.add(point)
 
 
 def questions_create(text):
