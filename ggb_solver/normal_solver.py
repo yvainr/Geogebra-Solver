@@ -174,15 +174,19 @@ def count_sizes_of_angles_and_segments(facts_generation, actual_question, iterat
 
 def find_simmilar_triangles(facts_generation, actual_question):
     for triangle_couple in list(permutations(combinations(tp.solver_data.points, 3), 2)):
-        tr1 = tp.find_polygon_with_points(tp.get_points_names_from_list(list(triangle_couple[0])))
-        tr2 = tp.find_polygon_with_points(tp.get_points_names_from_list(list(triangle_couple[1])))
+        if triangle_couple[0][2] not in tp.find_line_with_points(triangle_couple[0][0].name,
+                                                                 triangle_couple[0][1].name).points and \
+                triangle_couple[1][2] not in tp.find_line_with_points(triangle_couple[1][0].name,
+                                                                      triangle_couple[1][1].name).points:
+            tr1 = tp.find_polygon_with_points(tp.get_points_names_from_list(list(triangle_couple[0])))
+            tr2 = tp.find_polygon_with_points(tp.get_points_names_from_list(list(triangle_couple[1])))
 
-        try:
-            tr1.relations[tr2]
+            try:
+                tr1.relations[tr2]
 
-        except KeyError:
-            if check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
-                return True
+            except KeyError:
+                if check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
+                    return True
 
 
 def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
@@ -322,7 +326,10 @@ def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
                 try:
                     first_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([segments_list_1[0], segments_list_2[0]], 'relation')].value
                 except TypeError:
-                    first_segments_relation = None
+                    if segments_list_1[0] == segments_list_2[0]:
+                        first_segments_relation = Size(1)
+                    else:
+                        first_segments_relation = None
 
             try:
                 second_segments_relation = segments_list_1[1].size / segments_list_2[1].size
@@ -330,7 +337,10 @@ def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
                 try:
                     second_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([segments_list_1[1], segments_list_2[1]], 'relation')].value
                 except TypeError:
-                    second_segments_relation = None
+                    if segments_list_1[1] == segments_list_2[1]:
+                        second_segments_relation = Size(1)
+                    else:
+                        second_segments_relation = None
 
             try:
                 third_segments_relation = segments_list_1[2].size / segments_list_2[2].size
@@ -338,7 +348,10 @@ def check_is_triangles_simmilar(tr1, tr2, facts_generation, actual_question):
                 try:
                     third_segments_relation = tp.solver_data.facts[find_fact_id_with_objects([segments_list_1[2], segments_list_2[2]], 'relation')].value
                 except TypeError:
-                    third_segments_relation = None
+                    if segments_list_1[2] == segments_list_2[2]:
+                        third_segments_relation = Size(1)
+                    else:
+                        third_segments_relation = None
 
             if first_segments_relation and first_segments_relation == second_segments_relation == third_segments_relation:
                 tr1.relations[tr2] = first_segments_relation
@@ -432,17 +445,22 @@ def create_fact_about_objects_relations(objects, facts_generation):
     ans2 = find_fact_id_with_objects([objects[1], objects[0]], 'relation')
 
     if not ans1 and not ans2:
-        if objects[0].size and objects[1].size:
+        if (objects[0].size and objects[1].size) or objects[0] == objects[1]:
             simmilar_fact = tp.Fact(
                     len(tp.solver_data.facts),
                     facts_generation,
                     'relation',
                     [objects[0], objects[1]],
-                    objects[0].size / objects[1].size
+                    None
                 )
             tp.solver_data.facts.append(simmilar_fact)
-            simmilar_fact.root_facts.add(find_fact_id_with_objects([objects[0]], 'size'))
-            simmilar_fact.root_facts.add(find_fact_id_with_objects([objects[1]], 'size'))
+
+            if objects[0].size and objects[1].size:
+                simmilar_fact.value = objects[0].size / objects[1].size
+                simmilar_fact.root_facts.add(find_fact_id_with_objects([objects[0]], 'size'))
+                simmilar_fact.root_facts.add(find_fact_id_with_objects([objects[1]], 'size'))
+            elif objects[0] == objects[1]:
+                simmilar_fact.value = Size(1)
 
             return len(tp.solver_data.facts) - 1
 
@@ -725,10 +743,7 @@ def create_null_facts_generation():
 
     for triangle in combinations(tp.solver_data.points, 3):
         A, B, C = triangle
-        if tp.find_segment_with_points(A.name, B.name, tp.solver_data, False) and tp.find_segment_with_points(B.name, C.name,
-                                                                                                    tp.solver_data,
-                                                                                                    False) and tp.find_segment_with_points(
-                C.name, A.name, tp.solver_data, False):
+        if C not in tp.find_line_with_points(A.name, B.name).points:
             tp.solver_data.facts.append(tp.Fact(
                 len(tp.solver_data.facts),
                 0,
@@ -814,9 +829,9 @@ def solving_process():
             if facts_list_length == len(tp.solver_data.facts):
                 break
 
-        # for fact in tp.solver_data.facts:
-        #     print(fact)
-        # print()
+            # for fact in tp.solver_data.facts:
+            #     print(pretty_detailed_description(fact))
+            # print()
 
         try:
             question_fact = tp.solver_data.facts[find_fact_id_with_objects(question.objects, question.fact_type)]

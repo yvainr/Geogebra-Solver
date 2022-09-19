@@ -1,13 +1,17 @@
 from math import tan, pi
 from random import uniform, choice
 from ggb_data_processing.objects_types import sqrt
+from itertools import combinations
 
 
-# class MyPoint:
-# 	def __init__(self, x, y, name=None):
-# 		self.x = x
-# 		self.y = y
-# 		self.name = name
+class MyPoint:
+	def __init__(self, x, y, name=None):
+		self.x = x
+		self.y = y
+		self.name = name
+
+	def __str__(self):
+		return f'{self.name}, {self.x}, {self.y}'
 
 
 class MyLine:
@@ -204,3 +208,38 @@ def PointSymmetryAboutLine(P, l1):
 	x, y = LineIntersectionPoint(l1, l2)
 
 	return 2 * x - P.x, 2 * y - P.y
+
+
+def CheckSegmentsIntersection(side1, side2):
+	A1, B1 = side1
+	A2, B2 = side2
+
+	l1 = TwoPointsLine(A1, B1)
+	l2 = TwoPointsLine(A2, B2)
+
+	try:
+		x, y = LineIntersectionPoint(l1, l2)
+		return min(A1.x, B1.x) <= x <= max(A1.x, B1.x) and min(A2.x, B2.x) <= x <= max(A2.x, B2.x) and min(A1.y, B1.y) <= y <= max(A1.y, B1.y) and min(A2.y, B2.y) <= y <= max(A2.y, B2.y)
+
+	except Exception:
+		return IsLineParallel(l1, l2) == 2 and (min(A1.x, B1.x) <= max(A2.x, B2.x) or min(A2.x, B2.x) <= max(A1.x, B1.x))
+
+
+def CheckTrianglesIntersection(tr1, tr2):
+	M1 = MediansIntersection(*tr1)
+	M2 = MediansIntersection(*tr2)
+
+	for point in tr1:
+		if DistanceBetweenPoints(M2, point) < (max(DistanceBetweenPoints(M2, tr2[0]), DistanceBetweenPoints(M2, tr2[1]), DistanceBetweenPoints(M2, tr2[2])) + 1):
+			return True
+
+	for point in tr2:
+		if DistanceBetweenPoints(M1, point) < (max(DistanceBetweenPoints(M1, tr1[0]), DistanceBetweenPoints(M1, tr1[1]), DistanceBetweenPoints(M1, tr1[2])) + 1):
+			return True
+
+	for side1 in combinations(tr1, 2):
+		for side2 in combinations(tr2, 2):
+			if CheckSegmentsIntersection(side1, side2):
+				return True
+
+	return False
